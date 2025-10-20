@@ -80,11 +80,8 @@ namespace tool
 			switch (instruction.opcode.type)
 			{
 			case D3D10_SB_OPCODE_MOV:
-				return patch_instruction(output_buffer, instruction, cb_indices);
 			case D3D10_SB_OPCODE_MUL:
-				return patch_instruction(output_buffer, instruction, cb_indices);
 			case D3D10_SB_OPCODE_ADD:
-				return patch_instruction(output_buffer, instruction, cb_indices);
 			case D3D10_SB_OPCODE_DP4:
 				return patch_instruction(output_buffer, instruction, cb_indices);
 			}
