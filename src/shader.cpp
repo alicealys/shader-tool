@@ -248,6 +248,7 @@ namespace shader
 			D3D10_SB_OPCODE_XOR,
 
 			D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER,
+			D3D10_SB_OPCODE_DCL_TEMPS,
 		};
 
 		namespace reader
@@ -437,7 +438,7 @@ namespace shader
 				opcode.controls = input_buffer.read_bits(13);
 				opcode.length = input_buffer.read_bits(7);
 				opcode.extended = input_buffer.read_bits(1);
-
+				
 				auto extended = opcode.extended;
 				while (extended)
 				{
@@ -454,11 +455,22 @@ namespace shader
 				instruction_t instruction{};
 				instruction.opcode = read_opcode(input_buffer);
 
-				const auto end = input_buffer.total() + (instruction.opcode.length - 1) * 8 * 4;
-				while (input_buffer.total() < end)
+				if (instruction.opcode.type == D3D10_SB_OPCODE_DCL_TEMPS)
 				{
-					const auto operand = read_operand(allocator, input_buffer);
+					operand_t operand{};
+					operand.custom.is_custom = true;
+					operand.custom.type = D3D10_SB_OPCODE_DCL_TEMPS;
+					operand.custom.types.dcl_temps.size = input_buffer.read_bytes(4);
 					instruction.operands.emplace_back(operand);
+				}
+				else
+				{
+					const auto end = input_buffer.total() + (instruction.opcode.length - 1) * 8 * 4;
+					while (input_buffer.total() < end)
+					{
+						const auto operand = read_operand(allocator, input_buffer);
+						instruction.operands.emplace_back(operand);
+					}
 				}
 
 				return instruction;
@@ -467,8 +479,24 @@ namespace shader
 
 		namespace writer
 		{
+			void write_operand_custom(utils::bit_buffer_le& output_buffer, const operand_t& operand)
+			{
+				switch (operand.custom.type)
+				{
+				case D3D10_SB_OPCODE_DCL_TEMPS:
+					output_buffer.write_bytes(4, operand.custom.types.dcl_temps.size);
+					break;
+				}
+			}
+
 			void write_operand(utils::bit_buffer_le& output_buffer, const operand_t& operand)
 			{
+				if (operand.custom.is_custom)
+				{
+					write_operand_custom(output_buffer, operand);
+					return;
+				}
+
 				output_buffer.write_bits(2, operand.components.type);
 				output_buffer.write_bits(2, operand.components.selection_mode);
 
@@ -601,8 +629,8 @@ namespace shader
 
 			void write_opcode(utils::bit_buffer_le& output_buffer, const opcode_t& opcode)
 			{
-				output_buffer.write_bits(10, opcode.type);
-				output_buffer.write_bits(14, opcode.controls);
+				output_buffer.write_bits(11, opcode.type);
+				output_buffer.write_bits(13, opcode.controls);
 				output_buffer.write_bits(6, opcode.length);
 				output_buffer.write_bits(1, opcode.extended);
 				output_buffer.write_bits(1, 0);
@@ -683,6 +711,18 @@ namespace shader
 		{
 			void print_operand(const operand_t& op, bool last)
 			{
+				if (op.custom.is_custom)
+				{
+					switch (op.custom.type)
+					{
+					case D3D10_SB_OPCODE_DCL_TEMPS:
+						printf("%i", op.custom.types.dcl_temps.size);
+						break;
+					}
+
+					return;
+				}
+
 				if (op.extended)
 				{
 					for (const auto& extension : op.extensions)
@@ -728,7 +768,7 @@ namespace shader
 					if (op.extra_operand != nullptr)
 					{
 						print_operand(*op.extra_operand, true);
-						printf(" ");
+						printf(" + ");
 					}
 					printf("%i]", op.indices[1].values[0].u32);
 				}
@@ -736,7 +776,11 @@ namespace shader
 				if (op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER)
 				{
 					printf("icb[");
-					print_operand(*op.extra_operand, true);
+					if (op.extra_operand != nullptr)
+					{
+						print_operand(*op.extra_operand, true);
+						printf(" + ");
+					}
 					printf("]");
 				}
 
@@ -868,7 +912,7 @@ namespace shader
 
 				const auto name = opcode_names[instruction.opcode.type];
 
-				if (instruction.opcode.controls & 0x8)
+				if (instruction.opcode.controls & 4)
 				{
 					printf("%s_sat ", name);
 				}

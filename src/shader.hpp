@@ -67,6 +67,21 @@ namespace shader
 
 		struct operand_t;
 
+		struct operand_dcl_temps_t
+		{
+			std::uint32_t size;
+		};
+
+		struct operand_custom_t
+		{
+			bool is_custom;
+			std::uint32_t type;
+			union
+			{
+				operand_dcl_temps_t dcl_temps;
+			} types;
+		};
+
 		struct operand_t
 		{
 			std::uint32_t type;
@@ -76,6 +91,7 @@ namespace shader
 			operand_index_t indices[3];
 			operand_components_t components;
 			operand_t* extra_operand;
+			operand_custom_t custom;
 		};
 
 		struct opcode_extended_t
