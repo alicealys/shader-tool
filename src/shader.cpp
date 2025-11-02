@@ -2,10 +2,13 @@
 
 #include "shader.hpp"
 
-#include <utils/io.hpp>
-#include <utils/string.hpp>
-#include <utils/bit_buffer.hpp>
-#include <utils/dxbc_checksum.hpp>
+#include "components/reader.hpp"
+#include "components/writer.hpp"
+#include "components/disassembler.hpp"
+
+#include "instructions/generic.hpp"
+#include "instructions/dcl_resource.hpp"
+#include "instructions/dcl_globalflags.hpp"
 
 namespace shader
 {
@@ -45,1047 +48,361 @@ namespace shader
 
 	namespace asm_
 	{
-		std::array<const char*, 107> opcode_names =
+		namespace
 		{
-			"add",
-			"and",
-			"break",
-			"breakc",
-			"call",
-			"callc",
-			"case",
-			"continue",
-			"continuec",
-			"cut",
-			"default",
-			"deriv_rtx",
-			"deriv_rty",
-			"discard",
-			"div",
-			"dp2",
-			"dp3",
-			"dp4",
-			"else",
-			"emit",
-			"emitThenCut",
-			"endif",
-			"endloop",
-			"endswitch",
-			"eq",
-			"exp",
-			"frc",
-			"ftoi",
-			"ftou",
-			"ge",
-			"iadd",
-			"if",
-			"ieq",
-			"ige",
-			"ilt",
-			"imad",
-			"imax",
-			"imin",
-			"imul",
-			"ine",
-			"ineg",
-			"ishl",
-			"ishr",
-			"itof",
-			"label",
-			"ld",
-			"ldms",
-			"log",
-			"loop",
-			"lt",
-			"mad",
-			"min",
-			"max",
-			"custom_data",
-			"mov",
-			"movc",
-			"mul",
-			"ne",
-			"nop",
-			"not",
-			"or",
-			"resinfo",
-			"ret",
-			"retc",
-			"round_ne",
-			"round_ni",
-			"round_pi",
-			"round_z",
-			"rsq",
-			"sample",
-			"sample_c",
-			"sample_c_lz",
-			"sample_l",
-			"sample_d",
-			"sample_b",
-			"sqrt",
-			"switch",
-			"sincos",
-			"udiv",
-			"ult",
-			"uge",
-			"umul",
-			"umad",
-			"umax",
-			"umin",
-			"ushr",
-			"utof",
-			"xor",
-			"dcl_resource",
-			"dcl_constantbuffer",
-			"dcl_sampler",
-			"dcl_indexrange",
-			"dcl_outputtopology",
-			"dcl_inputprimitive",
-			"dcl_maxout",
-			"dcl_input",
-			"dcl_input_sgv",
-			"dcl_input_siv",
-			"dcl_input_ps",
-			"dcl_input_ps_sgv",
-			"dcl_input_ps_siv",
-			"dcl_output",
-			"dcl_output_sgv",
-			"dcl_output_siv",
-			"dcl_temps",
-			"dcl_indexableTemp",
-			"dcl_globalFlags",
-		};
+			std::unordered_map<std::uint32_t, std::unique_ptr<base_instruction>> instruction_handlers;
 
-		std::unordered_set<std::uint32_t> allowed_opcodes =
-		{
-			D3D10_SB_OPCODE_ADD,
-			D3D10_SB_OPCODE_AND,
-			D3D10_SB_OPCODE_BREAK,
-			D3D10_SB_OPCODE_BREAKC,
-			D3D10_SB_OPCODE_CALL,
-			D3D10_SB_OPCODE_CALLC,
-			D3D10_SB_OPCODE_CASE,
-			D3D10_SB_OPCODE_CONTINUE,
-			D3D10_SB_OPCODE_CONTINUEC,
-			D3D10_SB_OPCODE_CUT,
-			D3D10_SB_OPCODE_DEFAULT,
-			D3D10_SB_OPCODE_DERIV_RTX,
-			D3D10_SB_OPCODE_DERIV_RTY,
-			D3D10_SB_OPCODE_DISCARD,
-			D3D10_SB_OPCODE_DIV,
-			D3D10_SB_OPCODE_DP2,
-			D3D10_SB_OPCODE_DP3,
-			D3D10_SB_OPCODE_DP4,
-			D3D10_SB_OPCODE_ELSE,
-			D3D10_SB_OPCODE_EMIT,
-			D3D10_SB_OPCODE_EMITTHENCUT,
-			D3D10_SB_OPCODE_ENDIF,
-			D3D10_SB_OPCODE_ENDLOOP,
-			D3D10_SB_OPCODE_ENDSWITCH,
-			D3D10_SB_OPCODE_EQ,
-			D3D10_SB_OPCODE_EXP,
-			D3D10_SB_OPCODE_FRC,
-			D3D10_SB_OPCODE_FTOI,
-			D3D10_SB_OPCODE_FTOU,
-			D3D10_SB_OPCODE_GE,
-			D3D10_SB_OPCODE_IADD,
-			D3D10_SB_OPCODE_IF,
-			D3D10_SB_OPCODE_IEQ,
-			D3D10_SB_OPCODE_IGE,
-			D3D10_SB_OPCODE_ILT,
-			D3D10_SB_OPCODE_IMAD,
-			D3D10_SB_OPCODE_IMAX,
-			D3D10_SB_OPCODE_IMIN,
-			D3D10_SB_OPCODE_IMUL,
-			D3D10_SB_OPCODE_INE,
-			D3D10_SB_OPCODE_INEG,
-			D3D10_SB_OPCODE_ISHL,
-			D3D10_SB_OPCODE_ISHR,
-			D3D10_SB_OPCODE_ITOF,
-			D3D10_SB_OPCODE_LABEL,
-			D3D10_SB_OPCODE_LD,
-			D3D10_SB_OPCODE_LD_MS,
-			D3D10_SB_OPCODE_LOG,
-			D3D10_SB_OPCODE_LOOP,
-			D3D10_SB_OPCODE_LT,
-			D3D10_SB_OPCODE_MAD,
-			D3D10_SB_OPCODE_MIN,
-			D3D10_SB_OPCODE_MAX,
-			D3D10_SB_OPCODE_CUSTOMDATA,
-			D3D10_SB_OPCODE_MOV,
-			D3D10_SB_OPCODE_MOVC,
-			D3D10_SB_OPCODE_MUL,
-			D3D10_SB_OPCODE_NE,
-			D3D10_SB_OPCODE_NOP,
-			D3D10_SB_OPCODE_NOT,
-			D3D10_SB_OPCODE_OR,
-			D3D10_SB_OPCODE_RESINFO,
-			D3D10_SB_OPCODE_RET,
-			D3D10_SB_OPCODE_RETC,
-			D3D10_SB_OPCODE_ROUND_NE,
-			D3D10_SB_OPCODE_ROUND_NI,
-			D3D10_SB_OPCODE_ROUND_PI,
-			D3D10_SB_OPCODE_ROUND_Z,
-			D3D10_SB_OPCODE_RSQ,
-			//D3D10_SB_OPCODE_SAMPLE,
-			//D3D10_SB_OPCODE_SAMPLE_C,
-			//D3D10_SB_OPCODE_SAMPLE_C_LZ,
-			//D3D10_SB_OPCODE_SAMPLE_L,
-			//D3D10_SB_OPCODE_SAMPLE_D,
-			//D3D10_SB_OPCODE_SAMPLE_B,
-			D3D10_SB_OPCODE_SQRT,
-			D3D10_SB_OPCODE_SWITCH,
-			D3D10_SB_OPCODE_SINCOS,
-			D3D10_SB_OPCODE_UDIV,
-			D3D10_SB_OPCODE_ULT,
-			D3D10_SB_OPCODE_UGE,
-			D3D10_SB_OPCODE_UMUL,
-			D3D10_SB_OPCODE_UMAD,
-			D3D10_SB_OPCODE_UMAX,
-			D3D10_SB_OPCODE_UMIN,
-			D3D10_SB_OPCODE_USHR,
-			D3D10_SB_OPCODE_UTOF,
-			D3D10_SB_OPCODE_XOR,
-
-			D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER,
-			D3D10_SB_OPCODE_DCL_TEMPS,
-		};
-
-		namespace reader
-		{
-			operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer)
+			template <typename T>
+			class initializer final
 			{
-				operand_extended_t operand{};
-
-				operand.type = bit_buffer.read_bits(6);
-				if (operand.type == D3D10_SB_EXTENDED_OPERAND_MODIFIER)
+			public:
+				initializer(T fn)
 				{
-					operand.modifier = bit_buffer.read_bits(8);
-					bit_buffer.read_bits(17);
+					fn();
+				}
+			};
+
+			template <typename T, typename... Args>
+			void register_instruction_handler(const std::uint32_t type, Args&&... args)
+			{
+				auto handler = std::make_unique<T>(std::forward<Args>(args)...);
+				instruction_handlers.insert(std::make_pair(type, std::move(handler)));
+			}
+
+			void initialize()
+			{
+				/* dx10.0 opcodes */
+
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ADD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_AND);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_BREAK);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_BREAKC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CALL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CALLC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CASE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CONTINUE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CONTINUEC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CUT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DEFAULT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DERIV_RTX);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DERIV_RTY);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DISCARD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DIV);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP2);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP3);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP4);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ELSE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EMIT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EMITTHENCUT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ENDIF);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ENDLOOP);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ENDSWITCH);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EQ);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EXP);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FRC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FTOI);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FTOU);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_GE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IADD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IF);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IEQ);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IGE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ILT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMAD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMAX);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMIN);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMUL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_INE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_INEG);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ISHL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ISHR);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ITOF);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LABEL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LD_MS);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LOG);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LOOP);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MIN);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAX);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CUSTOMDATA);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOV);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOVC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MUL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NOP);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NOT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_OR);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RESINFO);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RET);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RETC);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_NE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_NI);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_PI);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_Z);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RSQ);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_C);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_C_LZ);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_L);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_D);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_B);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SQRT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SWITCH);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SINCOS);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UDIV);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ULT);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UGE);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMUL);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMAD);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMAX);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMIN);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_USHR);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UTOF);
+				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_XOR);
+
+				/* dx10 declarations */
+
+				register_instruction_handler<dcl_resource>(D3D10_SB_OPCODE_DCL_RESOURCE);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_SAMPLER);
+				register_instruction_handler<declaration_instruction<1, 1>>(D3D10_SB_OPCODE_DCL_INDEX_RANGE);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE);
+				register_instruction_handler<declaration_instruction<0, 1>>(D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_INPUT);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_SGV);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_SIV);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_INPUT_PS);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_PS_SGV);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_OUTPUT);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_OUTPUT_SGV);
+				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_OUTPUT_SIV);
+				register_instruction_handler<declaration_instruction<0, 1>>(D3D10_SB_OPCODE_DCL_TEMPS);
+				register_instruction_handler<declaration_instruction<0, 3>>(D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP);
+				register_instruction_handler<dcl_globalflags>(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS);
+
+				/* dx10.1 opcodes */
+
+				register_instruction_handler<general_instruction>(D3D10_1_SB_OPCODE_LOD);
+				register_instruction_handler<general_instruction>(D3D10_1_SB_OPCODE_GATHER4);
+				register_instruction_handler<general_instruction>(D3D10_1_SB_OPCODE_SAMPLE_POS);
+				register_instruction_handler<general_instruction>(D3D10_1_SB_OPCODE_SAMPLE_INFO);
+
+				/* dx11.0 opcodes */
+
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_HS_DECLS);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_HS_CONTROL_POINT_PHASE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_HS_FORK_PHASE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_HS_JOIN_PHASE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EMIT_STREAM);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_CUT_STREAM);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EMITTHENCUT_STREAM);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_INTERFACE_CALL);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_BUFINFO);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTX_COARSE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTX_FINE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTY_COARSE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTY_FINE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_C);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_PO);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_PO_C);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_RCP);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_F32TOF16);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_F16TOF32);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_UADDC);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_USUBB);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_COUNTBITS);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_FIRSTBIT_HI);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_FIRSTBIT_LO);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_FIRSTBIT_SHI);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_UBFE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IBFE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_BFI);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_BFREV);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_SWAPC);
+
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_LD_UAV_TYPED);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_STORE_UAV_TYPED);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_LD_RAW);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_STORE_RAW);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_LD_STRUCTURED);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_STORE_STRUCTURED);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_AND);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_OR);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_XOR);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_CMP_STORE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_IADD);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_IMAX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_IMIN);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_UMAX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ATOMIC_UMIN);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_ALLOC);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_CONSUME);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_IADD);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_AND);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_OR);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_XOR);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_EXCH);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_CMP_EXCH);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_IMAX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_IMIN);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_UMAX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_UMIN);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_SYNC);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DADD);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMAX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMIN);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMUL);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DEQ);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DGE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DLT);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DNE);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMOV);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMOVC);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DTOF);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_FTOD);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EVAL_SNAPPED);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EVAL_SAMPLE_INDEX);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EVAL_CENTROID);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DCL_GS_INSTANCE_COUNT);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_ABORT);
+				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DEBUG_BREAK);
+
+				/* dx11 declarations */
+
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_STREAM);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_FUNCTION_BODY);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_INTERFACE);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_INPUT_CONTROL_POINT_COUNT);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_OUTPUT_CONTROL_POINT_COUNT);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_TESS_DOMAIN);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_TESS_PARTITIONING);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_TESS_OUTPUT_PRIMITIVE);
+				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_MAX_TESSFACTOR);
+				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT);
+				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT);
+				register_instruction_handler<declaration_instruction<0, 3>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP);
+				register_instruction_handler<dcl_resource>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW);
+				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED);
+				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW);
+				register_instruction_handler<declaration_instruction<1, 2>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED);
+				register_instruction_handler<declaration_instruction<1, 0>>(D3D11_SB_OPCODE_DCL_RESOURCE_RAW);
+				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED);
+
+				/* dx11.1 opcodes */
+
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DDIV);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DFMA);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DRCP);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_MSAD);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DTOI);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DTOU);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_ITOD);
+				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_UTOD);
+
+				/* wddm 1.3 opcodes */
+
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_GATHER4_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_GATHER4_C_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_GATHER4_PO_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_GATHER4_PO_C_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_LD_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_LD_MS_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_LD_UAV_TYPED_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_LD_RAW_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_LD_STRUCTURED_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_L_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_C_LZ_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_CLAMP_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_B_CLAMP_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_D_CLAMP_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_SAMPLE_C_CLAMP_FEEDBACK);
+				//register_instruction_handler<general_instruction>(D3DWDDM1_3_SB_OPCODE_CHECK_ACCESS_FULLY_MAPPED);
+			}
+
+			initializer _(initialize);
+
+			void process_instruction(utils::bit_buffer_le& input_buffer, utils::bit_buffer_le& output_buffer, const instruction_cb& callback)
+			{
+				const auto begin = input_buffer.total();
+
+				const auto opcode = static_cast<std::uint32_t>(input_buffer.read_bits(11));
+				if (opcode == D3D10_SB_OPCODE_CUSTOMDATA)
+				{
+					input_buffer.set_bit(begin);
+
+					const auto desc = input_buffer.read_bytes(4);
+					const auto count = input_buffer.read_bytes(4);
+
+					output_buffer.write_bytes(4, desc);
+					output_buffer.write_bytes(4, count);
+
+					for (auto i = 0u; i < count - 2; i++)
+					{
+						output_buffer.write_bytes(4, input_buffer.read_bytes(4));
+					}
 				}
 				else
 				{
-					bit_buffer.read_bits(25);
-				}
+					input_buffer.read_bits(13);
+					const auto length = input_buffer.read_bits(7);
+					input_buffer.read_bits(1);
 
-				operand.extended = bit_buffer.read_bits(1);
+					input_buffer.set_bit(begin);
 
-				return operand;
-			}
+					const auto instruction_opt = read_instruction(input_buffer);
+					const auto skip = instruction_opt.has_value() ? callback(output_buffer, instruction_opt.value()) : false;
 
-			operand_t read_operand(utils::memory::allocator& allocator, utils::bit_buffer_le& bit_buffer)
-			{
-				operand_t operand{};
-
-				operand.components.type = bit_buffer.read_bits(2);
-
-				switch (operand.components.type)
-				{
-				case D3D10_SB_OPERAND_4_COMPONENT:
-				{
-					operand.components.selection_mode = bit_buffer.read_bits(2);
-					if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
+					input_buffer.set_bit(begin);
+					for (auto i = 0u; i < length; i++)
 					{
-						operand.components.mask = bit_buffer.read_bits(4);
-						bit_buffer.read_bits(4);
-					}
-					else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE)
-					{
-						operand.components.names[0] = bit_buffer.read_bits(2);
-						operand.components.names[1] = bit_buffer.read_bits(2);
-						operand.components.names[2] = bit_buffer.read_bits(2);
-						operand.components.names[3] = bit_buffer.read_bits(2);
-					}
-					else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE)
-					{
-						operand.components.names[0] = bit_buffer.read_bits(2);
-						bit_buffer.read_bits(6);
-					}
-
-					break;
-				}
-				case D3D10_SB_OPERAND_0_COMPONENT:
-				case D3D10_SB_OPERAND_1_COMPONENT:
-				default:
-					bit_buffer.read_bits(10);
-					break;
-				}
-
-				operand.type = bit_buffer.read_bits(8);
-				operand.dimension = bit_buffer.read_bits(2);
-
-				operand.indices[0].representation = bit_buffer.read_bits(3);
-				operand.indices[1].representation = bit_buffer.read_bits(3);
-				operand.indices[2].representation = bit_buffer.read_bits(3);
-
-				operand.extended = bit_buffer.read_bits(1);
-				auto extended = operand.extended;
-				while (extended)
-				{
-					const auto operand_extended = read_extended_operand(bit_buffer);
-					operand.extensions.emplace_back(operand_extended);
-					extended = operand_extended.extended;
-				}
-
-				const auto read_index_rep = [&](const std::uint32_t index)
-				{
-					switch (operand.indices[index].representation)
-					{
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-						operand.indices[index].values[0].u32 = bit_buffer.read_bytes(4);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-						operand.indices[index].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-						operand.indices[index].values[0].u64.fields.high = bit_buffer.read_bytes(4);
-						break;
-					case D3D10_SB_OPERAND_INDEX_RELATIVE:
-						operand.extra_operand = allocator.allocate<operand_t>();
-						*operand.extra_operand = read_operand(allocator, bit_buffer);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-						operand.indices[index].values[0].u32 = bit_buffer.read_bytes(4);
-						operand.extra_operand = allocator.allocate<operand_t>();
-						*operand.extra_operand = read_operand(allocator, bit_buffer);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-						operand.indices[index].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-						operand.indices[index].values[0].u64.fields.high = bit_buffer.read_bytes(4);
-						operand.extra_operand = allocator.allocate<operand_t>();
-						*operand.extra_operand = read_operand(allocator, bit_buffer);
-						break;
-					}
-				};
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-				{
-					read_index_rep(0);
-				}
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-				{
-					read_index_rep(1);
-				}
-
-				if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-				{
-					read_index_rep(2);
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
-				{
-					if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
-					{
-						operand.indices[0].values[0].u32 = bit_buffer.read_bytes(4);
-						operand.indices[0].values[1].u32 = bit_buffer.read_bytes(4);
-						operand.indices[0].values[2].u32 = bit_buffer.read_bytes(4);
-						operand.indices[0].values[3].u32 = bit_buffer.read_bytes(4);
-					}
-					else
-					{
-						operand.indices[0].values[0].u32 = bit_buffer.read_bytes(4);
-					}
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
-				{
-					operand.indices[0].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-					operand.indices[0].values[0].u64.fields.high = bit_buffer.read_bytes(4);
-				}
-
-				return operand;
-			}
-
-			opcode_extended_t read_opcode_extended(utils::bit_buffer_le& input_buffer)
-			{
-				opcode_extended_t opcode{};
-
-				opcode.type = input_buffer.read_bits(6);
-				switch (opcode.type)
-				{
-				case D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS:
-					input_buffer.read_bits(3);
-					opcode.values[0] = input_buffer.read_bits(4);
-					opcode.values[1] = input_buffer.read_bits(4);
-					opcode.values[2] = input_buffer.read_bits(4);
-					input_buffer.read_bits(10);
-					break;
-				case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
-					opcode.values[0] = input_buffer.read_bits(5);
-					input_buffer.read_bits(20);
-					break;
-				case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
-					opcode.values[0] = input_buffer.read_bits(4);
-					opcode.values[1] = input_buffer.read_bits(4);
-					opcode.values[2] = input_buffer.read_bits(4);
-					opcode.values[3] = input_buffer.read_bits(4);
-					input_buffer.read_bits(9);
-					break;
-				default:
-					input_buffer.read_bits(25);
-					break;
-				}
-
-				opcode.extended = input_buffer.read_bits(1);
-
-				return opcode;
-			}
-
-			opcode_t read_opcode(utils::bit_buffer_le& input_buffer)
-			{
-				opcode_t opcode{};
-
-				opcode.type = input_buffer.read_bits(11);
-				opcode.controls = input_buffer.read_bits(13);
-				opcode.length = input_buffer.read_bits(7);
-				opcode.extended = input_buffer.read_bits(1);
-				
-				auto extended = opcode.extended;
-				while (extended)
-				{
-					const auto opcode_extended = read_opcode_extended(input_buffer);
-					opcode.extensions.emplace_back(opcode_extended);
-					extended = opcode_extended.extended;
-				}
-
-				return opcode;
-			}
-
-			instruction_t read_instruction(utils::memory::allocator& allocator, utils::bit_buffer_le& input_buffer)
-			{
-				instruction_t instruction{};
-				instruction.opcode = read_opcode(input_buffer);
-
-				if (instruction.opcode.type == D3D10_SB_OPCODE_DCL_TEMPS)
-				{
-					operand_t operand{};
-					operand.custom.is_custom = true;
-					operand.custom.type = D3D10_SB_OPCODE_DCL_TEMPS;
-					operand.custom.types.dcl_temps.size = input_buffer.read_bytes(4);
-					instruction.operands.emplace_back(operand);
-				}
-				else
-				{
-					const auto end = input_buffer.total() + (instruction.opcode.length - 1) * 8 * 4;
-					while (input_buffer.total() < end)
-					{
-						const auto operand = read_operand(allocator, input_buffer);
-						instruction.operands.emplace_back(operand);
-					}
-				}
-
-				return instruction;
-			}
-		}
-
-		namespace writer
-		{
-			void write_operand_custom(utils::bit_buffer_le& output_buffer, const operand_t& operand)
-			{
-				switch (operand.custom.type)
-				{
-				case D3D10_SB_OPCODE_DCL_TEMPS:
-					output_buffer.write_bytes(4, operand.custom.types.dcl_temps.size);
-					break;
-				}
-			}
-
-			void write_operand(utils::bit_buffer_le& output_buffer, const operand_t& operand)
-			{
-				if (operand.custom.is_custom)
-				{
-					write_operand_custom(output_buffer, operand);
-					return;
-				}
-
-				output_buffer.write_bits(2, operand.components.type);
-				output_buffer.write_bits(2, operand.components.selection_mode);
-
-				switch (operand.components.selection_mode)
-				{
-				case D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE:
-					output_buffer.write_bits(4, operand.components.mask);
-					output_buffer.write_bits(4, 0);
-					break;
-				case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
-					output_buffer.write_bits(2, operand.components.names[0]);
-					output_buffer.write_bits(2, operand.components.names[1]);
-					output_buffer.write_bits(2, operand.components.names[2]);
-					output_buffer.write_bits(2, operand.components.names[3]);
-					break;
-				case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
-					output_buffer.write_bits(2, operand.components.names[0]);
-					output_buffer.write_bits(6, 0);
-					break;
-				}
-
-				output_buffer.write_bits(8, operand.type);
-				output_buffer.write_bits(2, operand.dimension);
-
-				output_buffer.write_bits(3, operand.indices[0].representation);
-				output_buffer.write_bits(3, operand.indices[1].representation);
-				output_buffer.write_bits(3, operand.indices[2].representation);
-
-				output_buffer.write_bits(1, operand.extended);
-
-				for (const auto& operand_extended : operand.extensions)
-				{
-					output_buffer.write_bits(6, operand_extended.type);
-					output_buffer.write_bits(8, operand_extended.modifier);
-					output_buffer.write_bits(17, 0);
-					output_buffer.write_bits(1, operand_extended.extended);
-				}
-
-				const auto write_index = [&](const std::uint32_t index)
-				{
-					switch (operand.indices[index].representation)
-					{
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-						output_buffer.write_bytes(4, operand.indices[index].values[0].u32);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-						output_buffer.write_bytes(8, operand.indices[index].values[0].u64.value);
-						break;
-					case D3D10_SB_OPERAND_INDEX_RELATIVE:
-						write_operand(output_buffer, *operand.extra_operand);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-						output_buffer.write_bytes(4, operand.indices[index].values[0].u32);
-						write_operand(output_buffer, *operand.extra_operand);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-						output_buffer.write_bytes(8, operand.indices[index].values[0].u64.value);
-						write_operand(output_buffer, *operand.extra_operand);
-						break;
-					}
-				};
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-				{
-					write_index(0);
-				}
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-				{
-					write_index(1);
-				}
-
-				if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-				{
-					write_index(2);
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
-				{
-					if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
-					{
-						output_buffer.write_bytes(4, operand.indices[0].values[0].u32);
-						output_buffer.write_bytes(4, operand.indices[0].values[1].u32);
-						output_buffer.write_bytes(4, operand.indices[0].values[2].u32);
-						output_buffer.write_bytes(4, operand.indices[0].values[3].u32);
-					}
-					else
-					{
-						output_buffer.write_bytes(4, operand.indices[0].values[0].u32);
-					}
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
-				{
-					output_buffer.write_bytes(8, operand.indices[0].values[0].u64.value);
-				}
-			}
-
-			void write_opcode_extended(utils::bit_buffer_le& output_buffer, const opcode_extended_t& opcode)
-			{
-				output_buffer.write_bits(6, opcode.type);
-
-				switch (opcode.type)
-				{
-				case D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS:
-					output_buffer.write_bits(3, 0);
-					output_buffer.write_bits(4, opcode.values[0]);
-					output_buffer.write_bits(4, opcode.values[0]);
-					output_buffer.write_bits(4, opcode.values[0]);
-					output_buffer.write_bits(10, 0);
-					break;
-				case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
-					output_buffer.write_bits(5, opcode.values[0]);
-					output_buffer.write_bits(20, 0);
-					break;
-				case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
-					output_buffer.write_bits(4, opcode.values[0]);
-					output_buffer.write_bits(4, opcode.values[1]);
-					output_buffer.write_bits(4, opcode.values[2]);
-					output_buffer.write_bits(4, opcode.values[3]);
-					output_buffer.write_bits(9, 0);
-					break;
-				default:
-					output_buffer.write_bits(25, 0);
-					break;
-				}
-
-				output_buffer.write_bits(1, opcode.extended);
-			}
-
-			void write_opcode(utils::bit_buffer_le& output_buffer, const opcode_t& opcode)
-			{
-				output_buffer.write_bits(11, opcode.type);
-				output_buffer.write_bits(13, opcode.controls);
-				output_buffer.write_bits(6, opcode.length);
-				output_buffer.write_bits(1, opcode.extended);
-				output_buffer.write_bits(1, 0);
-
-				for (const auto& opcode_extended : opcode.extensions)
-				{
-					write_opcode_extended(output_buffer, opcode_extended);
-				}
-			}
-
-			std::uint32_t get_operand_length(const operand_t& operand)
-			{
-				std::uint32_t length = 1;
-
-				length += static_cast<std::uint32_t>(operand.extensions.size());
-
-				const auto write_index = [&](const std::uint32_t index)
-				{
-					switch (operand.indices[index].representation)
-					{
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-						length += 1;
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-						length += 2;
-						break;
-					case D3D10_SB_OPERAND_INDEX_RELATIVE:
-						length += get_operand_length(*operand.extra_operand);
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-						length += get_operand_length(*operand.extra_operand);
-						length += 1;
-						break;
-					case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-						length += get_operand_length(*operand.extra_operand);
-						length += 2;
-						break;
-					}
-				};
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-				{
-					write_index(0);
-				}
-
-				if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-				{
-					write_index(1);
-				}
-
-				if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-				{
-					write_index(2);
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
-				{
-					if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
-					{
-						length += 4;
-					}
-					else
-					{
-						length += 1;
-					}
-				}
-
-				if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
-				{
-					length += 2;
-				}
-
-				return length;
-			}
-		}
-
-		namespace disassembler
-		{
-			void print_operand(const operand_t& op, bool last)
-			{
-				if (op.custom.is_custom)
-				{
-					switch (op.custom.type)
-					{
-					case D3D10_SB_OPCODE_DCL_TEMPS:
-						printf("%i", op.custom.types.dcl_temps.size);
-						break;
-					}
-
-					return;
-				}
-
-				if (op.extended)
-				{
-					for (const auto& extension : op.extensions)
-					{
-						switch (extension.modifier)
+						const auto value = input_buffer.read_bytes(4);
+						if (!skip)
 						{
-						case D3D10_SB_OPERAND_MODIFIER_NEG:
-							printf("-");
-							break;
-						case D3D10_SB_OPERAND_MODIFIER_ABS:
-							printf("abs(");
-							break;
-						case D3D10_SB_OPERAND_MODIFIER_ABSNEG:
-							printf("-abs(");
-							break;
+							output_buffer.write_bytes(4, value);
 						}
 					}
 				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_INPUT)
-				{
-					printf("v%i", op.indices[0].values[0].u32);
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_OUTPUT)
-				{
-					printf("o%i", op.indices[0].values[0].u32);
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_TEMP)
-				{
-					printf("r%i", op.indices[0].values[0].u32);
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_SAMPLER)
-				{
-					printf("s%i", op.indices[0].values[0].u32);
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER)
-				{
-					printf("cb%i[", op.indices[0].values[0].u32);
-					if (op.extra_operand != nullptr)
-					{
-						print_operand(*op.extra_operand, true);
-						printf(" + ");
-					}
-					printf("%i]", op.indices[1].values[0].u32);
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER)
-				{
-					printf("icb[");
-					if (op.extra_operand != nullptr)
-					{
-						print_operand(*op.extra_operand, true);
-						printf(" + ");
-					}
-					printf("]");
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
-				{
-					if (op.components.type == D3D10_SB_OPERAND_4_COMPONENT)
-					{
-						printf("l(%f, %f, %f, %f)",
-							op.indices[0].values[0].f32,
-							op.indices[0].values[1].f32,
-							op.indices[0].values[2].f32,
-							op.indices[0].values[3].f32
-						);
-					}
-					else
-					{
-						printf("l(%f)", op.indices[0].values[0].f32);
-					}
-
-				}
-
-				if (op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
-				{
-					printf("l(%lli)", op.indices[0].values[0].u64.value);
-				}
-
-				const auto print_component = [&](const std::uint32_t component)
-				{
-					switch (component)
-					{
-					case D3D10_SB_4_COMPONENT_X:
-						printf("x");
-						break;
-					case D3D10_SB_4_COMPONENT_Y:
-						printf("y");
-						break;
-					case D3D10_SB_4_COMPONENT_Z:
-						printf("z");
-						break;
-					case D3D10_SB_4_COMPONENT_W:
-						printf("w");
-						break;
-					}
-				};
-
-				switch (op.components.selection_mode)
-				{
-				case D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE:
-				{
-					const auto mask = (op.components.mask << D3D10_SB_OPERAND_4_COMPONENT_MASK_SHIFT);
-					if ((mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_MASK) != 0)
-					{
-						printf(".");
-					}
-
-					if (mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_X)
-					{
-						printf("x");
-					}
-
-					if (mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_Y)
-					{
-						printf("y");
-					}
-
-					if (mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_Z)
-					{
-						printf("z");
-					}
-
-					if (mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_W)
-					{
-						printf("w");
-					}
-
-					break;
-				}
-				case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
-				{
-					printf(".");
-					print_component(op.components.names[0]);
-					print_component(op.components.names[1]);
-					print_component(op.components.names[2]);
-					print_component(op.components.names[3]);
-					break;
-				}
-				case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
-				{
-					printf(".");
-					print_component(op.components.names[0]);
-					break;
-				}
-				}
-
-				if (op.extended)
-				{
-					for (const auto& extension : op.extensions)
-					{
-						switch (extension.modifier)
-						{
-						case D3D10_SB_OPERAND_MODIFIER_ABS:
-						case D3D10_SB_OPERAND_MODIFIER_ABSNEG:
-							printf(")");
-							break;
-						}
-					}
-				}
-
-				if (!last)
-				{
-					printf(", ");
-				}
-			}
-
-			void print_operands(const std::vector<operand_t>& operands)
-			{
-				for (auto i = 0; i < operands.size(); i++)
-				{
-					print_operand(operands[i], i == operands.size() - 1);
-				}
-			}
-
-			void print_instruction(const instruction_t& instruction)
-			{
-				if (instruction.opcode.type >= opcode_names.size())
-				{
-					return;
-				}
-
-				const auto name = opcode_names[instruction.opcode.type];
-
-				if (instruction.opcode.controls & 4)
-				{
-					printf("%s_sat ", name);
-				}
-				else
-				{
-					printf("%s ", name);
-				}
-
-				print_operands(instruction.operands);
-
-				printf("\n");
 			}
 		}
 
-		namespace tokens
+		std::optional<instruction_t> read_instruction(utils::bit_buffer_le& input_buffer)
 		{
-			opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls)
+			const auto beg = input_buffer.total();
+			const auto opcode_type = input_buffer.read_bits(11);
+			input_buffer.set_bit(beg);
+
+			if (const auto iter = instruction_handlers.find(opcode_type); iter != instruction_handlers.end())
 			{
-				opcode_t opcode{};
-
-				opcode.type = type;
-				opcode.controls = controls;
-				opcode.length = 1;
-
-				return opcode;
+				return {iter->second->read(input_buffer)};
 			}
 
-			operand_t create_literal_operand(const float x, const float y, const float z, const float w)
+			return {};
+		}
+
+		void write_instruction(utils::bit_buffer_le& output_buffer, instruction_t& instruction)
+		{
+			if (const auto iter = instruction_handlers.find(instruction.opcode.type); iter != instruction_handlers.end())
 			{
-				operand_t operand{};
-
-				operand.type = D3D10_SB_OPERAND_TYPE_IMMEDIATE32;
-
-				operand.dimension = D3D10_SB_OPERAND_INDEX_0D;
-				operand.extended = 0;
-
-				operand.components.type = D3D10_SB_OPERAND_4_COMPONENT;
-				operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-				operand.components.mask = 0;
-
-				operand.indices[0].values[0].f32 = x;
-				operand.indices[0].values[1].f32 = y;
-				operand.indices[0].values[2].f32 = z;
-				operand.indices[0].values[3].f32 = w;
-
-				return operand;
-			}
-
-			operand_t create_register_operand(const std::uint32_t type, const std::string& component_names, const std::vector<std::uint32_t>& indices)
-			{
-				if (indices.size() > 3 || component_names.size() > 4)
-				{
-					throw std::runtime_error("create_register_operand: invalid args");
-				}
-
-				operand_t operand{};
-
-				operand.type = type;
-
-				operand.dimension = static_cast<std::uint32_t>(indices.size());
-				operand.extended = 0;
-
-				operand.components.type = D3D10_SB_OPERAND_4_COMPONENT;
-				operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
-				operand.components.mask = 0;
-
-				static std::unordered_map<char, std::uint32_t> component_name_map =
-				{
-					{'x', D3D10_SB_4_COMPONENT_X},
-					{'y', D3D10_SB_4_COMPONENT_Y},
-					{'z', D3D10_SB_4_COMPONENT_Z},
-					{'w', D3D10_SB_4_COMPONENT_W},
-					{'r', D3D10_SB_4_COMPONENT_R},
-					{'g', D3D10_SB_4_COMPONENT_G},
-					{'b', D3D10_SB_4_COMPONENT_B},
-					{'a', D3D10_SB_4_COMPONENT_A},
-				};
-
-				for (auto i = 0u; i < component_names.size(); i++)
-				{
-					const auto iter = component_name_map.find(component_names[i]);
-					if (iter == component_name_map.end())
-					{
-						continue;
-					}
-
-					operand.components.names[i] = iter->second;
-				}
-
-				for (auto i = 0u; i < indices.size(); i++)
-				{
-					operand.indices[i].values[0].u32 = indices[i];
-				}
-
-				return operand;
-			}
-
-			std::vector<std::uint32_t> find_operands(const instruction_t& instruction, const std::uint32_t beg,
-				const std::function<bool(const operand_t&)>& cb)
-			{
-				std::vector<std::uint32_t> result;
-
-				if (beg >= instruction.operands.size())
-				{
-					return result;
-				}
-
-				for (auto i = beg; i < instruction.operands.size(); i++)
-				{
-					if (cb(instruction.operands[i]))
-					{
-						result.emplace_back(i);
-					}
-				}
-
-				return result;
+				iter->second->write(output_buffer, instruction);
 			}
 		}
 
-		void process_instruction(utils::memory::allocator& allocator, utils::bit_buffer_le& input_buffer, utils::bit_buffer_le& output_buffer,
-			const instruction_cb& callback)
+		void print_instruction(const instruction_t& instruction)
 		{
-			const auto begin = input_buffer.total();
-
-			const auto opcode = static_cast<std::uint32_t>(input_buffer.read_bits(11));
-			if (opcode == D3D10_SB_OPCODE_CUSTOMDATA)
+			if (const auto iter = instruction_handlers.find(instruction.opcode.type); iter != instruction_handlers.end())
 			{
-				input_buffer.set_bit(begin);
-
-				const auto desc = input_buffer.read_bytes(4);
-				const auto count = input_buffer.read_bytes(4);
-
-				output_buffer.write_bytes(4, desc);
-				output_buffer.write_bytes(4, count);
-
-				for (auto i = 0u; i < count - 2; i++)
-				{
-					output_buffer.write_bytes(4, input_buffer.read_bytes(4));
-				}
-			}
-			else if (allowed_opcodes.contains(opcode))
-			{
-				input_buffer.set_bit(begin);
-
-				const auto instruction = reader::read_instruction(allocator, input_buffer);
-				const auto skip = callback(output_buffer, instruction);
-
-				input_buffer.set_bit(begin);
-				for (auto i = 0u; i < instruction.opcode.length; i++)
-				{
-					const auto value = input_buffer.read_bytes(4);
-					if (!skip)
-					{
-						output_buffer.write_bytes(4, value);
-					}
-				}
-			}
-			else
-			{
-				input_buffer.read_bits(13);
-				const auto length = input_buffer.read_bits(7);
-				input_buffer.read_bits(1);
-
-				input_buffer.set_bit(begin);
-				for (auto i = 0u; i < length; i++)
-				{
-					output_buffer.write_bytes(4, input_buffer.read_bytes(4));
-				}
+				iter->second->print(instruction);
 			}
 		}
 	}
 
-	std::string patch_shader(unsigned char* program, unsigned int program_size, const asm_::instruction_cb& callback)
+	std::string patch_shader(unsigned char* program, unsigned int program_size, const instruction_cb& callback)
 	{
 		std::string output_program;
 
@@ -1119,11 +436,9 @@ namespace shader
 		output_buffer.write_bytes(2, unk);
 		output_buffer.write_bytes(4, num_dwords);
 
-		utils::memory::allocator allocator;
-
 		while (input_buffer.total() < chunk_size * 8)
 		{
-			asm_::process_instruction(allocator, input_buffer, output_buffer, callback);
+			asm_::process_instruction(input_buffer, output_buffer, callback);
 		}
 
 		const auto total_len = output_buffer.total() / 8u;
