@@ -95,7 +95,7 @@ namespace tool
 
 		void test_single_file()
 		{
-			const auto file = "E:\\cod\\iw6\\dump\\techsets_mp_boneyard_ns\\techsets\\hs\\world_displacement_debug_normals_world_disp_z2z3_vcl.hlsl_iw6.cso"s;
+			const auto file = "E:\\cod\\iw6\\dump\\techsets_mp_boneyard_ns1\\techsets\\ps\\lpo_sm_ldb_sunsm_nofog_t0c0n0s0l0_nc_blm_sm5.hlsl_iw6.cso"s;
 
 			{
 				const auto file2 = file;
@@ -127,7 +127,7 @@ namespace tool
 
 		void start_unsafe(int argc, char** argv)
 		{
-			test_files();
+			test_single_file();
 		}
 	}
 

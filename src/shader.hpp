@@ -32,8 +32,8 @@ namespace shader
 
 	namespace asm_
 	{
-		std::optional<instruction_t> read_instruction(utils::bit_buffer_le& input_buffer);
-		void write_instruction(utils::bit_buffer_le& output_buffer, instruction_t& instruction);
+		instruction_t read_instruction(utils::bit_buffer_le& input_buffer);
+		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction);
 		void print_instruction(const instruction_t& instruction);
 	}
 

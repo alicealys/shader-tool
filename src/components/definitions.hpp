@@ -64,20 +64,12 @@ namespace shader::asm_
 		std::uint32_t size;
 	};
 
-	struct operand_resource_return_type
-	{
-		std::uint32_t x;
-		std::uint32_t y;
-		std::uint32_t z;
-		std::uint32_t w;
-	};
-
 	struct operand_custom_t
 	{
 		union
 		{
-			operand_resource_return_type resource_return_type;
 			std::uint32_t value;
+			std::uint32_t values[4];
 		} u;
 	};
 
@@ -109,10 +101,24 @@ namespace shader::asm_
 		std::vector<opcode_extended_t> extensions;
 	};
 
+	union instruction_customdata_value_t
+	{
+		std::uint32_t u32;
+		float f32;
+	};
+
+	struct instruction_customdata_t
+	{
+		std::uint32_t data_class;
+		std::uint32_t count;
+		std::vector<instruction_customdata_value_t> values;
+	};
+
 	struct instruction_t
 	{
 		opcode_t opcode;
 		std::vector<operand_t> operands;
+		instruction_customdata_t customdata;
 	};
 
 	extern std::unordered_map<std::uint32_t, const char*> opcode_names;

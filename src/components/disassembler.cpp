@@ -30,6 +30,9 @@ namespace shader::asm_::disassembler
 		case D3D10_SB_OPERAND_TYPE_INPUT:
 			printf("v%i", op.indices[0].values[0].u32);
 			break;
+		case D3D10_SB_OPERAND_TYPE_OUTPUT_COVERAGE_MASK:
+			printf("oMask");
+			break;
 		case D3D10_SB_OPERAND_TYPE_OUTPUT:
 			printf("o%i", op.indices[0].values[0].u32);
 			break;
@@ -84,6 +87,8 @@ namespace shader::asm_::disassembler
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE64:
 			printf("l(%lli)", op.indices[0].values[0].u64.value);
 			break;
+		default:
+			printf("op%i", op.type);
 		}
 
 		const auto print_component = [&](const std::uint32_t component)

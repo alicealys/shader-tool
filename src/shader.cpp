@@ -9,6 +9,7 @@
 #include "instructions/generic.hpp"
 #include "instructions/dcl_resource.hpp"
 #include "instructions/dcl_globalflags.hpp"
+#include "instructions/customdata.hpp"
 
 namespace shader
 {
@@ -126,7 +127,7 @@ namespace shader
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAD);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MIN);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAX);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CUSTOMDATA);
+				register_instruction_handler<customdata>(D3D10_SB_OPCODE_CUSTOMDATA);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOV);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOVC);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MUL);
@@ -329,49 +330,17 @@ namespace shader
 
 			void process_instruction(utils::bit_buffer_le& input_buffer, utils::bit_buffer_le& output_buffer, const instruction_cb& callback)
 			{
-				const auto begin = input_buffer.total();
+				const auto instruction = read_instruction(input_buffer);
+				const auto skip = callback(output_buffer, instruction);
 
-				const auto opcode = static_cast<std::uint32_t>(input_buffer.read_bits(11));
-				if (opcode == D3D10_SB_OPCODE_CUSTOMDATA)
+				if (!skip)
 				{
-					input_buffer.set_bit(begin);
-
-					const auto desc = input_buffer.read_bytes(4);
-					const auto count = input_buffer.read_bytes(4);
-
-					output_buffer.write_bytes(4, desc);
-					output_buffer.write_bytes(4, count);
-
-					for (auto i = 0u; i < count - 2; i++)
-					{
-						output_buffer.write_bytes(4, input_buffer.read_bytes(4));
-					}
-				}
-				else
-				{
-					input_buffer.read_bits(13);
-					const auto length = input_buffer.read_bits(7);
-					input_buffer.read_bits(1);
-
-					input_buffer.set_bit(begin);
-
-					const auto instruction_opt = read_instruction(input_buffer);
-					const auto skip = instruction_opt.has_value() ? callback(output_buffer, instruction_opt.value()) : false;
-
-					input_buffer.set_bit(begin);
-					for (auto i = 0u; i < length; i++)
-					{
-						const auto value = input_buffer.read_bytes(4);
-						if (!skip)
-						{
-							output_buffer.write_bytes(4, value);
-						}
-					}
+					write_instruction(output_buffer, instruction);
 				}
 			}
 		}
 
-		std::optional<instruction_t> read_instruction(utils::bit_buffer_le& input_buffer)
+		instruction_t read_instruction(utils::bit_buffer_le& input_buffer)
 		{
 			const auto beg = input_buffer.total();
 			const auto opcode_type = input_buffer.read_bits(11);
@@ -379,13 +348,13 @@ namespace shader
 
 			if (const auto iter = instruction_handlers.find(opcode_type); iter != instruction_handlers.end())
 			{
-				return {iter->second->read(input_buffer)};
+				return iter->second->read(input_buffer);
 			}
 
-			return {};
+			throw std::runtime_error("unsupported instruction");
 		}
 
-		void write_instruction(utils::bit_buffer_le& output_buffer, instruction_t& instruction)
+		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
 			if (const auto iter = instruction_handlers.find(instruction.opcode.type); iter != instruction_handlers.end())
 			{

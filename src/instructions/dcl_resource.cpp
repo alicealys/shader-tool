@@ -12,10 +12,10 @@ namespace shader::asm_
 		instruction.operands.emplace_back(reader::read_operand(input_buffer));
 
 		operand_t operand{};
-		operand.custom.u.resource_return_type.x = input_buffer.read_bits(4);
-		operand.custom.u.resource_return_type.y = input_buffer.read_bits(4);
-		operand.custom.u.resource_return_type.z = input_buffer.read_bits(4);
-		operand.custom.u.resource_return_type.w = input_buffer.read_bits(4);
+		operand.custom.u.values[0] = input_buffer.read_bits(4);
+		operand.custom.u.values[1] = input_buffer.read_bits(4);
+		operand.custom.u.values[2] = input_buffer.read_bits(4);
+		operand.custom.u.values[3] = input_buffer.read_bits(4);
 		input_buffer.read_bits(16);
 
 		instruction.operands.emplace_back(operand);
@@ -27,21 +27,21 @@ namespace shader::asm_
 	{
 		writer::write_opcode(output_buffer, instruction.opcode);
 		writer::write_operand(output_buffer, instruction.operands[0]);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.resource_return_type.x);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.resource_return_type.y);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.resource_return_type.z);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.resource_return_type.w);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[0]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[1]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[2]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[3]);
 		output_buffer.write_bits(16, 0);
 	}
 	
 	void dcl_resource::print(const instruction_t& instruction)
 	{
-		const auto& resource_return_type = instruction.operands[1].custom.u.resource_return_type;
+		const auto& resource_return_type = instruction.operands[1].custom.u.values;
 		printf("dcl_resource_%s ", get_resource_dimension_name(instruction.opcode.controls));
-		printf("(%s,%s,%s,%s) ", get_return_type_name(resource_return_type.x),
-			get_return_type_name(resource_return_type.w),
-			get_return_type_name(resource_return_type.z),
-			get_return_type_name(resource_return_type.w));
+		printf("(%s,%s,%s,%s) ", get_return_type_name(resource_return_type[0]),
+			get_return_type_name(resource_return_type[1]),
+			get_return_type_name(resource_return_type[2]),
+			get_return_type_name(resource_return_type[3]));
 		disassembler::print_operand(instruction.operands[0]);
 		printf("\n");
 	}

@@ -95,12 +95,12 @@ namespace shader::asm_
 		{D3D10_SB_OPCODE_UTOF, "utof"},
 		{D3D10_SB_OPCODE_XOR, "xor"},
 		{D3D10_SB_OPCODE_DCL_RESOURCE, "dcl_resource"},
-		{D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, "dcl_constant_buffer"},
+		{D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, "dcl_constantBuffer"},
 		{D3D10_SB_OPCODE_DCL_SAMPLER, "dcl_sampler"},
-		{D3D10_SB_OPCODE_DCL_INDEX_RANGE, "dcl_index_range"},
-		{D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, "dcl_gs_output_primitive_topology"},
-		{D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE, "dcl_gs_input_primitive"},
-		{D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT, "dcl_max_output_vertex_count"},
+		{D3D10_SB_OPCODE_DCL_INDEX_RANGE, "dcl_indexRange"},
+		{D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, "dcl_outputTopology"},
+		{D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE, "dcl_inputPrimitive"},
+		{D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT, "dcl_maxOutputVertexCount"},
 		{D3D10_SB_OPCODE_DCL_INPUT, "dcl_input"},
 		{D3D10_SB_OPCODE_DCL_INPUT_SGV, "dcl_input_sgv"},
 		{D3D10_SB_OPCODE_DCL_INPUT_SIV, "dcl_input_siv"},
@@ -111,8 +111,8 @@ namespace shader::asm_
 		{D3D10_SB_OPCODE_DCL_OUTPUT_SGV, "dcl_output_sgv"},
 		{D3D10_SB_OPCODE_DCL_OUTPUT_SIV, "dcl_output_siv"},
 		{D3D10_SB_OPCODE_DCL_TEMPS, "dcl_temps"},
-		{D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP, "dcl_indexable_temp"},
-		{D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, "dcl_global_flags"},
+		{D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP, "dcl_indexableTemp"},
+		{D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, "dcl_globalFlags"},
 		{D3D10_SB_OPCODE_RESERVED0, "reserved0"},
 		{D3D10_1_SB_OPCODE_LOD, "lod"},
 		{D3D10_1_SB_OPCODE_GATHER4, "gather4"},
@@ -255,23 +255,23 @@ namespace shader::asm_
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2D:
 			return "texture2d";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMS:
-			return "texture2dms";
+			return "texture2dMs";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE3D:
 			return "texture3d";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBE:
 			return "texturecube";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE1DARRAY:
-			return "texture1darray";
+			return "texture1dArray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DARRAY:
-			return "texture2darray";
+			return "texture2dArray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMSARRAY:
-			return "texture2dmsarray";
+			return "texture2dMsArray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBEARRAY:
-			return "texturecubearray";
+			return "textureCubeArray";
 		case D3D11_SB_RESOURCE_DIMENSION_RAW_BUFFER:
-			return "raw buffer";
+			return "rawBuffer";
 		case D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER:
-			return "sturctured buffer";
+			return "sturcturedBuffer";
 		}
 
 		return "unknown";
@@ -309,36 +309,47 @@ namespace shader::asm_
 		case D3D10_SB_NAME_POSITION:
 			return "position";
 		case D3D10_SB_NAME_CLIP_DISTANCE:
-			return "clip distance";
+			return "clipDistance";
 		case D3D10_SB_NAME_CULL_DISTANCE:
-			return "cull distance";
+			return "cullDistance";
 		case D3D10_SB_NAME_RENDER_TARGET_ARRAY_INDEX:
-			return "render target array index";
+			return "renderTargetArrayIndex";
 		case D3D10_SB_NAME_VIEWPORT_ARRAY_INDEX:
-			return "viewport array index";
+			return "viewportArrayIndex";
 		case D3D10_SB_NAME_VERTEX_ID:
-			return "vertex id";
+			return "vertexId";
 		case D3D10_SB_NAME_PRIMITIVE_ID:
 			return "primitive id";
 		case D3D10_SB_NAME_INSTANCE_ID:
-			return "instance id";
+			return "instanceId";
 		case D3D10_SB_NAME_IS_FRONT_FACE:
-			return "is front face";
+			return "isFrontFace";
 		case D3D10_SB_NAME_SAMPLE_INDEX:
-			return "sample index";
+			return "sampleIndex";
 		case D3D11_SB_NAME_FINAL_QUAD_U_EQ_0_EDGE_TESSFACTOR:
+			return "finalQuadUEq0EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_QUAD_V_EQ_0_EDGE_TESSFACTOR:
+			return "finalQuadVEq0EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_QUAD_U_EQ_1_EDGE_TESSFACTOR:
+			return "finalQuadUEq1EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_QUAD_V_EQ_1_EDGE_TESSFACTOR:
+			return "finalQuadVEq1EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_QUAD_U_INSIDE_TESSFACTOR:
+			return "finalQuadUInsideTessFactor";
 		case D3D11_SB_NAME_FINAL_QUAD_V_INSIDE_TESSFACTOR:
+			return "finalQuadVInsideTessFactor";
 		case D3D11_SB_NAME_FINAL_TRI_U_EQ_0_EDGE_TESSFACTOR:
+			return "finalTriUEq0EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_TRI_V_EQ_0_EDGE_TESSFACTOR:
+			return "finalTriVEq0EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_TRI_W_EQ_0_EDGE_TESSFACTOR:
+			return "finalTriWEq0EdgeTessFactor";
 		case D3D11_SB_NAME_FINAL_TRI_INSIDE_TESSFACTOR:
+			return "finalTriInsideTessFactor";
 		case D3D11_SB_NAME_FINAL_LINE_DETAIL_TESSFACTOR:
+			return "finalLineDetailTessFactor";
 		case D3D11_SB_NAME_FINAL_LINE_DENSITY_TESSFACTOR:
-			return "final";
+			return "finalLineDensityTessFactor";
 		}
 
 		return "undefined";
