@@ -11,25 +11,10 @@
 #include "components/writer.hpp"
 #include "components/disassembler.hpp"
 #include "components/tokens.hpp"
+#include "shader_object.hpp"
 
 namespace shader
 {
-	struct dx11_shader_header
-	{
-		unsigned char dxbc[4]; // "DXBC"
-		unsigned int checksum[4];
-		unsigned int unk_int; // always 1, sanity check?
-		unsigned int program_size;
-		unsigned int chunk_count;
-		// unsigned int chunk_offsets[chunk_count];
-		// unsigned char chunks[chunk_count][?];
-	};
-
-	struct shader_checksum
-	{
-		unsigned int checksum[4];
-	};
-
 	namespace asm_
 	{
 		instruction_t read_instruction(utils::bit_buffer_le& input_buffer);
@@ -39,5 +24,5 @@ namespace shader
 
 	using instruction_cb = std::function<bool(utils::bit_buffer_le&, asm_::instruction_t)>;
 
-	std::string patch_shader(unsigned char* program, unsigned int program_size, const instruction_cb& callback);
+	std::string patch_shader(const std::string& shader_data, const instruction_cb& callback);
 }

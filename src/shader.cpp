@@ -11,42 +11,10 @@
 #include "instructions/dcl_globalflags.hpp"
 #include "instructions/customdata.hpp"
 
+#include "shader_object.hpp"
+
 namespace shader
 {
-	namespace
-	{
-		unsigned char* parse_shader_chunk(unsigned char* program, unsigned int program_size, unsigned int* chunk_size)
-		{
-			const auto header = reinterpret_cast<dx11_shader_header*>(program);
-
-			auto shader_chunk_offset = 0;
-			for (auto i = 0u; i < header->chunk_count; i++)
-			{
-				const auto offset = *reinterpret_cast<int*>(
-					reinterpret_cast<size_t>(program) + sizeof(dx11_shader_header) + sizeof(int) * i);
-
-				const auto type = *reinterpret_cast<int*>(reinterpret_cast<size_t>(program) + offset);
-				if (type == 'RDHS' || type == 'XEHS')
-				{
-					shader_chunk_offset = offset;
-				}
-
-				if (i >= header->chunk_count - 1)
-				{
-					*chunk_size = header->program_size - shader_chunk_offset;
-				}
-				else
-				{
-					const auto next_offset = *reinterpret_cast<int*>(
-						reinterpret_cast<size_t>(program) + sizeof(dx11_shader_header) + sizeof(int) * (i + 1));
-					*chunk_size = next_offset - shader_chunk_offset;
-				}
-			}
-
-			return reinterpret_cast<unsigned char*>(reinterpret_cast<size_t>(program) + shader_chunk_offset);
-		}
-	}
-
 	namespace asm_
 	{
 		namespace
@@ -326,17 +294,6 @@ namespace shader
 			}
 
 			initializer _(initialize);
-
-			void process_instruction(utils::bit_buffer_le& input_buffer, utils::bit_buffer_le& output_buffer, const instruction_cb& callback)
-			{
-				const auto instruction = read_instruction(input_buffer);
-				const auto skip = callback(output_buffer, instruction);
-
-				if (!skip)
-				{
-					write_instruction(output_buffer, instruction);
-				}
-			}
 		}
 
 		instruction_t read_instruction(utils::bit_buffer_le& input_buffer)
@@ -374,64 +331,34 @@ namespace shader
 		}
 	}
 
-	std::string patch_shader(unsigned char* program, unsigned int program_size, const instruction_cb& callback)
+	std::string patch_shader(const std::string& shader_data, const instruction_cb& callback)
 	{
-		std::string output_program;
-
-		if (program_size == 0)
+		if (shader_data.size() == 0)
 		{
-			return output_program;
+			return shader_data;
 		}
 
-		unsigned int chunk_size{};
-		auto chunk = parse_shader_chunk(program, program_size, &chunk_size);
-		const auto offset = chunk - program;
+		auto shader = shader_object::parse(shader_data);
 
-		output_program.append(reinterpret_cast<char*>(program), offset);
+		shader_object new_shader;
+		new_shader.get_info() = shader.get_info();
+		new_shader.get_input_signature() = shader.get_input_signature();
+		new_shader.get_output_signature() = shader.get_output_signature();
 
-		utils::bit_buffer_le input_buffer({reinterpret_cast<char*>(chunk), chunk_size});
-		utils::bit_buffer_le output_buffer;
+		utils::bit_buffer_le instructions_buffer;
 
-		const auto type = input_buffer.read_bytes(4); // "SHEX"
-		const auto len = input_buffer.read_bytes(4);
-		const auto minor_version = input_buffer.read_bits(4);
-		const auto major_version = input_buffer.read_bits(4);
-		const auto program_type = input_buffer.read_bytes(1);
-		const auto unk = input_buffer.read_bytes(2);
-		const auto num_dwords = input_buffer.read_bytes(4);
-
-		output_buffer.write_bytes(4, type);
-		output_buffer.write_bytes(4, len);
-		output_buffer.write_bits(4, minor_version);
-		output_buffer.write_bits(4, major_version);
-		output_buffer.write_bytes(1, program_type);
-		output_buffer.write_bytes(2, unk);
-		output_buffer.write_bytes(4, num_dwords);
-
-		while (input_buffer.total() < chunk_size * 8)
+		for (const auto& instruction : shader.get_instructions())
 		{
-			asm_::process_instruction(input_buffer, output_buffer, callback);
+			if (!callback(instructions_buffer, instruction))
+			{
+				shader::asm_::write_instruction(instructions_buffer, instruction);
+			}
 		}
 
-		const auto total_len = output_buffer.total() / 8u;
-		const auto new_len = total_len - 8u;
-		const auto new_num_dwords = (new_len / 4u);
+		const auto size = static_cast<std::uint32_t>(instructions_buffer.total()) / 8u;
+		instructions_buffer.set_bit(0);
+		new_shader.parse_instructions(instructions_buffer, size);
 
-		output_buffer.set_byte(4);
-		output_buffer.write_bytes(4, new_len);
-		output_buffer.set_byte(12);
-		output_buffer.write_bytes(4, new_num_dwords);
-
-		const auto buffer = output_buffer.get_buffer().data();
-		output_program.append(buffer, total_len);
-
-		const auto header = reinterpret_cast<dx11_shader_header*>(output_program.data());
-
-		header->program_size = static_cast<std::uint32_t>(output_program.size());
-
-		dxbc::CalculateDXBCChecksum(reinterpret_cast<unsigned char*>(output_program.data()),
-			static_cast<std::uint32_t>(output_program.size()), reinterpret_cast<DWORD*>(&header->checksum));
-
-		return output_program;
+		return new_shader.serialize();
 	}
 }

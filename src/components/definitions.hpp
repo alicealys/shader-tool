@@ -51,12 +51,6 @@ namespace shader::asm_
 
 	struct operand_t;
 
-	enum operand_custom_type
-	{
-		operand_dcl_temps0,
-		operand_resource_return_type0,
-	};
-
 	struct operand_dcl_temps_t
 	{
 		std::uint32_t size;
@@ -73,14 +67,14 @@ namespace shader::asm_
 
 	struct operand_t
 	{
+		operand_components_t components;
 		std::uint32_t type;
 		std::uint32_t dimension;
 		std::uint32_t extended;
 		std::vector<operand_extended_t> extensions;
 		operand_index_t indices[3];
-		data_type_t immediate_values[4];
-		operand_components_t components;
 		std::shared_ptr<operand_t> extra_operand;
+		data_type_t immediate_values[4];
 		operand_custom_t custom;
 	};
 
@@ -88,7 +82,7 @@ namespace shader::asm_
 	{
 		std::uint32_t type;
 		std::uint32_t values[4];
-		bool extended;
+		std::uint32_t extended;
 	};
 
 	struct opcode_t
@@ -96,7 +90,7 @@ namespace shader::asm_
 		std::uint32_t type;
 		std::uint32_t controls;
 		std::uint32_t length;
-		bool extended;
+		std::uint32_t extended;
 		std::vector<opcode_extended_t> extensions;
 	};
 

@@ -47,6 +47,7 @@
 #include <optional>
 #include <unordered_set>
 #include <variant>
+#include <cassert>
 
 #include <gsl/gsl>
 
