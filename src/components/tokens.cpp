@@ -119,7 +119,7 @@ namespace shader::asm_::tokens
 	{
 		if (components.size() > 4)
 		{
-			throw std::runtime_error("create_src_operand_swizzle: invalid args");
+			throw std::runtime_error("create_operand: invalid args");
 		}
 
 		operand_components_t operand_components{};
@@ -158,7 +158,7 @@ namespace shader::asm_::tokens
 	{
 		if (component_names.size() > 4)
 		{
-			throw std::runtime_error("create_swizzle_components: invalid args");
+			throw std::runtime_error("create_operand: invalid args");
 		}
 
 		operand_components_t operand_components{};
@@ -188,7 +188,7 @@ namespace shader::asm_::tokens
 		operand_components_t operand_components{};
 		operand_components.type = D3D10_SB_OPERAND_4_COMPONENT;
 		operand_components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-		operand_components.mask = component_mask; // e.g. X|Y|Z|W
+		operand_components.mask = component_mask;
 
 		return create_operand(type, operand_components, indices);
 	}
