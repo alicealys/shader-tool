@@ -51,7 +51,7 @@ namespace shader
 	{
 		namespace
 		{
-			std::unordered_map<std::uint32_t, std::unique_ptr<base_instruction>> instruction_handlers;
+			std::array<std::unique_ptr<base_instruction>, D3D10_SB_NUM_OPCODES> instruction_handlers;
 
 			template <typename T>
 			class initializer final
@@ -66,8 +66,7 @@ namespace shader
 			template <typename T, typename... Args>
 			void register_instruction_handler(const std::uint32_t type, Args&&... args)
 			{
-				auto handler = std::make_unique<T>(std::forward<Args>(args)...);
-				instruction_handlers.insert(std::make_pair(type, std::move(handler)));
+				instruction_handlers[type] = std::make_unique<T>(std::forward<Args>(args)...);
 			}
 
 			void initialize()
@@ -346,9 +345,9 @@ namespace shader
 			const auto opcode_type = input_buffer.read_bits(11);
 			input_buffer.set_bit(beg);
 
-			if (const auto iter = instruction_handlers.find(opcode_type); iter != instruction_handlers.end())
+			if (const auto& handler = instruction_handlers[opcode_type]; handler.get() != nullptr)
 			{
-				return iter->second->read(input_buffer);
+				return handler->read(input_buffer);
 			}
 
 			throw std::runtime_error("unsupported instruction");
@@ -356,18 +355,22 @@ namespace shader
 
 		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
-			if (const auto iter = instruction_handlers.find(instruction.opcode.type); iter != instruction_handlers.end())
+			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
-				iter->second->write(output_buffer, instruction);
+				return handler->write(output_buffer, instruction);
 			}
+
+			throw std::runtime_error("unsupported instruction");
 		}
 
 		void print_instruction(const instruction_t& instruction)
 		{
-			if (const auto iter = instruction_handlers.find(instruction.opcode.type); iter != instruction_handlers.end())
+			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
-				iter->second->print(instruction);
+				return handler->print(instruction);
 			}
+
+			throw std::runtime_error("unsupported instruction");
 		}
 	}
 
