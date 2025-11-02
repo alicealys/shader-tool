@@ -27,7 +27,7 @@ namespace shader
 
 	struct shader_checksum
 	{
-		unsigned int cheksum[4];
+		unsigned int checksum[4];
 	};
 
 	namespace asm_

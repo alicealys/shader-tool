@@ -11,7 +11,7 @@ namespace shader::asm_
 		instruction.customdata.data_class = input_buffer.read_bits(21);
 		instruction.customdata.count = input_buffer.read_bytes(4);
 
-		for (auto i = 2; i < instruction.customdata.count; i++)
+		for (auto i = 2u; i < instruction.customdata.count; i++)
 		{
 			instruction.customdata.values.emplace_back(input_buffer.read_bytes(4));
 		}
@@ -46,7 +46,7 @@ namespace shader::asm_
 			printf("dcl_immediateConstantBuffer ");
 			const auto const_count = (instruction.customdata.count - 2) / 4;
 			printf("\n{\n");
-			for (auto i = 0; i < const_count; i++)
+			for (auto i = 0u; i < const_count; i++)
 			{
 				const auto values = &instruction.customdata.values[i * 4];
 				printf("\t{%f, %f, %f, %f}", values[0].f32, values[1].f32, values[2].f32, values[3].f32);

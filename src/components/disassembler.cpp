@@ -25,35 +25,37 @@ namespace shader::asm_::disassembler
 			}
 		}
 
+		const auto num_components = get_num_components(op.components.type);
+
 		switch (op.type)
 		{
 		case D3D10_SB_OPERAND_TYPE_INPUT:
-			printf("v%i", op.indices[0].values[0].u32);
+			printf("v%i", op.indices[0].value.uint32);
 			break;
 		case D3D10_SB_OPERAND_TYPE_OUTPUT_COVERAGE_MASK:
 			printf("oMask");
 			break;
 		case D3D10_SB_OPERAND_TYPE_OUTPUT:
-			printf("o%i", op.indices[0].values[0].u32);
+			printf("o%i", op.indices[0].value.uint32);
 			break;
 		case D3D10_SB_OPERAND_TYPE_TEMP:
-			printf("r%i", op.indices[0].values[0].u32);
+			printf("r%i", op.indices[0].value.uint32);
 			break;
 		case D3D10_SB_OPERAND_TYPE_RESOURCE:
-			printf("t%i", op.indices[0].values[0].u32);
+			printf("t%i", op.indices[0].value.uint32);
 			break;
 		case D3D10_SB_OPERAND_TYPE_SAMPLER:
-			printf("s%i", op.indices[0].values[0].u32);
+			printf("s%i", op.indices[0].value.uint32);
 			break;
 		case D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER:
 		{
-			printf("cb%i[", op.indices[0].values[0].u32);
+			printf("cb%i[", op.indices[0].value.uint32);
 			if (op.extra_operand != nullptr)
 			{
 				print_operand(*op.extra_operand);
 				printf(" + ");
 			}
-			printf("%i]", op.indices[1].values[0].u32);
+			printf("%i]", op.indices[1].value.uint32);
 			break;
 		}
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER:
@@ -64,28 +66,34 @@ namespace shader::asm_::disassembler
 				print_operand(*op.extra_operand);
 				printf(" + ");
 			}
-			printf("%i]", op.indices[1].values[0].u32);
+			printf("%i]", op.indices[1].value.uint32);
 			break;
 		}
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE32:
 		{
-			if (op.components.type == D3D10_SB_OPERAND_4_COMPONENT)
+			printf("l(");
+			for (auto i = 0u; i < num_components; i++)
 			{
-				printf("l(%f, %f, %f, %f)",
-					op.indices[0].values[0].f32,
-					op.indices[0].values[1].f32,
-					op.indices[0].values[2].f32,
-					op.indices[0].values[3].f32
-				);
+				printf("%f", op.immediate_values[0].float32);
+				if (i < num_components - 1)
+				{
+					printf(", ");
+				}
 			}
-			else
-			{
-				printf("l(%f)", op.indices[0].values[0].f32);
-			}
+			printf(")");
 			break;
 		}
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE64:
-			printf("l(%lli)", op.indices[0].values[0].u64.value);
+			printf("l(");
+			for (auto i = 0u; i < num_components; i++)
+			{
+				printf("%f", op.immediate_values[0].float64);
+				if (i < num_components - 1)
+				{
+					printf(", ");
+				}
+			}
+			printf(")");
 			break;
 		default:
 			printf("op%i", op.type);

@@ -11,29 +11,27 @@ namespace shader::asm_
 	constexpr auto component_w = 1 << D3D10_SB_4_COMPONENT_W;
 	constexpr auto component_all = component_x | component_y | component_z | component_w;
 
-	union operand_index_data_t
+	union data_type_t
 	{
-		struct u64_fields_t
+		union
 		{
-			std::uint32_t low;
-			std::uint32_t high;
-		};
-
-		union u64_t
-		{
-			u64_fields_t fields;
+			union
+			{
+				std::uint32_t low;
+				std::uint32_t high;
+			} fields;
 			std::uint64_t value;
-		};
+		} uint64;
 
-		std::uint32_t u32;
-		float f32;
-		u64_t u64;
+		std::uint32_t uint32;
+		float float32;
+		double float64;
 	};
 
 	struct operand_index_t
 	{
 		std::uint32_t representation;
-		operand_index_data_t values[4];
+		data_type_t value;
 	};
 
 	struct operand_components_t
@@ -80,6 +78,7 @@ namespace shader::asm_
 		std::uint32_t extended;
 		std::vector<operand_extended_t> extensions;
 		operand_index_t indices[3];
+		data_type_t immediate_values[4];
 		operand_components_t components;
 		std::shared_ptr<operand_t> extra_operand;
 		operand_custom_t custom;
@@ -126,4 +125,6 @@ namespace shader::asm_
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);
 	const char* get_name_token(const std::uint32_t type);
+
+	std::uint32_t get_num_components(const std::uint32_t type);
 }

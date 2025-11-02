@@ -354,4 +354,19 @@ namespace shader::asm_
 
 		return "undefined";
 	}
+
+	std::uint32_t get_num_components(const std::uint32_t type)
+	{
+		switch (type)
+		{
+		case D3D10_SB_OPERAND_0_COMPONENT:
+			return 0;
+		case D3D10_SB_OPERAND_1_COMPONENT:
+			return 1;
+		case D3D10_SB_OPERAND_4_COMPONENT:
+			return 4;
+		}
+
+		return 0;
+	}
 }

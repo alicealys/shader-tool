@@ -76,8 +76,19 @@ namespace utils
         bit_buffer_le() = default;
         bit_buffer_le(const std::string&);
 
-        std::uint32_t read_bits(const unsigned int num_bits);
-        std::uint32_t read_bytes(const unsigned int num_bytes);
+        template <typename T = std::uint32_t>
+        T read_bits(const unsigned int num_bits)
+        {
+            T data{};
+            this->read_bits_internal(num_bits, &data);
+            return data;
+        }
+
+        template <typename T = std::uint32_t>
+        T read_bytes(const unsigned int num_bytes)
+        {
+            return read_bits<T>(num_bytes * 8);
+        }
 
         std::uint64_t total();
 

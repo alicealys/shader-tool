@@ -49,20 +49,20 @@ namespace shader::asm_::writer
 			switch (operand.indices[index].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-				output_buffer.write_bytes(4, operand.indices[index].values[0].u32);
+				output_buffer.write_bytes(4, operand.indices[index].value.uint32);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-				output_buffer.write_bytes(8, operand.indices[index].values[0].u64.value);
+				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
 				write_operand(output_buffer, *operand.extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				output_buffer.write_bytes(4, operand.indices[index].values[0].u32);
+				output_buffer.write_bytes(4, operand.indices[index].value.uint32);
 				write_operand(output_buffer, *operand.extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				output_buffer.write_bytes(8, operand.indices[index].values[0].u64.value);
+				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
 				write_operand(output_buffer, *operand.extra_operand);
 				break;
 			}
@@ -83,24 +83,22 @@ namespace shader::asm_::writer
 			write_index(2);
 		}
 
+		const auto num_components = get_num_components(operand.components.type);
+
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
 		{
-			if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
+			for (auto i = 0u; i < num_components; i++)
 			{
-				output_buffer.write_bytes(4, operand.indices[0].values[0].u32);
-				output_buffer.write_bytes(4, operand.indices[0].values[1].u32);
-				output_buffer.write_bytes(4, operand.indices[0].values[2].u32);
-				output_buffer.write_bytes(4, operand.indices[0].values[3].u32);
-			}
-			else
-			{
-				output_buffer.write_bytes(4, operand.indices[0].values[0].u32);
+				output_buffer.write_bytes(4, operand.immediate_values[i].uint32);
 			}
 		}
 
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
 		{
-			output_buffer.write_bytes(8, operand.indices[0].values[0].u64.value);
+			for (auto i = 0u; i < num_components; i++)
+			{
+				output_buffer.write_bytes(8, operand.immediate_values[i].uint64);
+			}
 		}
 	}
 
@@ -113,8 +111,8 @@ namespace shader::asm_::writer
 		case D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS:
 			output_buffer.write_bits(3, 0);
 			output_buffer.write_bits(4, opcode.values[0]);
-			output_buffer.write_bits(4, opcode.values[0]);
-			output_buffer.write_bits(4, opcode.values[0]);
+			output_buffer.write_bits(4, opcode.values[1]);
+			output_buffer.write_bits(4, opcode.values[2]);
 			output_buffer.write_bits(10, 0);
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:

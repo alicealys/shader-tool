@@ -42,7 +42,7 @@ namespace shader::asm_::tokens
 
 		operand.components.type = D3D10_SB_OPERAND_1_COMPONENT;
 
-		operand.indices[0].values[0].f32 = value;
+		operand.immediate_values[0].float32 = value;
 
 		return operand;
 	}
@@ -60,10 +60,10 @@ namespace shader::asm_::tokens
 		operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 		operand.components.mask = 0;
 
-		operand.indices[0].values[0].f32 = x;
-		operand.indices[0].values[1].f32 = y;
-		operand.indices[0].values[2].f32 = z;
-		operand.indices[0].values[3].f32 = w;
+		operand.immediate_values[0].float32 = x;
+		operand.immediate_values[1].float32 = y;
+		operand.immediate_values[2].float32 = z;
+		operand.immediate_values[3].float32 = w;
 
 		return operand;
 	}
@@ -109,7 +109,7 @@ namespace shader::asm_::tokens
 
 		for (auto i = 0u; i < indices.size(); i++)
 		{
-			operand.indices[i].values[0].u32 = indices[i];
+			operand.indices[i].value.uint32 = indices[i];
 		}
 
 		return operand;

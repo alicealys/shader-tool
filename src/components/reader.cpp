@@ -83,22 +83,22 @@ namespace shader::asm_::reader
 			switch (operand.indices[index].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-				operand.indices[index].values[0].u32 = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint32 = bit_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-				operand.indices[index].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-				operand.indices[index].values[0].u64.fields.high = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.low = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
 				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				operand.indices[index].values[0].u32 = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint32 = bit_buffer.read_bytes(4);
 				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				operand.indices[index].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-				operand.indices[index].values[0].u64.fields.high = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.low = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
 				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			}
@@ -119,25 +119,22 @@ namespace shader::asm_::reader
 			read_index_rep(2);
 		}
 
+		const auto num_components = get_num_components(operand.components.type);
+
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
 		{
-			if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
+			for (auto i = 0u; i < num_components; i++)
 			{
-				operand.indices[0].values[0].u32 = bit_buffer.read_bytes(4);
-				operand.indices[0].values[1].u32 = bit_buffer.read_bytes(4);
-				operand.indices[0].values[2].u32 = bit_buffer.read_bytes(4);
-				operand.indices[0].values[3].u32 = bit_buffer.read_bytes(4);
-			}
-			else
-			{
-				operand.indices[0].values[0].u32 = bit_buffer.read_bytes(4);
+				operand.immediate_values[i].uint32 = bit_buffer.read_bytes(4);
 			}
 		}
 
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
 		{
-			operand.indices[0].values[0].u64.fields.low = bit_buffer.read_bytes(4);
-			operand.indices[0].values[0].u64.fields.high = bit_buffer.read_bytes(4);
+			for (auto i = 0u; i < num_components; i++)
+			{
+				operand.immediate_values[i].uint64.value = bit_buffer.read_bytes<std::uint64_t>(8);
+			}
 		}
 
 		return operand;
