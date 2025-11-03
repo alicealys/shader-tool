@@ -23,21 +23,23 @@ namespace shader::asm_::tokens
 	operand_creator::operand_creator(const operand_t& operand)
 		: current_(operand)
 	{
+		/* mask */
+
 		this->x.get_operand() = operand;
-		this->x.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_X;
-		this->x.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->x.get_operand().components.mask = component_x;
+		this->x.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
 		this->y.get_operand() = operand;
-		this->y.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Y;
-		this->y.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->y.get_operand().components.mask = component_y;
+		this->y.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
 		this->z.get_operand() = operand;
-		this->z.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Z;
-		this->z.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->z.get_operand().components.mask = component_z;
+		this->z.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
 		this->w.get_operand() = operand;
-		this->w.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_W;
-		this->w.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->w.get_operand().components.mask = component_w;
+		this->w.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
 		this->xy.get_operand() = operand;
 		this->xy.get_operand().components.mask = component_x | component_y;
@@ -50,6 +52,24 @@ namespace shader::asm_::tokens
 		this->xyzw.get_operand() = operand;
 		this->xyzw.get_operand().components.mask = component_all;
 		this->xyzw.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+
+		/* single */
+
+		this->x_s.get_operand() = operand;
+		this->x_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_X;
+		this->x_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->y_s.get_operand() = operand;
+		this->y_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Y;
+		this->y_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->z_s.get_operand() = operand;
+		this->z_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Z;
+		this->z_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->w_s.get_operand() = operand;
+		this->w_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_W;
+		this->w_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
 	}
 
 	operand_creator operand_creator::operator[](const std::uint32_t index) const
@@ -269,9 +289,19 @@ namespace shader::asm_::tokens
 
 	void parse_swizzle_components(operand_components_t& components, const std::string& swz)
 	{
-		for (auto i = 0u; i < swz.size(); i++)
+		auto last_component = 0u;
+		for (auto i = 0u; i < 4u; i++)
 		{
-			components.names[i] = get_swizzle_component(swz[i]);
+			if (i < swz.size())
+			{
+				components.names[i] = get_swizzle_component(swz[i]);
+			}
+			else
+			{
+				components.names[i] = last_component;
+			}
+
+			last_component = components.names[i];
 		}
 	}
 
@@ -340,11 +370,6 @@ namespace shader::asm_::tokens
 
 	operand_t create_operand(const std::uint32_t type, const std::string& component_names, const std::vector<std::uint32_t>& indices)
 	{
-		if (component_names.size() > 4)
-		{
-			throw std::runtime_error("create_operand: invalid args");
-		}
-
 		operand_components_t operand_components{};
 
 		operand_components.type = D3D10_SB_OPERAND_4_COMPONENT;
@@ -393,27 +418,6 @@ namespace shader::asm_::tokens
 		}
 
 		return result;
-	}
-
-	void convert_src_mask(operand_t& operand)
-	{
-		if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
-		{
-			return;
-		}
-
-		if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE)
-		{
-			operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-			operand.components.mask = 1 << operand.components.names[0];
-		}
-		else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
-		{
-			operand.components.mask = 1 << operand.components.names[0];
-			operand.components.mask = 1 << operand.components.names[1];
-			operand.components.mask = 1 << operand.components.names[2];
-			operand.components.mask = 1 << operand.components.names[3];
-		}
 	}
 
 	namespace literals

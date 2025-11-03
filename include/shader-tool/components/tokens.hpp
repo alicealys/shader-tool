@@ -36,6 +36,11 @@ namespace shader::asm_::tokens
 		operand_creator_final z;
 		operand_creator_final w;
 
+		operand_creator_final x_s;
+		operand_creator_final y_s;
+		operand_creator_final z_s;
+		operand_creator_final w_s;
+
 		operand_creator_final xy;
 		operand_creator_final xyz;
 		operand_creator_final xyzw;
@@ -163,8 +168,6 @@ namespace shader::asm_::tokens
 	std::vector<std::uint32_t> find_operands(const instruction_t& instruction, const std::uint32_t beg,
 		const std::function<bool(const operand_t&)>& cb);
 
-	void convert_src_mask(operand_t& operand);
-
 	template <typename ...Args>
 	instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, Args&&... args)
 	{
@@ -174,11 +177,6 @@ namespace shader::asm_::tokens
 		for (const auto& operand : instruction.operands)
 		{
 			instruction.opcode.length += writer::get_operand_length(operand);
-		}
-
-		if (instruction.operands.size() >= 1)
-		{
-			convert_src_mask(instruction.operands[0]);
 		}
 
 		return instruction;
