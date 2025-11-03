@@ -1,36 +1,12 @@
 # shader-tool
 
-sm5 shader parser/writer/disassembler
-
 ## how to use
 
 use this premake5 script ----> [here](https://github.com/alicealys/shader-tool/blob/main/deps/premake/templates/shader-tool.lua)
 
-## api example
+## API examples
 
-parser example:
-```c++
-
-#include <std_include.hpp>
-
-#include "shader-tool/shader.hpp"
-
-// ...
-
-void main()
-{
-	const auto data = utils::io::read_file("...");
-
-	auto shader = shader::shader_object::parse(data);
-	for (const auto& instruction : shader.get_instructions())
-	{
-		shader::asm_::print_instruction(instruction);
-	}
-}
-```
-
-assembler example:
-
+shader generation:
 ```c++
 #include <std_include.hpp>
 
@@ -81,5 +57,26 @@ void main()
 	}
 
 	utils::io::write_file("ps_test.cso", shader.serialize());
+}
+```
+
+parser:
+```c++
+
+#include <std_include.hpp>
+
+#include "shader-tool/shader.hpp"
+
+// ...
+
+void main()
+{
+	const auto data = utils::io::read_file("...");
+
+	auto shader = shader::shader_object::parse(data);
+	for (const auto& instruction : shader.get_instructions())
+	{
+		shader::asm_::print_instruction(instruction);
+	}
 }
 ```
