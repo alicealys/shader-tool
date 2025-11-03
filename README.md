@@ -2,6 +2,12 @@
 
 sm5 shader parser/writer/disassembler
 
+## how to use
+
+use this premake5 script ----> [here](https://github.com/alicealys/shader-tool/blob/main/deps/premake/templates/shader-tool.lua)
+
+## api example
+
 parser example:
 ```c++
 
