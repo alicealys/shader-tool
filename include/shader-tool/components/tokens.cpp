@@ -89,18 +89,20 @@ namespace shader::asm_::tokens
 		this->offset_.emplace(offset);
 	}
 
-	operand_t operand_creator::with_component::mask_mode() const
+	operand_creator::with_component operand_creator::with_component::mask() const
 	{
-		operand_t next = this->current_;
+		operand_creator::with_component next = *this;
 
 		if (!this->has_set_components_)
 		{
 			return next;
 		}
 
-		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
-		next.components.mask = 0;
+		next.has_set_components_ = false;
+
+		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.current_.components.mask = 0;
 
 		auto idx = 0;
 		for (auto i = 0; i < 4; i++)
@@ -111,28 +113,30 @@ namespace shader::asm_::tokens
 			}
 
 			const auto mask = 1 << (this->components_[i] - 1);
-			next.components.mask |= mask;
+			next.current_.components.mask |= mask;
 		}
 
 		return next;
 	}
 
-	operand_t operand_creator::with_component::swizzle_mode() const
+	operand_creator::with_component operand_creator::with_component::swz() const
 	{
-		operand_t next = this->current_;
+		operand_creator::with_component next = *this;
 
 		if (!this->has_set_components_)
 		{
 			return next;
 		}
 
-		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
-		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.has_set_components_ = false;
 
-		next.components.names[0] = 0;
-		next.components.names[1] = 0;
-		next.components.names[2] = 0;
-		next.components.names[3] = 0;
+		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
+		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+
+		next.current_.components.names[0] = 0;
+		next.current_.components.names[1] = 0;
+		next.current_.components.names[2] = 0;
+		next.current_.components.names[3] = 0;
 
 		auto idx = 0;
 		auto last_component = 0u;
@@ -140,12 +144,12 @@ namespace shader::asm_::tokens
 		{
 			if (this->components_[i] == component_none)
 			{
-				next.components.names[idx++] = last_component;
+				next.current_.components.names[idx++] = last_component;
 			}
 			else
 			{
 				const auto c = this->components_[i] - 1;
-				next.components.names[idx++] = c;
+				next.current_.components.names[idx++] = c;
 				last_component = c;
 			}
 		}
@@ -153,22 +157,24 @@ namespace shader::asm_::tokens
 		return next;
 	}
 
-	operand_t operand_creator::with_component::select_one_mode() const
+	operand_creator::with_component operand_creator::with_component::scalar() const
 	{
-		operand_t next = this->current_;
+		operand_creator::with_component next = *this;
 
 		if (!this->has_set_components_)
 		{
 			return next;
 		}
 
-		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
-		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.has_set_components_ = false;
 
-		next.components.names[0] = 0;
-		next.components.names[1] = 0;
-		next.components.names[2] = 0;
-		next.components.names[3] = 0;
+		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+
+		next.current_.components.names[0] = 0;
+		next.current_.components.names[1] = 0;
+		next.current_.components.names[2] = 0;
+		next.current_.components.names[3] = 0;
 
 		for (auto i = 0; i < 4; i++)
 		{
@@ -177,7 +183,7 @@ namespace shader::asm_::tokens
 				continue;
 			}
 
-			next.components.names[0] = this->components_[i] - 1;
+			next.current_.components.names[0] = this->components_[i] - 1;
 			break;
 		}
 
@@ -193,7 +199,7 @@ namespace shader::asm_::tokens
 		this->components_[1] = b;
 		this->components_[2] = c;
 		this->components_[3] = d;
-		this->current_ = this->mask_mode();
+		*this = this->mask();
 	}
 
 	operand_creator::operand_creator(const operand_t& operand)

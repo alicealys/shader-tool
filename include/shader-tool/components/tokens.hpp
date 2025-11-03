@@ -32,9 +32,9 @@ namespace shader::asm_::tokens
 			with_component neg() const;
 			with_component abs() const;
 
-			operand_t mask_mode() const;
-			operand_t swizzle_mode() const;
-			operand_t select_one_mode() const;
+			operand_creator::with_component mask() const;
+			operand_creator::with_component swz() const;
+			operand_creator::with_component scalar() const;
 
 			void set_offset(const std::uint32_t offset);
 

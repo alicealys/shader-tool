@@ -37,13 +37,13 @@ namespace shader
 					break;
 				}
 				case asm_::token_operand_4c_mask:
-					instruction.operands.emplace_back(operands[i].mask_mode());
+					instruction.operands.emplace_back(operands[i].mask());
 					break;
 				case asm_::token_operand_4c_swizzle:
-					instruction.operands.emplace_back(operands[i].swizzle_mode());
+					instruction.operands.emplace_back(operands[i].swz());
 					break;
 				case asm_::token_operand_4c_scalar:
-					instruction.operands.emplace_back(operands[i].select_one_mode());
+					instruction.operands.emplace_back(operands[i].scalar());
 					break;
 				case asm_::token_custom:
 					instruction.operands.emplace_back(operands[i]);
