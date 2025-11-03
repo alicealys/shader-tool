@@ -7,7 +7,7 @@ parser example:
 
 #include <std_include.hpp>
 
-#include "shader.hpp"
+#include "shader-tool/shader.hpp"
 
 // ...
 
@@ -28,7 +28,7 @@ assembler example:
 ```c++
 #include <std_include.hpp>
 
-#include "shader.hpp"
+#include "shader-tool/shader.hpp"
 
 // ...
 
