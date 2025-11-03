@@ -57,17 +57,17 @@ namespace shader
 
 #define DEFINE_INSTRUCTION(__name__, __type__, __controls__) \
 			template <typename ...Args> \
-			void __name__(Args&&... args) \
+			void __name__(Args&&... args) const \
 			{ \
 				this->shader_->add_instruction(shader::asm_::tokens::create_instruction(__type__, __controls__, std::forward<Args>(args)...)); \
 			} \
 			template <typename ...Args> \
-			void __name__##_c(const std::uint32_t controls, Args&&... args) \
+			void __name__##_c(const std::uint32_t controls, Args&&... args) const \
 			{ \
 				this->shader_->add_instruction(shader::asm_::tokens::create_instruction(__type__, controls, std::forward<Args>(args)...)); \
 			} \
 
-			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
+			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data) const;
 
 			DEFINE_INSTRUCTION(add, D3D10_SB_OPCODE_ADD, 0);
 			DEFINE_INSTRUCTION(add_sat, D3D10_SB_OPCODE_ADD, 4);

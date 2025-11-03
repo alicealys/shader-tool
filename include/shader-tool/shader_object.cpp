@@ -5,7 +5,7 @@
 
 namespace shader
 {
-	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data)
+	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data) const
 	{
 		shader::asm_::instruction_t instruction{};
 		instruction.opcode.type = D3D10_SB_OPCODE_CUSTOMDATA;
