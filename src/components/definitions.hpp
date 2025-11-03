@@ -5,11 +5,11 @@
 
 namespace shader::asm_
 {
-	constexpr auto component_x = 1 << D3D10_SB_4_COMPONENT_X;
-	constexpr auto component_y = 1 << D3D10_SB_4_COMPONENT_Y;
-	constexpr auto component_z = 1 << D3D10_SB_4_COMPONENT_Z;
-	constexpr auto component_w = 1 << D3D10_SB_4_COMPONENT_W;
-	constexpr auto component_all = component_x | component_y | component_z | component_w;
+	constexpr std::uint32_t component_x = 1 << D3D10_SB_4_COMPONENT_X;
+	constexpr std::uint32_t component_y = 1 << D3D10_SB_4_COMPONENT_Y;
+	constexpr std::uint32_t component_z = 1 << D3D10_SB_4_COMPONENT_Z;
+	constexpr std::uint32_t component_w = 1 << D3D10_SB_4_COMPONENT_W;
+	constexpr std::uint32_t component_all = component_x | component_y | component_z | component_w;
 
 	union data_type_t
 	{
@@ -61,7 +61,7 @@ namespace shader::asm_
 		union
 		{
 			std::uint32_t value;
-			std::uint32_t values[4];
+			std::uint8_t values[4];
 		} u;
 	};
 

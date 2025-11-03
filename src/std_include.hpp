@@ -51,6 +51,14 @@
 
 #include <gsl/gsl>
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #pragma warning(pop)
 #pragma warning(disable: 4100)
 

@@ -20,24 +20,35 @@ namespace shader::asm_
 	{
 		printf("dcl_globalFlags ");
 
+		std::vector<const char*> flags;
+
 		if ((instruction.opcode.controls & (1 << 0)) != 0)
 		{
-			printf("refactoringAllowed ");
+			flags.emplace_back("refactoringAllowed");
 		}
 
 		if ((instruction.opcode.controls & (1 << 1)) != 0)
 		{
-			printf("enableDoublePrecision ");
+			flags.emplace_back("enableDoublePrecisionFloatOps");
 		}
 
 		if ((instruction.opcode.controls & (1 << 2)) != 0)
 		{
-			printf("forceEarlyDepthStencilTest ");
+			flags.emplace_back("forceEarlyDepthStencil");
 		}
 
 		if ((instruction.opcode.controls & (1 << 3)) != 0)
 		{
-			printf("enableRawStructuredBuffers ");
+			flags.emplace_back("enableRawAndStructuredBuffers");
+		}
+
+		for (auto i = 0u; i < flags.size(); i++)
+		{
+			printf("%s", flags[i]);
+			if (i < flags.size() - 1)
+			{
+				printf(" | ");
+			}
 		}
 
 		printf("\n");

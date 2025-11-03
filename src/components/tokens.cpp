@@ -5,6 +5,129 @@
 
 namespace shader::asm_::tokens
 {
+	operand_creator::operand_creator(const operand_t& operand)
+		: current_(operand)
+	{
+		this->x = operand;
+		this->x.components.names[0] = D3D10_SB_4_COMPONENT_X;
+		this->x.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->y = operand;
+		this->y.components.names[0] = D3D10_SB_4_COMPONENT_Y;
+		this->y.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->z = operand;
+		this->z.components.names[0] = D3D10_SB_4_COMPONENT_Z;
+		this->z.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->w = operand;
+		this->w.components.names[0] = D3D10_SB_4_COMPONENT_W;
+		this->w.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+
+		this->xy = operand;
+		this->xy.components.mask = component_x | component_y;
+		this->xy.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+
+		this->xyz = operand;
+		this->xyz.components.mask = component_x | component_y | component_z;
+		this->xyz.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+
+		this->xyzw = operand;
+		this->xyzw.components.mask = component_all;
+		this->xyzw.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+	}
+
+	operand_creator operand_creator::operator[](const std::uint32_t index) const
+	{
+		operand_t next = this->current_;
+		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
+		next.indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
+		next.indices[1].value.uint32 = index;
+		return operand_creator(next);
+	}
+
+	operand_t operand_creator::swz(const std::string& swz) const
+	{
+		operand_t next = this->current_;
+		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
+		parse_swizzle_components(next.components, swz);
+		return next;
+	}
+
+	operand_creator::operator operand_t() const
+	{
+		return this->current_;
+	}
+
+	namespace literals
+	{
+		DEFINE_TEMP_REGISTER(r, 0);
+		DEFINE_TEMP_REGISTER(r, 1);
+		DEFINE_TEMP_REGISTER(r, 2);
+		DEFINE_TEMP_REGISTER(r, 3);
+		DEFINE_TEMP_REGISTER(r, 4);
+		DEFINE_TEMP_REGISTER(r, 5);
+		DEFINE_TEMP_REGISTER(r, 6);
+		DEFINE_TEMP_REGISTER(r, 7);
+		DEFINE_TEMP_REGISTER(r, 8);
+		DEFINE_TEMP_REGISTER(r, 9);
+
+		DEFINE_INPUT_REGISTER(v, 0);
+		DEFINE_INPUT_REGISTER(v, 1);
+		DEFINE_INPUT_REGISTER(v, 2);
+		DEFINE_INPUT_REGISTER(v, 3);
+		DEFINE_INPUT_REGISTER(v, 4);
+		DEFINE_INPUT_REGISTER(v, 5);
+		DEFINE_INPUT_REGISTER(v, 6);
+		DEFINE_INPUT_REGISTER(v, 7);
+		DEFINE_INPUT_REGISTER(v, 8);
+		DEFINE_INPUT_REGISTER(v, 9);
+
+		DEFINE_OUTPUT_REGISTER(o, 0);
+		DEFINE_OUTPUT_REGISTER(o, 1);
+		DEFINE_OUTPUT_REGISTER(o, 2);
+		DEFINE_OUTPUT_REGISTER(o, 3);
+		DEFINE_OUTPUT_REGISTER(o, 4);
+		DEFINE_OUTPUT_REGISTER(o, 5);
+		DEFINE_OUTPUT_REGISTER(o, 6);
+		DEFINE_OUTPUT_REGISTER(o, 7);
+		DEFINE_OUTPUT_REGISTER(o, 8);
+		DEFINE_OUTPUT_REGISTER(o, 9);
+
+		DEFINE_RESOURCE_REGISTER(t, 0);
+		DEFINE_RESOURCE_REGISTER(t, 1);
+		DEFINE_RESOURCE_REGISTER(t, 2);
+		DEFINE_RESOURCE_REGISTER(t, 3);
+		DEFINE_RESOURCE_REGISTER(t, 4);
+		DEFINE_RESOURCE_REGISTER(t, 5);
+		DEFINE_RESOURCE_REGISTER(t, 6);
+		DEFINE_RESOURCE_REGISTER(t, 7);
+		DEFINE_RESOURCE_REGISTER(t, 8);
+		DEFINE_RESOURCE_REGISTER(t, 9);
+
+		DEFINE_SAMPLER_REGISTER(s, 0);
+		DEFINE_SAMPLER_REGISTER(s, 1);
+		DEFINE_SAMPLER_REGISTER(s, 2);
+		DEFINE_SAMPLER_REGISTER(s, 3);
+		DEFINE_SAMPLER_REGISTER(s, 4);
+		DEFINE_SAMPLER_REGISTER(s, 5);
+		DEFINE_SAMPLER_REGISTER(s, 6);
+		DEFINE_SAMPLER_REGISTER(s, 7);
+		DEFINE_SAMPLER_REGISTER(s, 8);
+		DEFINE_SAMPLER_REGISTER(s, 9);
+
+		DEFINE_CB_REGISTER(cb, 0);
+		DEFINE_CB_REGISTER(cb, 1);
+		DEFINE_CB_REGISTER(cb, 2);
+		DEFINE_CB_REGISTER(cb, 3);
+		DEFINE_CB_REGISTER(cb, 4);
+		DEFINE_CB_REGISTER(cb, 5);
+		DEFINE_CB_REGISTER(cb, 6);
+		DEFINE_CB_REGISTER(cb, 7);
+		DEFINE_CB_REGISTER(cb, 8);
+		DEFINE_CB_REGISTER(cb, 9);
+	}
+
 	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls)
 	{
 		opcode_t opcode{};
@@ -91,6 +214,14 @@ namespace shader::asm_::tokens
 		return iter->second;
 	}
 
+	void parse_swizzle_components(operand_components_t& components, const std::string& swz)
+	{
+		for (auto i = 0u; i < swz.size(); i++)
+		{
+			components.names[i] = get_swizzle_component(swz[i]);
+		}
+	}
+
 	operand_t create_operand(const std::uint32_t type, const operand_components_t& operand_components, const std::vector<std::uint32_t>& indices)
 	{
 		if (indices.size() > 3)
@@ -175,10 +306,7 @@ namespace shader::asm_::tokens
 			operand_components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
 		}
 
-		for (auto i = 0u; i < component_names.size(); i++)
-		{
-			operand_components.names[i] = get_swizzle_component(component_names[i]);
-		}
+		parse_swizzle_components(operand_components, component_names);
 
 		return create_operand(type, operand_components, indices);
 	}
@@ -212,5 +340,46 @@ namespace shader::asm_::tokens
 		}
 
 		return result;
+	}
+
+	void convert_src_mask(operand_t& operand)
+	{
+		if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
+		{
+			return;
+		}
+
+		if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE)
+		{
+			operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+			operand.components.mask = 1 << operand.components.names[0];
+		}
+		else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
+		{
+			operand.components.mask = 1 << operand.components.names[0];
+			operand.components.mask = 1 << operand.components.names[1];
+			operand.components.mask = 1 << operand.components.names[2];
+			operand.components.mask = 1 << operand.components.names[3];
+		}
+	}
+
+	namespace literals
+	{
+		operand_t c(const std::uint32_t value)
+		{
+			operand_t operand{};
+			operand.custom.u.value = value;
+			return operand;
+		}
+
+		operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w)
+		{
+			operand_t operand{};
+			operand.custom.u.values[0] = x;
+			operand.custom.u.values[1] = y;
+			operand.custom.u.values[2] = z;
+			operand.custom.u.values[3] = w;
+			return operand;
+		}
 	}
 }

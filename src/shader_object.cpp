@@ -5,6 +5,19 @@
 
 namespace shader
 {
+	shader_object::shader_object()
+	{
+		this->info_.major_version = 5u;
+		this->info_.minor_version = 0u;
+	}
+
+	shader_object::shader_object(const shader_type type)
+	{
+		this->info_.program_type = static_cast<std::uint32_t>(type);
+		this->info_.major_version = 5u;
+		this->info_.minor_version = 0u;
+	}
+
 	shader_object shader_object::parse(const std::string& data)
 	{
 		if (data.size() < sizeof(shader_object::header))
@@ -308,6 +321,76 @@ namespace shader
 		{
 			this->instructions_.emplace_back(asm_::read_instruction(chunk));
 		}
+	}
+
+	void shader_object::add_instruction(const asm_::instruction_t& instruction)
+	{
+		this->instructions_.emplace_back(instruction);
+	}
+
+	void shader_object::add_signature(bool input, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
+		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
+	{
+		shader_object::signature_element element{};
+		element.name = name;
+		element.semantic_index = index;
+		element.mask = this->parse_signature_mask(mask);
+		element.rw_mask = this->parse_signature_mask(rw_mask);
+		element.register_ = register_;
+		element.system_value_type = static_cast<std::uint32_t>(sys_value);
+		element.component_type = static_cast<std::uint32_t>(format);
+		
+		if (input)
+		{
+			this->input_signature_.emplace_back(element);
+		}
+		else
+		{
+			this->output_signature_.emplace_back(element);
+		}
+	}
+
+	void shader_object::add_input(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
+		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
+	{
+		this->add_signature(true, name, index, mask, register_, sys_value, format, rw_mask);
+	}
+
+	void shader_object::add_output(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
+		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
+	{
+		this->add_signature(false, name, index, mask, register_, sys_value, format, rw_mask);
+	}
+
+	void shader_object::emit(const asm_::instruction_t& instruction)
+	{
+		this->add_instruction(instruction);
+	}
+
+	std::uint32_t shader_object::parse_signature_mask(const std::string& mask)
+	{
+		std::uint32_t mask_value{};
+
+		for (auto i = 0; i < std::min(mask.size(), 4ull); i++)
+		{
+			switch (mask[i])
+			{
+			case 'x':
+				mask_value |= 0x1;
+				break;
+			case 'y':
+				mask_value |= 0x2;
+				break;
+			case 'z':
+				mask_value |= 0x4;
+				break;
+			case 'w':
+				mask_value |= 0x8;
+				break;
+			}
+		}
+
+		return mask_value;
 	}
 
 	shader_object::info& shader_object::get_info()
