@@ -47,7 +47,6 @@
 #include <cstring>
 #include <cstdarg>
 #include <algorithm>
-#include <mutex>
 #include <cstdint>
 
 #ifdef min

@@ -5,6 +5,26 @@
 
 namespace shader
 {
+	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data)
+	{
+		shader::asm_::instruction_t instruction{};
+		instruction.opcode.type = D3D10_SB_OPCODE_CUSTOMDATA;
+		instruction.customdata.data_class = D3D10_SB_CUSTOMDATA_DCL_IMMEDIATE_CONSTANT_BUFFER;
+		instruction.customdata.count = static_cast<std::uint32_t>(data.size()) * 4u + 2u;
+
+		for (const auto& vec : data)
+		{
+			for (auto i = 0; i < 4; i++)
+			{
+				shader::asm_::instruction_customdata_value_t value{};
+				value.f32 = vec[i];
+				instruction.customdata.values.emplace_back(value);
+			}
+		}
+
+		this->shader_->add_instruction(instruction);
+	}
+
 	shader_object::shader_object()
 	{
 		this->info_.major_version = 5u;
