@@ -132,7 +132,7 @@ namespace shader::asm_::disassembler
 #ifdef DEBUG
 				printf(".mask_");
 #else
-				printf(".")
+				printf(".");
 #endif
 			}
 
@@ -163,7 +163,7 @@ namespace shader::asm_::disassembler
 #ifdef DEBUG
 			printf(".swz_");
 #else
-			printf(".")
+			printf(".");
 #endif
 			print_component(op.components.names[0]);
 			print_component(op.components.names[1]);
@@ -176,7 +176,7 @@ namespace shader::asm_::disassembler
 #ifdef DEBUG
 			printf(".sel_");
 #else
-			printf(".")
+			printf(".");
 #endif
 			print_component(op.components.names[0]);
 			break;
