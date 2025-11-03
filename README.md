@@ -48,6 +48,8 @@ void main()
 	a.and_(r1.xyzw, r2.xyzw, r1.xyzw);
 	a.xor_(r2.xyzw, r3.xyzw, r9.x);
 
+	a.mov(r0.xyzw, icb0[r1.x + 3u].xyzw);
+
 	a.lt(r0.x, v0.x, l(1.f));
 	a.if_nz(r0.x);
 	a.mov(r1.xyzw, cb0[1].swz("xy"));

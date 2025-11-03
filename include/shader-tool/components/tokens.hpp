@@ -5,29 +5,47 @@
 
 namespace shader::asm_::tokens
 {
+	class operand_creator_final
+	{
+	public:
+		operand_t& get_operand();
+		operator operand_t() const;
+
+		void set_offset(const std::uint32_t offset);
+
+		std::optional<std::uint32_t> offset_;
+
+	private:
+		operand_t operand_{};
+
+	};
+
 	class operand_creator
 	{
 	public:
 		operand_creator(const operand_t& operand);
 
 		operand_creator operator[](const std::uint32_t index) const;
+		operand_creator operator[](const operand_creator_final& extra_operand) const;
 		operand_t swz(const std::string& swz) const;
 
 		operator operand_t() const;
 
-		operand_t x;
-		operand_t y;
-		operand_t z;
-		operand_t w;
+		operand_creator_final x;
+		operand_creator_final y;
+		operand_creator_final z;
+		operand_creator_final w;
 
-		operand_t xy;
-		operand_t xyz;
-		operand_t xyzw;
+		operand_creator_final xy;
+		operand_creator_final xyz;
+		operand_creator_final xyzw;
 
 	private:
 		operand_t current_;
 
 	};
+
+	operand_creator_final operator+(const operand_creator_final& op, const std::uint32_t offset);
 
 #define DEFINE_REGISTER(__name__, __index__) extern const operand_creator __name__##__index__;
 #define DEFINE_REGISTER_C(__name__, __index__, __type__) const operand_creator __name__##__index__ = tokens::create_operand(__type__, component_all, __index__##u)
@@ -38,6 +56,7 @@ namespace shader::asm_::tokens
 #define DEFINE_SAMPLER_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_SAMPLER);
 #define DEFINE_RESOURCE_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_RESOURCE);
 #define DEFINE_CB_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
+#define DEFINE_ICB_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER);
 
 	namespace literals
 	{
@@ -106,6 +125,17 @@ namespace shader::asm_::tokens
 		DEFINE_REGISTER(cb, 7);
 		DEFINE_REGISTER(cb, 8);
 		DEFINE_REGISTER(cb, 9);
+
+		DEFINE_REGISTER(icb, 0);
+		DEFINE_REGISTER(icb, 1);
+		DEFINE_REGISTER(icb, 2);
+		DEFINE_REGISTER(icb, 3);
+		DEFINE_REGISTER(icb, 4);
+		DEFINE_REGISTER(icb, 5);
+		DEFINE_REGISTER(icb, 6);
+		DEFINE_REGISTER(icb, 7);
+		DEFINE_REGISTER(icb, 8);
+		DEFINE_REGISTER(icb, 9);
 	}
 
 	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls = 0u);

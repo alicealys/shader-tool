@@ -5,36 +5,51 @@
 
 namespace shader::asm_::tokens
 {
+	operand_t& operand_creator_final::get_operand()
+	{
+		return this->operand_;
+	}
+
+	operand_creator_final::operator operand_t() const
+	{
+		return this->operand_;
+	}
+
+	void operand_creator_final::set_offset(const std::uint32_t offset)
+	{
+		this->offset_.emplace(offset);
+	}
+
 	operand_creator::operand_creator(const operand_t& operand)
 		: current_(operand)
 	{
-		this->x = operand;
-		this->x.components.names[0] = D3D10_SB_4_COMPONENT_X;
-		this->x.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->x.get_operand() = operand;
+		this->x.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_X;
+		this->x.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
 
-		this->y = operand;
-		this->y.components.names[0] = D3D10_SB_4_COMPONENT_Y;
-		this->y.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->y.get_operand() = operand;
+		this->y.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Y;
+		this->y.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
 
-		this->z = operand;
-		this->z.components.names[0] = D3D10_SB_4_COMPONENT_Z;
-		this->z.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->z.get_operand() = operand;
+		this->z.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Z;
+		this->z.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
 
-		this->w = operand;
-		this->w.components.names[0] = D3D10_SB_4_COMPONENT_W;
-		this->w.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->w.get_operand() = operand;
+		this->w.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_W;
+		this->w.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
 
-		this->xy = operand;
-		this->xy.components.mask = component_x | component_y;
-		this->xy.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		this->xy.get_operand() = operand;
+		this->xy.get_operand().components.mask = component_x | component_y;
+		this->xy.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
-		this->xyz = operand;
-		this->xyz.components.mask = component_x | component_y | component_z;
-		this->xyz.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		this->xyz.get_operand() = operand;
+		this->xyz.get_operand().components.mask = component_x | component_y | component_z;
+		this->xyz.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 
-		this->xyzw = operand;
-		this->xyzw.components.mask = component_all;
-		this->xyzw.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		this->xyzw.get_operand() = operand;
+		this->xyzw.get_operand().components.mask = component_all;
+		this->xyzw.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
 	}
 
 	operand_creator operand_creator::operator[](const std::uint32_t index) const
@@ -43,6 +58,26 @@ namespace shader::asm_::tokens
 		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
 		next.indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
 		next.indices[1].value.uint32 = index;
+		return operand_creator(next);
+	}
+
+	operand_creator operand_creator::operator[](const operand_creator_final& extra_operand) const
+	{
+		operand_t next = this->current_;
+		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
+
+		if (extra_operand.offset_.has_value())
+		{
+			next.indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
+			next.indices[1].value.uint32 = extra_operand.offset_.value();
+
+		}
+		else
+		{
+			next.indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
+		}
+
+		next.extra_operand = std::make_shared<operand_t>(extra_operand);
 		return operand_creator(next);
 	}
 
@@ -57,6 +92,13 @@ namespace shader::asm_::tokens
 	operand_creator::operator operand_t() const
 	{
 		return this->current_;
+	}
+
+	operand_creator_final operator+(const operand_creator_final& op, const std::uint32_t offset)
+	{
+		operand_creator_final next = op;
+		next.set_offset(offset);
+		return next;
 	}
 
 	namespace literals
@@ -126,6 +168,17 @@ namespace shader::asm_::tokens
 		DEFINE_CB_REGISTER(cb, 7);
 		DEFINE_CB_REGISTER(cb, 8);
 		DEFINE_CB_REGISTER(cb, 9);
+
+		DEFINE_ICB_REGISTER(icb, 0);
+		DEFINE_ICB_REGISTER(icb, 1);
+		DEFINE_ICB_REGISTER(icb, 2);
+		DEFINE_ICB_REGISTER(icb, 3);
+		DEFINE_ICB_REGISTER(icb, 4);
+		DEFINE_ICB_REGISTER(icb, 5);
+		DEFINE_ICB_REGISTER(icb, 6);
+		DEFINE_ICB_REGISTER(icb, 7);
+		DEFINE_ICB_REGISTER(icb, 8);
+		DEFINE_ICB_REGISTER(icb, 9);
 	}
 
 	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls)
