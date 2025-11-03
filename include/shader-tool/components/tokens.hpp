@@ -5,63 +5,149 @@
 
 namespace shader::asm_::tokens
 {
-	class operand_creator_final
+	enum component_type
 	{
-	public:
-		operand_t& get_operand();
-		operator operand_t() const;
-
-		void set_offset(const std::uint32_t offset);
-
-		std::optional<std::uint32_t> offset_;
-
-	private:
-		operand_t operand_{};
-
+		component_none = 0,
+		component_x = 1,
+		component_y = 2,
+		component_z = 3,
+		component_w = 4
 	};
 
 	class operand_creator
 	{
 	public:
+		class with_component
+		{
+			friend class operand_creator;
+		public:
+			with_component() = default;
+			with_component(const operand_t& operand)
+				: current_(operand)
+			{
+			}
+
+			operator operand_t() const;
+
+			with_component neg() const;
+			with_component abs() const;
+
+			operand_t mask_mode() const;
+			operand_t swizzle_mode() const;
+			operand_t select_one_mode() const;
+
+			void set_offset(const std::uint32_t offset);
+
+			std::optional<std::uint32_t> offset_;
+
+			void set(const operand_t& operand, const std::uint32_t a, const std::uint32_t b = component_none,
+				const std::uint32_t c = component_none, const std::uint32_t d = component_none);
+
+		private:
+			bool has_set_components_{};
+			std::uint32_t components_[4]{};
+			operand_t current_{};
+
+		};
+
 		operand_creator(const operand_t& operand);
 
 		operand_creator operator[](const std::uint32_t index) const;
-		operand_creator operator[](const operand_creator_final& extra_operand) const;
-		operand_t swz(const std::string& swz) const;
+		operand_creator operator[](const with_component& extra_operand) const;
+		with_component comp(const std::string& swz) const;
 
 		operator operand_t() const;
 
-		operand_creator_final x;
-		operand_creator_final y;
-		operand_creator_final z;
-		operand_creator_final w;
-
-		operand_creator_final x_s;
-		operand_creator_final y_s;
-		operand_creator_final z_s;
-		operand_creator_final w_s;
-
-		operand_creator_final xy;
-		operand_creator_final xyz;
-		operand_creator_final xyzw;
+		with_component x;
+		with_component y;
+		with_component z;
+		with_component w;
+		with_component xx;
+		with_component xy;
+		with_component xz;
+		with_component xw;
+		with_component yy;
+		with_component yz;
+		with_component yw;
+		with_component zz;
+		with_component zw;
+		with_component ww;
+		with_component xxx;
+		with_component xxy;
+		with_component xxz;
+		with_component xxw;
+		with_component xyy;
+		with_component xyz;
+		with_component xyw;
+		with_component xzz;
+		with_component xzw;
+		with_component xww;
+		with_component yyy;
+		with_component yyz;
+		with_component yyw;
+		with_component yzz;
+		with_component yzw;
+		with_component yww;
+		with_component zzz;
+		with_component zzw;
+		with_component zww;
+		with_component www;
+		with_component xxxx;
+		with_component xxxy;
+		with_component xxxz;
+		with_component xxxw;
+		with_component xxyy;
+		with_component xxyz;
+		with_component xxyw;
+		with_component xxzz;
+		with_component xxzw;
+		with_component xxww;
+		with_component xyyy;
+		with_component xyyz;
+		with_component xyyw;
+		with_component xyzz;
+		with_component xyzw;
+		with_component xyzx;
+		with_component xyww;
+		with_component xzzz;
+		with_component xzzw;
+		with_component xzww;
+		with_component xwww;
+		with_component yyyy;
+		with_component yyyz;
+		with_component yyyw;
+		with_component yyzz;
+		with_component yyzw;
+		with_component yyww;
+		with_component yzzz;
+		with_component yzzw;
+		with_component yzww;
+		with_component ywww;
+		with_component zzzz;
+		with_component zzzw;
+		with_component zzww;
+		with_component zwww;
+		with_component wwww;
 
 	private:
 		operand_t current_;
 
 	};
 
-	operand_creator_final operator+(const operand_creator_final& op, const std::uint32_t offset);
+	operand_creator::with_component operator+(const operand_creator::with_component& op, const std::uint32_t offset);
+	operand_creator::with_component operator-(const operand_creator::with_component& operand);
 
 #define DEFINE_REGISTER(__name__, __index__) extern const operand_creator __name__##__index__;
-#define DEFINE_REGISTER_C(__name__, __index__, __type__) const operand_creator __name__##__index__ = tokens::create_operand(__type__, component_all, __index__##u)
+#define DEFINE_REGISTER_C(__name__, __index__, __type__) const operand_creator __name__##__index__ = tokens::create_operand(__type__, operand_components_t{}, __index__##u)
+#define DEFINE_REGISTER_C_SWZ(__name__, __swz__, __index__, __type__) const operand_creator __name__##__index__ = tokens::create_operand(__type__, __swz__, __index__##u)
 
 #define DEFINE_TEMP_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_TEMP);
 #define DEFINE_INPUT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_INPUT);
 #define DEFINE_OUTPUT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_OUTPUT);
 #define DEFINE_SAMPLER_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_SAMPLER);
 #define DEFINE_RESOURCE_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_RESOURCE);
-#define DEFINE_CB_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
-#define DEFINE_ICB_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER);
+#define DEFINE_CB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
+#define DEFINE_ICB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER);
 
 	namespace literals
 	{
@@ -168,20 +254,6 @@ namespace shader::asm_::tokens
 	std::vector<std::uint32_t> find_operands(const instruction_t& instruction, const std::uint32_t beg,
 		const std::function<bool(const operand_t&)>& cb);
 
-	template <typename ...Args>
-	instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, Args&&... args)
-	{
-		auto instruction = create_instruction(type, controls);
-		instruction.operands = std::vector<operand_t>{std::forward<Args>(args)...};
-
-		for (const auto& operand : instruction.operands)
-		{
-			instruction.opcode.length += writer::get_operand_length(operand);
-		}
-
-		return instruction;
-	}
-
 	namespace literals
 	{
 		template <typename ...Args>
@@ -192,5 +264,7 @@ namespace shader::asm_::tokens
 
 		operand_t c(const std::uint32_t value);
 		operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w);
+
+		operand_creator::with_component abs(const operand_creator::with_component& operand);
 	}
 }

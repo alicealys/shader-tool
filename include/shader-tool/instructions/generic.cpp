@@ -45,6 +45,7 @@ namespace shader::asm_
 		instruction.opcode = reader::read_opcode(input_buffer);
 
 		const auto op0 = reader::read_operand(input_buffer);
+		op1.custom.is_custom = true;
 		op1.custom.u.value = input_buffer.read_bits(15);
 
 		input_buffer.read_bits(17);

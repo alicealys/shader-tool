@@ -43,6 +43,15 @@ namespace shader
 		domainshader = 4,
 		computeshader = 5,
 	};
+	
+	enum shader_chunk_name
+	{
+		chunk_isgn = 'NGSI',
+		chunk_osgn = 'NGSO',
+		chunk_pcsg = 'GSCP',
+		chunk_osg5 = '5GSO',
+		chunk_shex = 'XEHS',
+	};
 
 	class shader_object
 	{
@@ -57,17 +66,18 @@ namespace shader
 
 #define DEFINE_INSTRUCTION(__name__, __type__, __controls__) \
 			template <typename ...Args> \
-			void __name__(Args&&... args) const \
+			void __name__(Args&&... args) \
 			{ \
-				this->shader_->add_instruction(shader::asm_::tokens::create_instruction(__type__, __controls__, std::forward<Args>(args)...)); \
-			} \
-			template <typename ...Args> \
-			void __name__##_c(const std::uint32_t controls, Args&&... args) const \
-			{ \
-				this->shader_->add_instruction(shader::asm_::tokens::create_instruction(__type__, controls, std::forward<Args>(args)...)); \
+				this->operator()(this->create_instruction(__type__, __controls__, {asm_::tokens::operand_creator::with_component(std::forward<Args>(args))...})); \
 			} \
 
-			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data) const;
+			void add_instruction(const asm_::instruction_t& instruction);
+			void operator()(const asm_::instruction_t& instruction);
+
+			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
+
+			void set_controls(const std::uint32_t controls);
+			void add_extension(const std::uint32_t type, const std::uint32_t x = 0u, const std::uint32_t y = 0u, const std::uint32_t z = 0u, const std::uint32_t w = 0u);
 
 			DEFINE_INSTRUCTION(add, D3D10_SB_OPCODE_ADD, 0);
 			DEFINE_INSTRUCTION(add_sat, D3D10_SB_OPCODE_ADD, 4);
@@ -191,7 +201,13 @@ namespace shader
 			DEFINE_INSTRUCTION(dcl_global_flags, D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, 0);
 
 		private:
+			asm_::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, 
+				const std::vector<asm_::tokens::operand_creator::with_component>& operands);
+
 			shader::shader_object* shader_;
+
+			std::optional<std::uint32_t> current_controls_;
+			std::vector<asm_::opcode_extended_t> current_extensions_;
 
 		};
 
@@ -202,7 +218,7 @@ namespace shader
 			std::uint32_t unk_int;
 			std::uint32_t program_size;
 			std::uint32_t chunk_count;
-			std::uint32_t chunk_offsets[3];
+			std::uint32_t chunk_offsets[1];
 		};
 
 		struct signature_element
@@ -234,8 +250,9 @@ namespace shader
 
 		std::string serialize();
 
-		signature& get_input_signature();
-		signature& get_output_signature();
+		std::unordered_map<std::uint32_t, signature>& get_signatures();
+		std::unordered_map<std::uint32_t, std::string>& get_unknown_chunks();
+		std::vector<std::uint32_t>& get_chunk_order();
 		std::vector<asm_::instruction_t>& get_instructions();
 
 		info& get_info();
@@ -245,7 +262,7 @@ namespace shader
 		void add_instruction(const asm_::instruction_t& instruction);
 		void emit(const asm_::instruction_t& instruction);
 
-		void add_signature(bool input, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
+		void add_signature(const std::uint32_t type, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 			const system_value_type sys_value, const signature_format format, const std::string& rw_mask);
 
 		void add_input(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
@@ -263,17 +280,16 @@ namespace shader
 		std::uint32_t parse_signature_mask(const std::string& mask);
 
 		signature parse_signature(utils::bit_buffer_le& data);
-		void parse_input_signature(utils::bit_buffer_le& data);
-		void parse_output_signature(utils::bit_buffer_le& data);
 		void parse_instructions_chunk(utils::bit_buffer_le& data, const std::uint32_t size);
 
-		utils::bit_buffer_le serialize_signature(const std::uint32_t type, const signature& elements);
-		utils::bit_buffer_le serialize_instructions();
+		std::string serialize_signature(const std::uint32_t type, const signature& elements);
+		std::string serialize_instructions();
 
-		signature input_signature_{};
-		signature output_signature_{};
+		std::unordered_map<std::uint32_t, signature> signatures_;
 		info info_{};
 		std::vector<asm_::instruction_t> instructions_;
+		std::unordered_map<std::uint32_t, std::string> unknown_chunks_;
+		std::vector<std::uint32_t> chunk_order_;
 
 	};
 }

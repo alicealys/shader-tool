@@ -6,7 +6,7 @@ namespace shader::asm_::disassembler
 {
 	void print_operand(const operand_t& op)
 	{
-		if (op.extended)
+		if (!op.extensions.empty())
 		{
 			for (const auto& extension : op.extensions)
 			{
@@ -118,6 +118,10 @@ namespace shader::asm_::disassembler
 			}
 		};
 
+#ifdef DEBUG
+		printf("(%i)", op.components.type);
+#endif
+
 		switch (op.components.selection_mode)
 		{
 		case D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE:
@@ -125,7 +129,11 @@ namespace shader::asm_::disassembler
 			const auto mask = (op.components.mask << D3D10_SB_OPERAND_4_COMPONENT_MASK_SHIFT);
 			if ((mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_MASK) != 0)
 			{
-				printf(".");
+#ifdef DEBUG
+				printf(".mask_");
+#else
+				printf(".")
+#endif
 			}
 
 			if (mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_X)
@@ -152,7 +160,11 @@ namespace shader::asm_::disassembler
 		}
 		case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
 		{
-			printf(".");
+#ifdef DEBUG
+			printf(".swz_");
+#else
+			printf(".")
+#endif
 			print_component(op.components.names[0]);
 			print_component(op.components.names[1]);
 			print_component(op.components.names[2]);
@@ -161,13 +173,17 @@ namespace shader::asm_::disassembler
 		}
 		case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
 		{
-			printf(".");
+#ifdef DEBUG
+			printf(".sel_");
+#else
+			printf(".")
+#endif
 			print_component(op.components.names[0]);
 			break;
 		}
 		}
 
-		if (op.extended)
+		if (!op.extensions.empty())
 		{
 			for (const auto& extension : op.extensions)
 			{
@@ -229,6 +245,10 @@ namespace shader::asm_::disassembler
 		{
 			printf("%s", name);
 		}
+
+#ifdef DEBUG
+		printf("(%i)", opcode.controls);
+#endif
 
 		for (const auto& ext : opcode.extensions)
 		{

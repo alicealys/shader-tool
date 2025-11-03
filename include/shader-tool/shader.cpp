@@ -21,16 +21,6 @@ namespace shader
 		{
 			std::array<std::unique_ptr<base_instruction>, D3D10_SB_NUM_OPCODES> instruction_handlers;
 
-			template <typename T>
-			class initializer final
-			{
-			public:
-				initializer(T fn)
-				{
-					fn();
-				}
-			};
-
 			template <typename T, typename... Args>
 			void register_instruction_handler(const std::uint32_t type, Args&&... args)
 			{
@@ -304,7 +294,56 @@ namespace shader
 
 			if (const auto& handler = instruction_handlers[opcode_type]; handler.get() != nullptr)
 			{
-				return handler->read(input_buffer);
+				const auto instruction = handler->read(input_buffer);
+
+				static std::unordered_set<std::uint32_t> done;
+				if (!done.contains(instruction.opcode.type))
+				{
+					printf("{%s, {", opcode_enum_names[instruction.opcode.type]);
+					for (auto i = 0; i < instruction.operands.size(); i++)
+					{
+						if (instruction.operands[i].custom.is_custom)
+						{
+							printf("custom");
+						}
+						else
+						{
+							if (instruction.operands[i].components.type == D3D10_SB_OPERAND_0_COMPONENT)
+							{
+								printf("_0c");
+							}
+							else if (instruction.operands[i].components.type == D3D10_SB_OPERAND_1_COMPONENT)
+							{
+								printf("_1c");
+							}
+							else if (instruction.operands[i].components.type == D3D10_SB_OPERAND_4_COMPONENT)
+							{
+								switch (instruction.operands[i].components.selection_mode)
+								{
+								case D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE:
+									printf("mask");
+									break;
+								case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
+									printf("swz");
+									break;
+								case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
+									printf("scalar");
+									break;
+								}
+							}
+						}
+					
+						if (i < instruction.operands.size() - 1)
+						{
+							printf(", ");
+						}
+					}
+					printf("}},\n");
+
+					done.insert(instruction.opcode.type);
+				}
+
+				return instruction;
 			}
 
 			throw std::runtime_error("unsupported instruction");
@@ -342,22 +381,18 @@ namespace shader
 
 		shader_object new_shader;
 		new_shader.get_info() = shader.get_info();
-		new_shader.get_input_signature() = shader.get_input_signature();
-		new_shader.get_output_signature() = shader.get_output_signature();
+		new_shader.get_signatures() = shader.get_signatures();
+		new_shader.get_unknown_chunks() = shader.get_unknown_chunks();
 
-		utils::bit_buffer_le instructions_buffer;
+		auto assembler = new_shader.get_assembler();
 
-		for (const auto& instruction : shader.get_instructions())
+		for (auto& instruction : shader.get_instructions())
 		{
-			if (!callback(instructions_buffer, instruction))
+			if (!callback(assembler, instruction))
 			{
-				shader::asm_::write_instruction(instructions_buffer, instruction);
+				assembler(instruction);
 			}
 		}
-
-		const auto size = static_cast<std::uint32_t>(instructions_buffer.total()) / 8u;
-		instructions_buffer.set_bit(0);
-		new_shader.parse_instructions(instructions_buffer, size);
 
 		return new_shader.serialize();
 	}

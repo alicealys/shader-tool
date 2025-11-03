@@ -11,6 +11,11 @@ namespace shader::asm_
 	constexpr std::uint32_t component_w = 1 << D3D10_SB_4_COMPONENT_W;
 	constexpr std::uint32_t component_all = component_x | component_y | component_z | component_w;
 
+	constexpr std::uint32_t refactoring_allowed = 1 << 0;
+	constexpr std::uint32_t double_precision = 1 << 1;
+	constexpr std::uint32_t early_depth_stencil = 1 << 2;
+	constexpr std::uint32_t raw_and_struct_buffers = 1 << 3;
+
 	union data_type_t
 	{
 		union
@@ -46,7 +51,6 @@ namespace shader::asm_
 	{
 		std::uint32_t type;
 		std::uint32_t modifier;
-		bool extended;
 	};
 
 	struct operand_t;
@@ -58,6 +62,7 @@ namespace shader::asm_
 
 	struct operand_custom_t
 	{
+		bool is_custom;
 		union
 		{
 			std::uint32_t value;
@@ -70,7 +75,6 @@ namespace shader::asm_
 		operand_components_t components;
 		std::uint32_t type;
 		std::uint32_t dimension;
-		std::uint32_t extended;
 		std::vector<operand_extended_t> extensions;
 		operand_index_t indices[3];
 		std::shared_ptr<operand_t> extra_operand;
@@ -82,7 +86,6 @@ namespace shader::asm_
 	{
 		std::uint32_t type;
 		std::uint32_t values[4];
-		std::uint32_t extended;
 	};
 
 	struct opcode_t
@@ -90,7 +93,6 @@ namespace shader::asm_
 		std::uint32_t type;
 		std::uint32_t controls;
 		std::uint32_t length;
-		std::uint32_t extended;
 		std::vector<opcode_extended_t> extensions;
 	};
 
@@ -114,7 +116,31 @@ namespace shader::asm_
 		instruction_customdata_t customdata;
 	};
 
+	template <typename T>
+	class initializer final
+	{
+	public:
+		initializer(T fn)
+		{
+			fn();
+		}
+	};
+
+	enum token_type
+	{
+		token_operand_0c = 0,
+		token_operand_1c = 1,
+		token_operand_4c_mask = 2,
+		token_operand_4c_swizzle = 3,
+		token_operand_4c_scalar = 4,
+		token_custom = 5,
+	};
+
+	using instruction_operands_t = std::vector<token_type>;
+
 	extern std::unordered_map<std::uint32_t, const char*> opcode_names;
+	extern std::unordered_map<std::uint32_t, const char*> opcode_enum_names;
+	extern std::array<instruction_operands_t, D3D10_SB_NUM_OPCODES> instruction_defs;
 
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);

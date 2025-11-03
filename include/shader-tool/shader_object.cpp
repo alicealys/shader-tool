@@ -5,7 +5,93 @@
 
 namespace shader
 {
-	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data) const
+	asm_::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
+		const std::vector<asm_::tokens::operand_creator::with_component>& operands)
+	{
+		auto instruction = asm_::tokens::create_instruction(type, this->current_controls_.value_or(controls));
+
+		instruction.opcode.extensions = this->current_extensions_;
+
+		this->current_controls_.reset();
+		this->current_extensions_.clear();
+
+		const auto& def = asm_::instruction_defs[type];
+		if (!def.empty())
+		{
+			for (auto i = 0u; i < def.size(); i++)
+			{
+				switch (def[i])
+				{
+				case asm_::token_operand_0c:
+				{
+					asm_::operand_t o = operands[i];
+					o.components.type = D3D10_SB_OPERAND_0_COMPONENT;
+					instruction.operands.emplace_back(o);
+					break;
+				}
+				case asm_::token_operand_1c:
+				{
+					asm_::operand_t o = operands[i];
+					o.components.type = D3D10_SB_OPERAND_1_COMPONENT;
+					instruction.operands.emplace_back(o);
+					break;
+				}
+				case asm_::token_operand_4c_mask:
+					instruction.operands.emplace_back(operands[i].mask_mode());
+					break;
+				case asm_::token_operand_4c_swizzle:
+					instruction.operands.emplace_back(operands[i].swizzle_mode());
+					break;
+				case asm_::token_operand_4c_scalar:
+					instruction.operands.emplace_back(operands[i].select_one_mode());
+					break;
+				case asm_::token_custom:
+					instruction.operands.emplace_back(operands[i]);
+					break;
+				}
+			}
+		}
+		else
+		{
+			for (const auto& operand : operands)
+			{
+				instruction.operands.emplace_back(operand);
+			}
+		}
+
+		asm_::writer::set_opcode_length(instruction);
+
+		return instruction;
+	}
+
+	void shader_object::assembler::set_controls(const std::uint32_t controls)
+	{
+		this->current_controls_.emplace(controls);
+	}
+
+	void shader_object::assembler::add_extension(const std::uint32_t type, 
+		const std::uint32_t x, const std::uint32_t y, const std::uint32_t z, const std::uint32_t w)
+	{
+		asm_::opcode_extended_t extension{};
+		extension.type = type;
+		extension.values[0] = x;
+		extension.values[1] = y;
+		extension.values[2] = z;
+		extension.values[3] = w;
+		this->current_extensions_.emplace_back(extension);
+	}
+
+	void shader_object::assembler::add_instruction(const asm_::instruction_t& instruction)
+	{
+		this->shader_->add_instruction(instruction);
+	}
+
+	void shader_object::assembler::operator()(const asm_::instruction_t& instruction)
+	{
+		this->shader_->add_instruction(instruction);
+	}
+
+	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data)
 	{
 		shader::asm_::instruction_t instruction{};
 		instruction.opcode.type = D3D10_SB_OPCODE_CUSTOMDATA;
@@ -67,18 +153,22 @@ namespace shader
 				chunk_size = header->program_size - offset;
 			}
 
-			utils::bit_buffer_le input_buffer({reinterpret_cast<const char*>(chunk), chunk_size});
+			const auto chunk_data = std::string{reinterpret_cast<const char*>(chunk), chunk_size};
+			utils::bit_buffer_le input_buffer(chunk_data);
 
-			switch (_byteswap_ulong(type))
+			switch (type)
 			{
-			case 'ISGN':
-				obj.parse_input_signature(input_buffer);
+			case chunk_isgn:
+			case chunk_osgn:
+			case chunk_osg5:
+			case chunk_pcsg:
+				obj.signatures_[type] = obj.parse_signature(input_buffer);
 				break;
-			case 'OSGN':
-				obj.parse_output_signature(input_buffer);
-				break;
-			case 'SHEX':
+			case chunk_shex:
 				obj.parse_instructions_chunk(input_buffer, chunk_size);
+				break;
+			default:
+				obj.unknown_chunks_.insert(std::make_pair(type, chunk_data));
 				break;
 			}
 		}
@@ -88,11 +178,11 @@ namespace shader
 
 	void shader_object::print_signature(const shader::shader_object::signature& signature)
 	{
-		printf("name                 index mask   register sys_value type     used\n");
-		printf("-------------------- ----- ------ -------- --------- -------- ----\n");
+		printf("name                                               index mask   register sys_value type     used\n");
+		printf("-------------------------------------------------- ----- ------ -------- --------- -------- ----\n");
 		for (const auto& element : signature)
 		{
-			printf("%20s %5i %6i %8i %9i %8i %4i\n", element.name.data(),
+			printf("%50s %5i %6i %8i %9i %8i %4i\n", element.name.data(),
 				element.semantic_index, element.mask, element.register_, element.system_value_type, element.component_type, element.rw_mask);
 		}
 	}
@@ -101,23 +191,30 @@ namespace shader
 	{
 		std::string buffer;
 
-		auto input_signature = serialize_signature('ISGN', this->input_signature_);
-		auto output_signature = serialize_signature('OSGN', this->output_signature_);
-		auto instructions = serialize_instructions();
+		std::unordered_map<std::uint32_t, std::string> chunks;
 
-		auto& input_signature_buffer = input_signature.get_buffer();
-		auto& output_signature_buffer = output_signature.get_buffer();
-		auto& instructions_buffer = instructions.get_buffer();
+		const auto chunk_count = 1 + this->signatures_.size() + this->unknown_chunks_.size();
+		const auto header_size = sizeof(shader_object::header) + (chunk_count - 1) * sizeof(std::uint32_t);
 
-		const auto input_signature_size = (input_signature.total() / 8);
-		const auto output_signature_size = (output_signature.total() / 8);
-		const auto instructions_size = (instructions.total() / 8);
+		auto program_size = header_size;
+		for (const auto& [name, signature] : this->signatures_)
+		{
+			const auto serialized = this->serialize_signature(name, signature);
+			chunks[name] = serialized;
+			program_size += serialized.size();
+		}
 
-		const auto program_size = static_cast<std::uint32_t>(
-			sizeof(shader_object::header) + input_signature_size + output_signature_size + instructions_size);
+		for (const auto& [name, data] : this->unknown_chunks_)
+		{
+			chunks[name] = data;
+			program_size += data.size();
+		}
+
+		const auto shex_chunk = this->serialize_instructions();
+		program_size += shex_chunk.size();
 
 		buffer.reserve(program_size);
-		buffer.append(sizeof(shader_object::header), 0);
+		buffer.append(header_size, 0);
 		const auto header = reinterpret_cast<shader_object::header*>(buffer.data());
 
 		header->dxbc[0] = 'D';
@@ -127,16 +224,36 @@ namespace shader
 
 		header->unk_int = 1;
 
-		header->chunk_count = 3;
-		header->chunk_offsets[0] = static_cast<std::uint32_t>(sizeof(shader_object::header));
-		header->chunk_offsets[1] = header->chunk_offsets[0] + static_cast<std::uint32_t>(input_signature_size);
-		header->chunk_offsets[2] = header->chunk_offsets[1] + static_cast<std::uint32_t>(output_signature_size);
+		auto current_offset = header_size;
+		const auto write_chunk = [&](const std::string& data)
+		{
+			const auto index = header->chunk_count++;
+			header->chunk_offsets[index] = current_offset;
+			buffer.append(data);
+			current_offset += data.size();
+		};
+		
+		const auto write_chunk_type = [&](const std::uint32_t type)
+		{
+			if (const auto iter = chunks.find(type); iter != chunks.end())
+			{
+				write_chunk(iter->second);
+			}
+		};
 
-		buffer.append(input_signature_buffer.data(), input_signature_size);
-		buffer.append(output_signature_buffer.data(), output_signature_size);
-		buffer.append(instructions_buffer.data(), instructions_size);
+		write_chunk_type(chunk_isgn);
+		write_chunk_type(chunk_osgn);
+		write_chunk_type(chunk_osg5);
+		write_chunk_type(chunk_pcsg);
 
-		header->program_size = program_size;
+		for (const auto& chunk : this->unknown_chunks_)
+		{
+			write_chunk(chunk.second);
+		}
+
+		write_chunk(shex_chunk);
+
+		header->program_size = static_cast<std::uint32_t>(program_size);
 
 		dxbc::CalculateDXBCChecksum(reinterpret_cast<unsigned char*>(buffer.data()),
 			static_cast<std::uint32_t>(buffer.size()), reinterpret_cast<std::uint32_t*>(&header->checksum));
@@ -144,7 +261,7 @@ namespace shader
 		return buffer;
 	}
 
-	utils::bit_buffer_le shader_object::serialize_signature(const std::uint32_t name, const shader_object::signature& elements)
+	std::string shader_object::serialize_signature(const std::uint32_t name, const shader_object::signature& elements)
 	{
 		utils::bit_buffer_le buffer;
 
@@ -202,8 +319,7 @@ namespace shader
 		const auto len = static_cast<std::uint32_t>(elements_size + element_names_size);
 		const auto aligned_len = align(len, 4);
 
-		const auto type = _byteswap_ulong(name);
-		buffer.write_bytes(4, type);
+		buffer.write_bytes(4, name);
 		buffer.write_bytes(4, aligned_len);
 		buffer.write_bytes(4, static_cast<std::uint32_t>(elements.size()));
 		buffer.write_bytes(4, 8);
@@ -239,16 +355,16 @@ namespace shader
 		auto total_len = buffer.total() / 8;
 		assert(total_len == aligned_len + 8);
 
-		return buffer;
+		auto data = buffer.get_buffer().data();
+
+		return {data, total_len};
 	}
 
-	utils::bit_buffer_le shader_object::serialize_instructions()
+	std::string shader_object::serialize_instructions()
 	{
 		utils::bit_buffer_le buffer;
 
-		const auto type = _byteswap_ulong('SHEX');
-
-		buffer.write_bytes(4, type);
+		buffer.write_bytes(4, chunk_shex);
 		buffer.write_bytes(4, 0); /* len */
 		buffer.write_bits(4, this->info_.minor_version);
 		buffer.write_bits(4, this->info_.major_version);
@@ -272,7 +388,9 @@ namespace shader
 		buffer.write_bytes(4, num_dwords);
 		buffer.set_bit(end);
 
-		return buffer;
+		auto data = buffer.get_buffer().data();
+
+		return {data, total_len};
 	}
 
 	shader_object::signature shader_object::parse_signature(utils::bit_buffer_le& chunk)
@@ -284,7 +402,6 @@ namespace shader
 		const auto element_count = chunk.read_bytes(4);
 		const auto unk = chunk.read_bytes(4);
 		assert(unk == 8);
-		assert(type == 'NGSI' || type == 'NGSO');
 
 		for (auto i = 0u; i < element_count; i++)
 		{
@@ -310,16 +427,6 @@ namespace shader
 		}
 
 		return elements;
-	}
-
-	void shader_object::parse_input_signature(utils::bit_buffer_le& chunk)
-	{
-		this->input_signature_ = parse_signature(chunk);
-	}
-
-	void shader_object::parse_output_signature(utils::bit_buffer_le& chunk)
-	{
-		this->output_signature_ = parse_signature(chunk);
 	}
 
 	void shader_object::parse_instructions_chunk(utils::bit_buffer_le& chunk, const std::uint32_t size)
@@ -348,7 +455,7 @@ namespace shader
 		this->instructions_.emplace_back(instruction);
 	}
 
-	void shader_object::add_signature(bool input, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
+	void shader_object::add_signature(const std::uint32_t type, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
 	{
 		shader_object::signature_element element{};
@@ -360,26 +467,19 @@ namespace shader
 		element.system_value_type = static_cast<std::uint32_t>(sys_value);
 		element.component_type = static_cast<std::uint32_t>(format);
 		
-		if (input)
-		{
-			this->input_signature_.emplace_back(element);
-		}
-		else
-		{
-			this->output_signature_.emplace_back(element);
-		}
+		this->signatures_[type].emplace_back(element);
 	}
 
 	void shader_object::add_input(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
 	{
-		this->add_signature(true, name, index, mask, register_, sys_value, format, rw_mask);
+		this->add_signature(chunk_isgn, name, index, mask, register_, sys_value, format, rw_mask);
 	}
 
 	void shader_object::add_output(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 		const system_value_type sys_value, const signature_format format, const std::string& rw_mask)
 	{
-		this->add_signature(false, name, index, mask, register_, sys_value, format, rw_mask);
+		this->add_signature(chunk_osgn, name, index, mask, register_, sys_value, format, rw_mask);
 	}
 
 	void shader_object::emit(const asm_::instruction_t& instruction)
@@ -418,14 +518,19 @@ namespace shader
 		return this->info_;
 	}
 
-	shader_object::signature& shader_object::get_input_signature()
+	std::unordered_map<std::uint32_t, shader_object::signature>& shader_object::get_signatures()
 	{
-		return this->input_signature_;
+		return this->signatures_;
 	}
 
-	shader_object::signature& shader_object::get_output_signature()
+	std::unordered_map<std::uint32_t, std::string>& shader_object::get_unknown_chunks()
 	{
-		return this->output_signature_;
+		return this->unknown_chunks_;
+	}
+
+	std::vector<std::uint32_t>& shader_object::get_chunk_order()
+	{
+		return this->chunk_order_;
 	}
 
 	std::vector<asm_::instruction_t>& shader_object::get_instructions()

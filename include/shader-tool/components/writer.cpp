@@ -34,14 +34,15 @@ namespace shader::asm_::writer
 		output_buffer.write_bits(3, operand.indices[1].representation);
 		output_buffer.write_bits(3, operand.indices[2].representation);
 
-		output_buffer.write_bits(1, operand.extended);
+		output_buffer.write_bits(1, !operand.extensions.empty());
 
-		for (const auto& operand_extended : operand.extensions)
+		for (auto i = 0u; i < operand.extensions.size(); i++)
 		{
-			output_buffer.write_bits(6, operand_extended.type);
-			output_buffer.write_bits(8, operand_extended.modifier);
+			output_buffer.write_bits(6, operand.extensions[i].type);
+			output_buffer.write_bits(8, operand.extensions[i].modifier);
 			output_buffer.write_bits(17, 0);
-			output_buffer.write_bits(1, operand_extended.extended);
+			const auto is_not_last = i < operand.extensions.size() - 1;
+			output_buffer.write_bits(1, is_not_last);
 		}
 
 		const auto write_index = [&](const std::uint32_t index)
@@ -102,7 +103,7 @@ namespace shader::asm_::writer
 		}
 	}
 
-	void write_opcode_extended(utils::bit_buffer_le& output_buffer, const opcode_extended_t& opcode)
+	void write_opcode_extended(utils::bit_buffer_le& output_buffer, const opcode_extended_t& opcode, bool extended)
 	{
 		output_buffer.write_bits(6, opcode.type);
 
@@ -131,7 +132,7 @@ namespace shader::asm_::writer
 			break;
 		}
 
-		output_buffer.write_bits(1, opcode.extended);
+		output_buffer.write_bits(1, extended);
 	}
 
 	void write_opcode(utils::bit_buffer_le& output_buffer, const opcode_t& opcode)
@@ -139,11 +140,11 @@ namespace shader::asm_::writer
 		output_buffer.write_bits(11, opcode.type);
 		output_buffer.write_bits(13, opcode.controls);
 		output_buffer.write_bits(7, opcode.length);
-		output_buffer.write_bits(1, opcode.extended);
+		output_buffer.write_bits(1, !opcode.extensions.empty());
 
-		for (const auto& opcode_extended : opcode.extensions)
+		for (auto i = 0u; i < opcode.extensions.size(); i++)
 		{
-			write_opcode_extended(output_buffer, opcode_extended);
+			write_opcode_extended(output_buffer, opcode.extensions[i], i < opcode.extensions.size() - 1);
 		}
 	}
 
@@ -214,7 +215,7 @@ namespace shader::asm_::writer
 
 	void set_opcode_length(instruction_t& instruction)
 	{
-		instruction.opcode.length = 1;
+		instruction.opcode.length = 1 + static_cast<std::uint32_t>(instruction.opcode.extensions.size());
 		for (const auto& operand : instruction.operands)
 		{
 			instruction.opcode.length += get_operand_length(operand);

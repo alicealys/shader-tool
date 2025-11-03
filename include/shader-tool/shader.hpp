@@ -19,7 +19,7 @@ namespace shader
 		void print_instruction(const instruction_t& instruction);
 	}
 
-	using instruction_cb = std::function<bool(utils::bit_buffer_le&, asm_::instruction_t)>;
+	using instruction_cb = std::function<bool(shader::shader_object::assembler&, asm_::instruction_t&)>;
 
 	std::string patch_shader(const std::string& shader_data, const instruction_cb& callback);
 }

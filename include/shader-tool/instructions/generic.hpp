@@ -38,6 +38,7 @@ namespace shader::asm_
 			for (auto i = 0u; i < ValueCount; i++)
 			{
 				operand_t op{};
+				op.custom.is_custom = true;
 				op.custom.u.value = input_buffer.read_bytes(4);
 				instruction.operands.emplace_back(op);
 			}

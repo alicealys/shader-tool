@@ -12,6 +12,7 @@ namespace shader::asm_
 		instruction.operands.emplace_back(reader::read_operand(input_buffer));
 
 		operand_t operand{};
+		operand.custom.is_custom = true;
 		operand.custom.u.values[0] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
 		operand.custom.u.values[1] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
 		operand.custom.u.values[2] = static_cast<std::uint8_t>(input_buffer.read_bits(4));

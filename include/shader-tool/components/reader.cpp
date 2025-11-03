@@ -4,7 +4,7 @@
 
 namespace shader::asm_::reader
 {
-	operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer)
+	operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer, bool& extended)
 	{
 		operand_extended_t operand{};
 
@@ -19,7 +19,7 @@ namespace shader::asm_::reader
 			bit_buffer.read_bits(25);
 		}
 
-		operand.extended = bit_buffer.read_bits(1);
+		extended = bit_buffer.read_bits(1);
 
 		return operand;
 	}
@@ -69,13 +69,11 @@ namespace shader::asm_::reader
 		operand.indices[1].representation = bit_buffer.read_bits(3);
 		operand.indices[2].representation = bit_buffer.read_bits(3);
 
-		operand.extended = bit_buffer.read_bits(1);
-		auto extended = operand.extended;
+		auto extended = bit_buffer.read_bits<bool>(1);
 		while (extended)
 		{
-			const auto operand_extended = read_extended_operand(bit_buffer);
+			const auto operand_extended = read_extended_operand(bit_buffer, extended);
 			operand.extensions.emplace_back(operand_extended);
-			extended = operand_extended.extended;
 		}
 
 		const auto read_index_rep = [&](const std::uint32_t index)
@@ -140,7 +138,7 @@ namespace shader::asm_::reader
 		return operand;
 	}
 
-	opcode_extended_t read_opcode_extended(utils::bit_buffer_le& input_buffer)
+	opcode_extended_t read_opcode_extended(utils::bit_buffer_le& input_buffer, bool& extended)
 	{
 		opcode_extended_t opcode{};
 
@@ -170,7 +168,7 @@ namespace shader::asm_::reader
 			break;
 		}
 
-		opcode.extended = input_buffer.read_bits(1);
+		extended = input_buffer.read_bits(1);
 
 		return opcode;
 	}
@@ -182,14 +180,12 @@ namespace shader::asm_::reader
 		opcode.type = input_buffer.read_bits(11);
 		opcode.controls = input_buffer.read_bits(13);
 		opcode.length = input_buffer.read_bits(7);
-		opcode.extended = input_buffer.read_bits(1);
 
-		auto extended = opcode.extended;
+		auto extended = input_buffer.read_bits<bool>(1);
 		while (extended)
 		{
-			const auto opcode_extended = read_opcode_extended(input_buffer);
+			const auto opcode_extended = read_opcode_extended(input_buffer, extended);
 			opcode.extensions.emplace_back(opcode_extended);
-			extended = opcode_extended.extended;
 		}
 
 		return opcode;

@@ -5,71 +5,270 @@
 
 namespace shader::asm_::tokens
 {
-	operand_t& operand_creator_final::get_operand()
+	operand_creator::with_component::operator operand_t() const
 	{
-		return this->operand_;
+		return this->current_;
 	}
 
-	operand_creator_final::operator operand_t() const
+	operand_creator::with_component operand_creator::with_component::neg() const
 	{
-		return this->operand_;
+		operand_creator::with_component next = *this;
+
+		if (next.current_.extensions.empty())
+		{
+			operand_extended_t extension{};
+			extension.type = D3D10_SB_EXTENDED_OPERAND_MODIFIER;
+			extension.modifier = D3D10_SB_OPERAND_MODIFIER_NEG;
+			next.current_.extensions.emplace_back(extension);
+			return next;
+		}
+
+		if (next.current_.extensions.size() > 1)
+		{
+			throw std::runtime_error("invalid operand extensions");
+		}
+
+		auto& current_extension = next.current_.extensions[0];
+		if (current_extension.type != D3D10_SB_EXTENDED_OPERAND_MODIFIER)
+		{
+			throw std::runtime_error("invalid operand extensions");
+		}
+
+		if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_NEG)
+		{
+			next.current_.extensions.clear();
+			return next;
+		}
+		else if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_ABS)
+		{
+			current_extension.modifier = D3D10_SB_OPERAND_MODIFIER_ABSNEG;
+			return next;
+		}
+
+		throw std::runtime_error("invalid operand extensions");
 	}
 
-	void operand_creator_final::set_offset(const std::uint32_t offset)
+	operand_creator::with_component operand_creator::with_component::abs() const
+	{
+		operand_creator::with_component next = *this;
+
+		if (next.current_.extensions.empty())
+		{
+			operand_extended_t extension{};
+			extension.type = D3D10_SB_EXTENDED_OPERAND_MODIFIER;
+			extension.modifier = D3D10_SB_OPERAND_MODIFIER_ABS;
+			next.current_.extensions.emplace_back(extension);
+		}
+
+		if (next.current_.extensions.size() > 1)
+		{
+			throw std::runtime_error("invalid operand extensions");
+		}
+
+		auto& current_extension = next.current_.extensions[0];
+		if (current_extension.type != D3D10_SB_EXTENDED_OPERAND_MODIFIER)
+		{
+			throw std::runtime_error("invalid operand extensions");
+		}
+
+		if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_NEG)
+		{
+			current_extension.modifier = D3D10_SB_OPERAND_MODIFIER_ABS;
+			return next;
+		}
+		else if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_ABS)
+		{
+			return next;
+		}
+
+		throw std::runtime_error("invalid operand extensions");
+	}
+
+	void operand_creator::with_component::set_offset(const std::uint32_t offset)
 	{
 		this->offset_.emplace(offset);
+	}
+
+	operand_t operand_creator::with_component::mask_mode() const
+	{
+		operand_t next = this->current_;
+
+		if (!this->has_set_components_)
+		{
+			return next;
+		}
+
+		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.components.mask = 0;
+
+		auto idx = 0;
+		for (auto i = 0; i < 4; i++)
+		{
+			if (this->components_[i] == component_none)
+			{
+				continue;
+			}
+
+			const auto mask = 1 << (this->components_[i] - 1);
+			next.components.mask |= mask;
+		}
+
+		return next;
+	}
+
+	operand_t operand_creator::with_component::swizzle_mode() const
+	{
+		operand_t next = this->current_;
+
+		if (!this->has_set_components_)
+		{
+			return next;
+		}
+
+		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
+		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+
+		next.components.names[0] = 0;
+		next.components.names[1] = 0;
+		next.components.names[2] = 0;
+		next.components.names[3] = 0;
+
+		auto idx = 0;
+		auto last_component = 0u;
+		for (auto i = 0; i < 4; i++)
+		{
+			if (this->components_[i] == component_none)
+			{
+				next.components.names[idx++] = last_component;
+			}
+			else
+			{
+				const auto c = this->components_[i] - 1;
+				next.components.names[idx++] = c;
+				last_component = c;
+			}
+		}
+
+		return next;
+	}
+
+	operand_t operand_creator::with_component::select_one_mode() const
+	{
+		operand_t next = this->current_;
+
+		if (!this->has_set_components_)
+		{
+			return next;
+		}
+
+		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		next.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+
+		next.components.names[0] = 0;
+		next.components.names[1] = 0;
+		next.components.names[2] = 0;
+		next.components.names[3] = 0;
+
+		for (auto i = 0; i < 4; i++)
+		{
+			if (this->components_[i] == component_none)
+			{
+				continue;
+			}
+
+			next.components.names[0] = this->components_[i] - 1;
+			break;
+		}
+
+		return next;
+	}
+
+	void operand_creator::with_component::set(const operand_t& operand, const std::uint32_t a, const std::uint32_t b,
+		const std::uint32_t c, const std::uint32_t d)
+	{
+		this->current_ = operand;
+		this->has_set_components_ = true;
+		this->components_[0] = a;
+		this->components_[1] = b;
+		this->components_[2] = c;
+		this->components_[3] = d;
+		this->current_ = this->mask_mode();
 	}
 
 	operand_creator::operand_creator(const operand_t& operand)
 		: current_(operand)
 	{
-		/* mask */
-
-		this->x.get_operand() = operand;
-		this->x.get_operand().components.mask = component_x;
-		this->x.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->y.get_operand() = operand;
-		this->y.get_operand().components.mask = component_y;
-		this->y.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->z.get_operand() = operand;
-		this->z.get_operand().components.mask = component_z;
-		this->z.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->w.get_operand() = operand;
-		this->w.get_operand().components.mask = component_w;
-		this->w.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->xy.get_operand() = operand;
-		this->xy.get_operand().components.mask = component_x | component_y;
-		this->xy.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->xyz.get_operand() = operand;
-		this->xyz.get_operand().components.mask = component_x | component_y | component_z;
-		this->xyz.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		this->xyzw.get_operand() = operand;
-		this->xyzw.get_operand().components.mask = component_all;
-		this->xyzw.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-
-		/* single */
-
-		this->x_s.get_operand() = operand;
-		this->x_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_X;
-		this->x_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
-
-		this->y_s.get_operand() = operand;
-		this->y_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Y;
-		this->y_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
-
-		this->z_s.get_operand() = operand;
-		this->z_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_Z;
-		this->z_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
-
-		this->w_s.get_operand() = operand;
-		this->w_s.get_operand().components.names[0] = D3D10_SB_4_COMPONENT_W;
-		this->w_s.get_operand().components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		this->x.set(operand, component_x);
+		this->y.set(operand, component_y);
+		this->z.set(operand, component_z);
+		this->w.set(operand, component_w);
+		this->xx.set(operand, component_x, component_x);
+		this->xy.set(operand, component_x, component_y);
+		this->xz.set(operand, component_x, component_z);
+		this->xw.set(operand, component_x, component_w);
+		this->yy.set(operand, component_y, component_y);
+		this->yz.set(operand, component_y, component_z);
+		this->yw.set(operand, component_y, component_w);
+		this->zz.set(operand, component_z, component_z);
+		this->zw.set(operand, component_z, component_w);
+		this->ww.set(operand, component_w, component_w);
+		this->xxx.set(operand, component_x, component_x, component_x);
+		this->xxy.set(operand, component_x, component_x, component_y);
+		this->xxz.set(operand, component_x, component_x, component_z);
+		this->xxw.set(operand, component_x, component_x, component_w);
+		this->xyy.set(operand, component_x, component_y, component_y);
+		this->xyz.set(operand, component_x, component_y, component_z);
+		this->xyw.set(operand, component_x, component_y, component_w);
+		this->xzz.set(operand, component_x, component_z, component_z);
+		this->xzw.set(operand, component_x, component_z, component_w);
+		this->xww.set(operand, component_x, component_w, component_w);
+		this->yyy.set(operand, component_y, component_y, component_y);
+		this->yyz.set(operand, component_y, component_y, component_z);
+		this->yyw.set(operand, component_y, component_y, component_w);
+		this->yzz.set(operand, component_y, component_z, component_z);
+		this->yzw.set(operand, component_y, component_z, component_w);
+		this->yww.set(operand, component_y, component_w, component_w);
+		this->zzz.set(operand, component_z, component_z, component_z);
+		this->zzw.set(operand, component_z, component_z, component_w);
+		this->zww.set(operand, component_z, component_w, component_w);
+		this->www.set(operand, component_w, component_w, component_w);
+		this->xxxx.set(operand, component_x, component_x, component_x, component_x);
+		this->xxxy.set(operand, component_x, component_x, component_x, component_y);
+		this->xxxz.set(operand, component_x, component_x, component_x, component_z);
+		this->xxxw.set(operand, component_x, component_x, component_x, component_w);
+		this->xxyy.set(operand, component_x, component_x, component_y, component_y);
+		this->xxyz.set(operand, component_x, component_x, component_y, component_z);
+		this->xxyw.set(operand, component_x, component_x, component_y, component_w);
+		this->xxzz.set(operand, component_x, component_x, component_z, component_z);
+		this->xxzw.set(operand, component_x, component_x, component_z, component_w);
+		this->xxww.set(operand, component_x, component_x, component_w, component_w);
+		this->xyyy.set(operand, component_x, component_y, component_y, component_y);
+		this->xyyz.set(operand, component_x, component_y, component_y, component_z);
+		this->xyyw.set(operand, component_x, component_y, component_y, component_w);
+		this->xyzz.set(operand, component_x, component_y, component_z, component_z);
+		this->xyzw.set(operand, component_x, component_y, component_z, component_w);
+		this->xyzx.set(operand, component_x, component_y, component_z, component_x);
+		this->xyww.set(operand, component_x, component_y, component_w, component_w);
+		this->xzzz.set(operand, component_x, component_z, component_z, component_z);
+		this->xzzw.set(operand, component_x, component_z, component_z, component_w);
+		this->xzww.set(operand, component_x, component_z, component_w, component_w);
+		this->xwww.set(operand, component_x, component_w, component_w, component_w);
+		this->yyyy.set(operand, component_y, component_y, component_y, component_y);
+		this->yyyz.set(operand, component_y, component_y, component_y, component_z);
+		this->yyyw.set(operand, component_y, component_y, component_y, component_w);
+		this->yyzz.set(operand, component_y, component_y, component_z, component_z);
+		this->yyzw.set(operand, component_y, component_y, component_z, component_w);
+		this->yyww.set(operand, component_y, component_y, component_w, component_w);
+		this->yzzz.set(operand, component_y, component_z, component_z, component_z);
+		this->yzzw.set(operand, component_y, component_z, component_z, component_w);
+		this->yzww.set(operand, component_y, component_z, component_w, component_w);
+		this->ywww.set(operand, component_y, component_w, component_w, component_w);
+		this->zzzz.set(operand, component_z, component_z, component_z, component_z);
+		this->zzzw.set(operand, component_z, component_z, component_z, component_w);
+		this->zzww.set(operand, component_z, component_z, component_w, component_w);
+		this->zwww.set(operand, component_z, component_w, component_w, component_w);
+		this->wwww.set(operand, component_w, component_w, component_w, component_w);
 	}
 
 	operand_creator operand_creator::operator[](const std::uint32_t index) const
@@ -81,7 +280,7 @@ namespace shader::asm_::tokens
 		return operand_creator(next);
 	}
 
-	operand_creator operand_creator::operator[](const operand_creator_final& extra_operand) const
+	operand_creator operand_creator::operator[](const operand_creator::with_component& extra_operand) const
 	{
 		operand_t next = this->current_;
 		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
@@ -101,11 +300,30 @@ namespace shader::asm_::tokens
 		return operand_creator(next);
 	}
 
-	operand_t operand_creator::swz(const std::string& swz) const
+	operand_creator::with_component operand_creator::comp(const std::string& components) const
 	{
-		operand_t next = this->current_;
-		next.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
-		parse_swizzle_components(next.components, swz);
+		operand_creator::with_component next = this->current_;
+
+		auto idx = 0;
+		for (const auto& c : components)
+		{
+			switch (c)
+			{
+			case 'x':
+				next.components_[idx++] = component_x;
+				break;
+			case 'y':
+				next.components_[idx++] = component_y;
+				break;
+			case 'z':
+				next.components_[idx++] = component_z;
+				break;
+			case 'w':
+				next.components_[idx++] = component_w;
+				break;
+			}
+		}
+
 		return next;
 	}
 
@@ -114,11 +332,16 @@ namespace shader::asm_::tokens
 		return this->current_;
 	}
 
-	operand_creator_final operator+(const operand_creator_final& op, const std::uint32_t offset)
+	operand_creator::with_component operator+(const operand_creator::with_component& op, const std::uint32_t offset)
 	{
-		operand_creator_final next = op;
+		operand_creator::with_component next = op;
 		next.set_offset(offset);
 		return next;
+	}
+
+	operand_creator::with_component operator-(const operand_creator::with_component& operand)
+	{
+		return operand.neg();
 	}
 
 	namespace literals
@@ -232,10 +455,7 @@ namespace shader::asm_::tokens
 		operand_t operand{};
 
 		operand.type = D3D10_SB_OPERAND_TYPE_IMMEDIATE32;
-
 		operand.dimension = D3D10_SB_OPERAND_INDEX_0D;
-		operand.extended = 0;
-
 		operand.components.type = D3D10_SB_OPERAND_1_COMPONENT;
 
 		operand.immediate_values[0].float32 = value;
@@ -250,7 +470,6 @@ namespace shader::asm_::tokens
 		operand.type = D3D10_SB_OPERAND_TYPE_IMMEDIATE32;
 
 		operand.dimension = D3D10_SB_OPERAND_INDEX_0D;
-		operand.extended = 0;
 
 		operand.components.type = D3D10_SB_OPERAND_4_COMPONENT;
 		operand.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
@@ -315,10 +534,7 @@ namespace shader::asm_::tokens
 		operand_t operand{};
 
 		operand.type = type;
-
 		operand.dimension = static_cast<std::uint32_t>(indices.size());
-		operand.extended = 0;
-
 		operand.components = operand_components;
 
 		for (auto i = 0u; i < indices.size(); i++)
@@ -437,6 +653,11 @@ namespace shader::asm_::tokens
 			operand.custom.u.values[2] = z;
 			operand.custom.u.values[3] = w;
 			return operand;
+		}
+
+		operand_creator::with_component abs(const operand_creator::with_component& operand)
+		{
+			return operand.abs();
 		}
 	}
 }
