@@ -1,4 +1,4 @@
-#include <std_include.hpp>
+#include "std_include.hpp"
 
 #include "shader.hpp"
 #include "shader_object.hpp"
@@ -119,7 +119,7 @@ namespace shader
 		header->program_size = program_size;
 
 		dxbc::CalculateDXBCChecksum(reinterpret_cast<unsigned char*>(buffer.data()),
-			static_cast<std::uint32_t>(buffer.size()), reinterpret_cast<DWORD*>(&header->checksum));
+			static_cast<std::uint32_t>(buffer.size()), reinterpret_cast<std::uint32_t*>(&header->checksum));
 
 		return buffer;
 	}

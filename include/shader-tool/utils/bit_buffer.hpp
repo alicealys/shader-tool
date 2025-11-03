@@ -128,20 +128,20 @@ namespace utils
                 auto rem_bit = 8 - bit_pos;
                 const auto this_write = (bit < rem_bit) ? bit : rem_bit;
 
-                const BYTE mask = ((0xFF >> rem_bit) | (0xFF << (bit_pos + this_write)));
+                const std::uint8_t mask = ((0xFF >> rem_bit) | (0xFF << (bit_pos + this_write)));
                 const std::uint64_t byte_pos = this->current_bit_ >> 3;
 
-                const BYTE temp_byte = (mask & bytes[byte_pos]);
-                const BYTE this_bit = ((bits - bit) & 7);
+                const std::uint8_t temp_byte = (mask & bytes[byte_pos]);
+                const std::uint8_t this_bit = ((bits - bit) & 7);
                 const auto this_byte = (bits - bit) >> 3;
 
                 auto this_data = input_bytes[this_byte];
 
                 const auto next_byte = (((bits - 1) >> 3) > this_byte) ? input_bytes[this_byte + 1] : 0;
 
-                this_data = BYTE((next_byte << (8 - this_bit)) | (this_data >> this_bit));
+                this_data = std::uint8_t((next_byte << (8 - this_bit)) | (this_data >> this_bit));
 
-                const BYTE out_byte = (~mask & (this_data << bit_pos) | temp_byte);
+                const std::uint8_t out_byte = (~mask & (this_data << bit_pos) | temp_byte);
                 bytes[byte_pos] = out_byte;
 
                 this->current_bit_ += this_write;

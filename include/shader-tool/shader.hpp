@@ -1,10 +1,7 @@
 #pragma once
 
-#include <utils/io.hpp>
-#include <utils/string.hpp>
-#include <utils/memory.hpp>
-#include <utils/bit_buffer.hpp>
-#include <utils/dxbc_checksum.hpp>
+#include "utils/bit_buffer.hpp"
+#include "utils/dxbc_checksum.hpp"
 
 #include "components/definitions.hpp"
 #include "components/reader.hpp"

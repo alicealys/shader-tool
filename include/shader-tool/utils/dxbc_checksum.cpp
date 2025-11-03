@@ -1,4 +1,4 @@
-#include <std_include.hpp>
+#include "../std_include.hpp"
 
 #include <Windows.h>
 #include <stdio.h>
@@ -259,7 +259,7 @@ namespace dxbc
 
 	static const DWORD dwHashOffset = 0x14;
 
-	BOOL CalculateDXBCChecksum(BYTE* pData, DWORD dwSize, DWORD dwHash[4])
+	bool CalculateDXBCChecksum(std::uint8_t* pData, std::uint32_t dwSize, std::uint32_t dwHash[4])
 	{
 		MD5_CTX md5Ctx;
 		MD5Init(&md5Ctx, 0);
@@ -321,6 +321,6 @@ namespace dxbc
 
 		memcpy(dwHash, md5Ctx.buf, 4 * sizeof(DWORD));
 
-		return TRUE;
+		return true;
 	}
 }

@@ -220,78 +220,79 @@ newaction {
 dependencies.load()
 
 workspace "shader-tool"
-startproject "shader-tool"
-location "./build"
-objdir "%{wks.location}/obj"
-targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
+	startproject "shader-tool"
+		location "./build"
+		objdir "%{wks.location}/obj"
+		targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 
-configurations {"Debug", "Release"}
+		configurations {"Debug", "Release"}
 
-architecture "x64"
-platforms "x64"
+		architecture "x64"
+		platforms "x64"
 
-buildoptions "/std:c++latest"
-systemversion "latest"
-symbols "On"
-staticruntime "On"
-editandcontinue "Off"
-warnings "Extra"
-characterset "ASCII"
+		buildoptions "/std:c++latest"
+		systemversion "latest"
+		symbols "On"
+		staticruntime "On"
+		editandcontinue "Off"
+		warnings "Extra"
+		characterset "ASCII"
 
-if _OPTIONS["dev-build"] then
-	defines {"DEV_BUILD"}
-end
+		if _OPTIONS["dev-build"] then
+			defines {"DEV_BUILD"}
+		end
 
-if os.getenv("CI") then
-	defines {"CI"}
-end
+		if os.getenv("CI") then
+			defines {"CI"}
+		end
 
-flags {"NoIncrementalLink", "NoMinimalRebuild", "MultiProcessorCompile", "No64BitChecks"}
+		flags {"NoIncrementalLink", "NoMinimalRebuild", "MultiProcessorCompile", "No64BitChecks"}
 
-filter "platforms:x64"
-	defines {"_WINDOWS", "WIN32"}
-filter {}
+		filter "platforms:x64"
+			defines {"_WINDOWS", "WIN32"}
+		filter {}
 
-filter "configurations:Release"
-	optimize "Size"
-	buildoptions {"/GL"}
-	linkoptions { "/IGNORE:4702", "/LTCG" }
-	defines {"NDEBUG"}
-	flags {"FatalCompileWarnings"}
-filter {}
+		filter "configurations:Release"
+			optimize "Size"
+			buildoptions {"/GL"}
+			linkoptions { "/IGNORE:4702", "/LTCG" }
+			defines {"NDEBUG"}
+			flags {"FatalCompileWarnings"}
+		filter {}
 
-filter "configurations:Debug"
-	optimize "Debug"
-	buildoptions {"/bigobj"}
-	defines {"DEBUG", "_DEBUG"}
-filter {}
+		filter "configurations:Debug"
+			optimize "Debug"
+			buildoptions {"/bigobj"}
+			defines {"DEBUG", "_DEBUG"}
+		filter {}
 
-project "shader-tool"
-kind "ConsoleApp"
-language "C++"
+		project "shader-tool"
+		kind "ConsoleApp"
+		language "C++"
 
-targetname "shader-tool"
+		targetname "shader-tool"
 
-pchheader "std_include.hpp"
-pchsource "src/std_include.cpp"
+		pchheader "std_include.hpp"
+		pchsource "src/std_include.cpp"
 
-linkoptions {"/IGNORE:4254", "/DYNAMICBASE:NO", "/SAFESEH:NO", "/LARGEADDRESSAWARE", "/LAST:.main", "/PDBCompress"}
+		linkoptions {"/IGNORE:4254", "/DYNAMICBASE:NO", "/SAFESEH:NO", "/LARGEADDRESSAWARE", "/LAST:.main", "/PDBCompress"}
 
-files {"./src/**.rc", "./src/**.hpp", "./src/**.cpp", "./src/resources/**.*"}
+		files {"./src/**.hpp", "./src/**.cpp"}
 
-includedirs {"./src", "%{prj.location}/src"}
+		includedirs {"./src", "%{prj.location}/src"}
 
-resincludedirs {"$(ProjectDir)src"}
+		resincludedirs {"$(ProjectDir)src"}
 
-dependson {"tlsdll"}
+		dependson {"tlsdll"}
 
-prebuildcommands {"pushd %{_MAIN_SCRIPT_DIR}", "tools\\premake5 generate-buildinfo", "popd"}
+		prebuildcommands {"pushd %{_MAIN_SCRIPT_DIR}", "tools\\premake5 generate-buildinfo", "popd"}
 
-if _OPTIONS["copy-to"] then
-	postbuildcommands {"copy /y \"$(TargetPath)\" \"" .. _OPTIONS["copy-to"] .. "\""}
-end
+		if _OPTIONS["copy-to"] then
+			postbuildcommands {"copy /y \"$(TargetPath)\" \"" .. _OPTIONS["copy-to"] .. "\""}
+		end
 
-dependencies.imports()
+		dependencies.imports()
 
 group "Dependencies"
-dependencies.projects()
+	dependencies.projects()
+	

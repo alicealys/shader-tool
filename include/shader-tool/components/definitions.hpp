@@ -1,7 +1,7 @@
 #pragma once
 
-#include <utils/d3d11TokenizedProgramFormat.hpp>
-#include <utils/bit_buffer.hpp>
+#include "../utils/d3d11TokenizedProgramFormat.hpp"
+#include "../utils/bit_buffer.hpp"
 
 namespace shader::asm_
 {
