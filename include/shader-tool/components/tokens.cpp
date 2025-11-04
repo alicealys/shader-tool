@@ -2173,7 +2173,6 @@ namespace alys::shader::asm_::tokens
 
 		opcode.type = type;
 		opcode.controls = controls;
-		opcode.length = 1;
 
 		return opcode;
 	}
@@ -2185,12 +2184,6 @@ namespace alys::shader::asm_::tokens
 		inst.opcode = create_opcode(type, controls);
 
 		return inst;
-	}
-
-	void add_operand(instruction_t& instruction, const operand_t& operand)
-	{
-		instruction.operands.emplace_back(operand);
-		instruction.opcode.length += writer::get_operand_length(operand);
 	}
 
 	operand_t create_literal_operand(const float value)

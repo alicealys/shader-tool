@@ -135,11 +135,11 @@ namespace alys::shader::asm_::writer
 		output_buffer.write_bits(1, extended);
 	}
 
-	void write_opcode(utils::bit_buffer_le& output_buffer, const opcode_t& opcode)
+	void write_opcode(utils::bit_buffer_le& output_buffer, const opcode_t& opcode, const std::uint32_t length)
 	{
 		output_buffer.write_bits(11, opcode.type);
 		output_buffer.write_bits(13, opcode.controls);
-		output_buffer.write_bits(7, opcode.length);
+		output_buffer.write_bits(7, length);
 		output_buffer.write_bits(1, !opcode.extensions.empty());
 
 		for (auto i = 0u; i < opcode.extensions.size(); i++)
@@ -213,12 +213,15 @@ namespace alys::shader::asm_::writer
 		return length;
 	}
 
-	void set_opcode_length(instruction_t& instruction)
+	std::uint32_t get_opcode_length(const instruction_t& instruction)
 	{
-		instruction.opcode.length = 1 + static_cast<std::uint32_t>(instruction.opcode.extensions.size());
+		auto length = 1u;
+		length += static_cast<std::uint32_t>(instruction.opcode.extensions.size());
 		for (const auto& operand : instruction.operands)
 		{
-			instruction.opcode.length += get_operand_length(operand);
+			length += get_operand_length(operand);
 		}
+
+		return length;
 	}
 }

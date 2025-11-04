@@ -356,7 +356,6 @@ namespace alys::shader
 		{
 			if (!callback(assembler, instruction))
 			{
-				shader::asm_::writer::set_opcode_length(instruction);
 				assembler(instruction);
 			}
 		}

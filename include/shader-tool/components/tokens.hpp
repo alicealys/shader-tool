@@ -626,8 +626,6 @@ namespace alys::shader::asm_::tokens
 	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls = 0u);
 	instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls = 0u);
 
-	void add_operand(instruction_t& instruction, const operand_t& operand);
-
 	operand_t create_literal_operand(const float value);
 	operand_t create_literal_operand(const float x, const float y, const float z, const float w);
 

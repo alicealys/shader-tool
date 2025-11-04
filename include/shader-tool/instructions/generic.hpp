@@ -28,7 +28,8 @@ namespace alys::shader::asm_
 		{
 			instruction_t instruction{};
 
-			instruction.opcode = reader::read_opcode(input_buffer);
+			std::uint32_t length{};
+			instruction.opcode = reader::read_opcode(input_buffer, length);
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{
@@ -48,7 +49,8 @@ namespace alys::shader::asm_
 
 		void write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
-			writer::write_opcode(output_buffer, instruction.opcode);
+			const auto length = writer::get_opcode_length(instruction);
+			writer::write_opcode(output_buffer, instruction.opcode, length);
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{

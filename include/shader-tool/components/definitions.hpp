@@ -82,7 +82,6 @@ namespace alys::shader::asm_
 	{
 		std::uint32_t type;
 		std::uint32_t controls;
-		std::uint32_t length;
 		std::vector<opcode_extended_t> extensions;
 	};
 

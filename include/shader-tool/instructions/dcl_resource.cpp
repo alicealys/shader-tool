@@ -7,7 +7,10 @@ namespace alys::shader::asm_
 	instruction_t dcl_resource::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction;
-		instruction.opcode = reader::read_opcode(input_buffer);
+
+		std::uint32_t length{};
+		instruction.opcode = reader::read_opcode(input_buffer, length);
+		assert(length == 4u);
 
 		instruction.operands.emplace_back(reader::read_operand(input_buffer));
 
@@ -26,7 +29,8 @@ namespace alys::shader::asm_
 
 	void dcl_resource::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		writer::write_opcode(output_buffer, instruction.opcode);
+		const auto length = writer::get_opcode_length(instruction);
+		writer::write_opcode(output_buffer, instruction.opcode, length);
 		writer::write_operand(output_buffer, instruction.operands[0]);
 		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[0]);
 		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[1]);

@@ -7,13 +7,15 @@ namespace alys::shader::asm_
 	instruction_t dcl_globalflags::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction;
-		instruction.opcode = reader::read_opcode(input_buffer);
+		std::uint32_t length{};
+		instruction.opcode = reader::read_opcode(input_buffer, length);
+		assert(length == 1u);
 		return instruction;
 	}
 
 	void dcl_globalflags::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		writer::write_opcode(output_buffer, instruction.opcode);
+		writer::write_opcode(output_buffer, instruction.opcode, 1);
 	}
 
 	void dcl_globalflags::print(const instruction_t& instruction)

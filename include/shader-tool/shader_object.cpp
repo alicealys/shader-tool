@@ -137,8 +137,6 @@ namespace alys::shader
 			}
 		}
 
-		asm_::writer::set_opcode_length(instruction);
-
 		return instruction;
 	}
 
@@ -535,9 +533,7 @@ namespace alys::shader
 
 	void shader_object::add_instruction(const asm_::instruction_t& instruction)
 	{
-		asm_::instruction_t fixed_instruction = instruction;
-		asm_::writer::set_opcode_length(fixed_instruction);
-		this->instructions_.emplace_back(fixed_instruction);
+		this->instructions_.emplace_back(instruction);
 	}
 
 	void shader_object::add_signature(const std::uint32_t type, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,

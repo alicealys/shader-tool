@@ -7,10 +7,11 @@ namespace alys::shader::asm_
 	instruction_t general_instruction::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction{};
-		instruction.opcode = reader::read_opcode(input_buffer);
+		std::uint32_t opcode_length{};
+		instruction.opcode = reader::read_opcode(input_buffer, opcode_length);
 
 		const auto opcode_op_len = 1 + instruction.opcode.extensions.size();
-		const auto end = input_buffer.total() + (instruction.opcode.length - opcode_op_len) * 8 * 4;
+		const auto end = input_buffer.total() + (opcode_length - opcode_op_len) * 8 * 4;
 		while (input_buffer.total() < end)
 		{
 			const auto operand = reader::read_operand(input_buffer);
@@ -22,7 +23,8 @@ namespace alys::shader::asm_
 
 	void general_instruction::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		writer::write_opcode(output_buffer, instruction.opcode);
+		const auto length = writer::get_opcode_length(instruction);
+		writer::write_opcode(output_buffer, instruction.opcode, length);
 		for (const auto& operand : instruction.operands)
 		{
 			writer::write_operand(output_buffer, operand);
@@ -42,7 +44,9 @@ namespace alys::shader::asm_
 		instruction_t instruction{};
 		operand_t op1{};
 
-		instruction.opcode = reader::read_opcode(input_buffer);
+		std::uint32_t length{};
+		instruction.opcode = reader::read_opcode(input_buffer, length);
+		assert(length == 4u);
 
 		const auto op0 = reader::read_operand(input_buffer);
 		op1.custom.is_custom = true;
@@ -58,7 +62,8 @@ namespace alys::shader::asm_
 
 	void declaration_instruction_nametoken::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		writer::write_opcode(output_buffer, instruction.opcode);
+		const auto length = writer::get_opcode_length(instruction);
+		writer::write_opcode(output_buffer, instruction.opcode, length);
 		writer::write_operand(output_buffer, instruction.operands[0]);
 		output_buffer.write_bits(15, instruction.operands[1].custom.u.value);
 		output_buffer.write_bits(17, 0);

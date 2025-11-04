@@ -173,13 +173,13 @@ namespace alys::shader::asm_::reader
 		return opcode;
 	}
 
-	opcode_t read_opcode(utils::bit_buffer_le& input_buffer)
+	opcode_t read_opcode(utils::bit_buffer_le& input_buffer, std::uint32_t& length)
 	{
 		opcode_t opcode{};
 
 		opcode.type = input_buffer.read_bits(11);
 		opcode.controls = input_buffer.read_bits(13);
-		opcode.length = input_buffer.read_bits(7);
+		length = input_buffer.read_bits(7);
 
 		auto extended = input_buffer.read_bits<bool>(1);
 		while (extended)
