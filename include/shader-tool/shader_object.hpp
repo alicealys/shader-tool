@@ -53,6 +53,9 @@ namespace alys::shader
 		chunk_shex = 'XEHS',
 	};
 
+	const char* get_sys_value_name(const std::uint32_t value);
+	const char* get_format_name(const std::uint32_t value);
+
 	class shader_object
 	{
 	public:
@@ -252,6 +255,7 @@ namespace alys::shader
 
 		std::string serialize();
 
+		signature get_signature(const std::uint32_t name);
 		std::unordered_map<std::uint32_t, signature>& get_signatures();
 		std::unordered_map<std::uint32_t, std::string>& get_unknown_chunks();
 		std::vector<std::uint32_t>& get_chunk_order();

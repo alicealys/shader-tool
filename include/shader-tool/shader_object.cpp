@@ -5,6 +5,85 @@
 
 namespace alys::shader
 {
+	const char* get_sys_value_name(const std::uint32_t value)
+	{
+		switch (value)
+		{
+		case TARGET: 
+			return "TARGET";
+		case POS: 
+			return "POS";
+		case CLIPDST: 
+			return "CLIPDST";
+		case CULLDST: 
+			return "CULLDST";
+		case RTINDEX:
+			return "RTINDEX";
+		case VPINDEX:
+			return "VPINDEX";
+		case VERTID:
+			return "VERTID";
+		case PRIMID:
+			return "PRIMID";
+		case INSTID:
+			return "INSTID";
+		case FFACE:
+			return "FFACE";
+		case SAMPLE:
+			return "SAMPLE";
+		case QUADEDGE:
+			return "QUADEDGE";
+		case QUADINT:
+			return "QUADINT";
+		case TRIEDGE:
+			return "TRIEDGE";
+		case TRIINT:
+			return "TRIINT";
+		case LINEDET:
+			return "LINEDET";
+		case LINEDEN:
+			return "LINEDEN";
+		}
+
+		return "UNKNOWN";
+	};
+
+	const char* get_format_name(const std::uint32_t value)
+	{
+		switch (value)
+		{
+		case format_uint:
+			return "uint";
+		case format_int:
+			return "int";
+		case format_float:
+			return "float";
+		}
+
+		return "unknown";
+	}
+
+	std::string get_mask_str(const std::uint32_t mask)
+	{
+		char mask_str[4]{};
+
+		auto idx = 0;
+		const auto add_component = [&](const std::uint32_t flag, const char c)
+		{
+			if ((mask & flag) != 0)
+			{
+				mask_str[idx++] = c;
+			}
+		};
+
+		add_component(1, 'x');
+		add_component(2, 'y');
+		add_component(4, 'z');
+		add_component(8, 'w');
+
+		return mask_str;
+	}
+
 	asm_::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
 		const std::vector<asm_::tokens::operand_creator::with_component>& operands)
 	{
@@ -186,8 +265,13 @@ namespace alys::shader
 		printf("-------------------------------------------------- ----- ------ -------- --------- -------- ----\n");
 		for (const auto& element : signature)
 		{
-			printf("%50s %5i %6i %8i %9i %8i %4i\n", element.name.data(),
-				element.semantic_index, element.mask, element.register_, element.system_value_type, element.component_type, element.rw_mask);
+			const auto mask = get_mask_str(element.mask);
+			const auto rw_mask = get_mask_str(element.rw_mask);
+
+			printf("%-50s %-5i %-6s %-8i %-9s %-8s %-4s\n", element.name.data(),
+				element.semantic_index, mask.data(), element.register_,
+				get_sys_value_name(element.system_value_type), 
+				get_format_name(element.component_type), rw_mask.data());
 		}
 	}
 
@@ -520,6 +604,17 @@ namespace alys::shader
 	shader_object::info& shader_object::get_info()
 	{
 		return this->info_;
+	}
+
+	shader_object::signature shader_object::get_signature(const std::uint32_t name)
+	{
+		const auto iter = this->signatures_.find(name);
+		if (iter == this->signatures_.end())
+		{
+			return {};
+		}
+
+		return iter->second;
 	}
 
 	std::unordered_map<std::uint32_t, shader_object::signature>& shader_object::get_signatures()
