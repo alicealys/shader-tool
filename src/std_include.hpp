@@ -1,7 +1,5 @@
 #pragma once
 
-#define BINARY_PAYLOAD_SIZE 0x12000000
-
 #pragma warning(push)
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4127)
@@ -28,8 +26,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <winsock.h>
-
 #include <map>
 #include <atomic>
 #include <vector>
@@ -48,8 +44,7 @@
 #include <unordered_set>
 #include <variant>
 #include <cassert>
-
-#include <gsl/gsl>
+#include <array>
 
 #ifdef min
 #undef min
@@ -61,7 +56,5 @@
 
 #pragma warning(pop)
 #pragma warning(disable: 4100)
-
-#pragma comment(lib, "ws2_32.lib")
 
 using namespace std::literals;
