@@ -3,24 +3,23 @@
 #include "tool.hpp"
 
 //#define SHADER_TOOL_DEFINE_OPERATOR_COMPONENTS
-#include "shader-tool/shader.hpp"
+#include <shader-tool/shader.hpp>
 
 #include <utils/io.hpp>
 
-using namespace alys;
 using namespace alys::shader::asm_::tokens::literals;
 
 int example1()
 {
-	alys::shader::shader_object shader(shader::pixelshader);
+	alys::shader::shader_object shader(alys::shader::pixelshader);
 
-	shader.add_input("SV_POSITION", 0, "xyzw", 0, shader::POS, shader::format_float, "");
-	shader.add_input("COLOR", 0, "xyzw", 1, shader::NONE, shader::format_float, "xyzw");
-	shader.add_input("TEXCOORD", 0, "xy", 2, shader::NONE, shader::format_float, "xy");
-	shader.add_input("TEXCOORD", 1, "xyzw", 3, shader::NONE, shader::format_float, "xyzw");
-	shader.add_input("TEXCOORD", 5, "xyz", 4, shader::NONE, shader::format_float, "xyz");
+	shader.add_input("SV_POSITION", 0, "xyzw", 0, alys::shader::POS, alys::shader::format_float, "");
+	shader.add_input("COLOR", 0, "xyzw", 1, alys::shader::NONE, alys::shader::format_float, "xyzw");
+	shader.add_input("TEXCOORD", 0, "xy", 2, alys::shader::NONE, alys::shader::format_float, "xy");
+	shader.add_input("TEXCOORD", 1, "xyzw", 3, alys::shader::NONE, alys::shader::format_float, "xyzw");
+	shader.add_input("TEXCOORD", 5, "xyz", 4, alys::shader::NONE, alys::shader::format_float, "xyz");
 
-	shader.add_output("SV_TARGET", 0, "xyzw", 0, shader::TARGET, shader::format_float, "");
+	shader.add_output("SV_TARGET", 0, "xyzw", 0, alys::shader::TARGET, alys::shader::format_float, "");
 
 	auto a = shader.get_assembler();
 
@@ -84,7 +83,7 @@ int example1()
 
 	for (const auto& instruction : shader.get_instructions())
 	{
-		shader::asm_::print_instruction(instruction);
+		alys::shader::asm_::print_instruction(instruction);
 	}
 
 	::utils::io::write_file("ps_test.cso", shader.serialize());
