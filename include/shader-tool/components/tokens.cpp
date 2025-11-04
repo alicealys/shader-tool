@@ -7,28 +7,28 @@ namespace shader::asm_::tokens
 {
 	operand_creator::with_component::operator operand_t() const
 	{
-		return this->current_;
+		return *this->current_;
 	}
 
 	operand_creator::with_component operand_creator::with_component::neg() const
 	{
 		operand_creator::with_component next = *this;
 
-		if (next.current_.extensions.empty())
+		if (next.current_->extensions.empty())
 		{
 			operand_extended_t extension{};
 			extension.type = D3D10_SB_EXTENDED_OPERAND_MODIFIER;
 			extension.modifier = D3D10_SB_OPERAND_MODIFIER_NEG;
-			next.current_.extensions.emplace_back(extension);
+			next.current_->extensions.emplace_back(extension);
 			return next;
 		}
 
-		if (next.current_.extensions.size() > 1)
+		if (next.current_->extensions.size() > 1)
 		{
 			throw std::runtime_error("invalid operand extensions");
 		}
 
-		auto& current_extension = next.current_.extensions[0];
+		auto& current_extension = next.current_->extensions[0];
 		if (current_extension.type != D3D10_SB_EXTENDED_OPERAND_MODIFIER)
 		{
 			throw std::runtime_error("invalid operand extensions");
@@ -36,7 +36,7 @@ namespace shader::asm_::tokens
 
 		if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_NEG)
 		{
-			next.current_.extensions.clear();
+			next.current_->extensions.clear();
 			return next;
 		}
 		else if (current_extension.modifier == D3D10_SB_OPERAND_MODIFIER_ABS)
@@ -52,20 +52,20 @@ namespace shader::asm_::tokens
 	{
 		operand_creator::with_component next = *this;
 
-		if (next.current_.extensions.empty())
+		if (next.current_->extensions.empty())
 		{
 			operand_extended_t extension{};
 			extension.type = D3D10_SB_EXTENDED_OPERAND_MODIFIER;
 			extension.modifier = D3D10_SB_OPERAND_MODIFIER_ABS;
-			next.current_.extensions.emplace_back(extension);
+			next.current_->extensions.emplace_back(extension);
 		}
 
-		if (next.current_.extensions.size() > 1)
+		if (next.current_->extensions.size() > 1)
 		{
 			throw std::runtime_error("invalid operand extensions");
 		}
 
-		auto& current_extension = next.current_.extensions[0];
+		auto& current_extension = next.current_->extensions[0];
 		if (current_extension.type != D3D10_SB_EXTENDED_OPERAND_MODIFIER)
 		{
 			throw std::runtime_error("invalid operand extensions");
@@ -100,9 +100,9 @@ namespace shader::asm_::tokens
 
 		next.has_set_components_ = false;
 
-		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
-		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
-		next.current_.components.mask = 0;
+		next.current_->components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE;
+		next.current_->components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.current_->components.mask = 0;
 
 		auto idx = 0;
 		for (auto i = 0; i < 4; i++)
@@ -113,7 +113,7 @@ namespace shader::asm_::tokens
 			}
 
 			const auto mask = 1 << (this->components_[i] - 1);
-			next.current_.components.mask |= mask;
+			next.current_->components.mask |= mask;
 		}
 
 		return next;
@@ -130,13 +130,13 @@ namespace shader::asm_::tokens
 
 		next.has_set_components_ = false;
 
-		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
-		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.current_->components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE;
+		next.current_->components.type = D3D10_SB_OPERAND_4_COMPONENT;
 
-		next.current_.components.names[0] = 0;
-		next.current_.components.names[1] = 0;
-		next.current_.components.names[2] = 0;
-		next.current_.components.names[3] = 0;
+		next.current_->components.names[0] = 0;
+		next.current_->components.names[1] = 0;
+		next.current_->components.names[2] = 0;
+		next.current_->components.names[3] = 0;
 
 		auto idx = 0;
 		auto last_component = 0u;
@@ -144,12 +144,12 @@ namespace shader::asm_::tokens
 		{
 			if (this->components_[i] == component_none)
 			{
-				next.current_.components.names[idx++] = last_component;
+				next.current_->components.names[idx++] = last_component;
 			}
 			else
 			{
 				const auto c = this->components_[i] - 1;
-				next.current_.components.names[idx++] = c;
+				next.current_->components.names[idx++] = c;
 				last_component = c;
 			}
 		}
@@ -168,13 +168,13 @@ namespace shader::asm_::tokens
 
 		next.has_set_components_ = false;
 
-		next.current_.components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
-		next.current_.components.type = D3D10_SB_OPERAND_4_COMPONENT;
+		next.current_->components.selection_mode = D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE;
+		next.current_->components.type = D3D10_SB_OPERAND_4_COMPONENT;
 
-		next.current_.components.names[0] = 0;
-		next.current_.components.names[1] = 0;
-		next.current_.components.names[2] = 0;
-		next.current_.components.names[3] = 0;
+		next.current_->components.names[0] = 0;
+		next.current_->components.names[1] = 0;
+		next.current_->components.names[2] = 0;
+		next.current_->components.names[3] = 0;
 
 		for (auto i = 0; i < 4; i++)
 		{
@@ -183,7 +183,7 @@ namespace shader::asm_::tokens
 				continue;
 			}
 
-			next.current_.components.names[0] = this->components_[i] - 1;
+			next.current_->components.names[0] = this->components_[i] - 1;
 			break;
 		}
 
@@ -193,7 +193,7 @@ namespace shader::asm_::tokens
 	void operand_creator::with_component::set(const operand_t& operand, const std::uint32_t a, const std::uint32_t b,
 		const std::uint32_t c, const std::uint32_t d)
 	{
-		this->current_ = operand;
+		*this->current_ = operand;
 		this->has_set_components_ = true;
 		this->components_[0] = a;
 		this->components_[1] = b;

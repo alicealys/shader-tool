@@ -9,9 +9,13 @@ namespace shader::asm_::tokens
 	{
 		component_none = 0,
 		component_x = 1,
+		_x = 1,
 		component_y = 2,
+		_y = 2,
 		component_z = 3,
-		component_w = 4
+		_z = 3,
+		component_w = 4,
+		_w = 4,
 	};
 
 	class operand_creator
@@ -21,9 +25,13 @@ namespace shader::asm_::tokens
 		{
 			friend class operand_creator;
 		public:
-			with_component() = default;
+			with_component()
+				: current_(std::make_shared<operand_t>())
+			{
+			}
+
 			with_component(const operand_t& operand)
-				: current_(operand)
+				: current_(std::make_shared<operand_t>(operand))
 			{
 			}
 
@@ -45,8 +53,8 @@ namespace shader::asm_::tokens
 
 		private:
 			bool has_set_components_{};
-			std::uint32_t components_[4]{};
-			operand_t current_{};
+			std::uint8_t components_[4]{};
+			std::shared_ptr<operand_t> current_{};
 
 		};
 
