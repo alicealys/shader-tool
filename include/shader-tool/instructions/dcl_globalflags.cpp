@@ -2,7 +2,7 @@
 
 #include "dcl_globalflags.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	instruction_t dcl_globalflags::read(utils::bit_buffer_le& input_buffer)
 	{

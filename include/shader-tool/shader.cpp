@@ -13,7 +13,7 @@
 
 #include "shader_object.hpp"
 
-namespace shader
+namespace alys::shader
 {
 	namespace asm_
 	{
@@ -286,7 +286,7 @@ namespace shader
 			initializer _(initialize);
 		}
 
-		instruction_t read_instruction(utils::bit_buffer_le& input_buffer)
+		instruction_t read_instruction(alys::utils::bit_buffer_le& input_buffer)
 		{
 			const auto beg = input_buffer.total();
 			const auto opcode_type = input_buffer.read_bits(11);
@@ -300,7 +300,7 @@ namespace shader
 			throw std::runtime_error("unsupported instruction");
 		}
 
-		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+		void write_instruction(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{

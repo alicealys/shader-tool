@@ -2,7 +2,7 @@
 
 #include "dcl_resource.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	instruction_t dcl_resource::read(utils::bit_buffer_le& input_buffer)
 	{

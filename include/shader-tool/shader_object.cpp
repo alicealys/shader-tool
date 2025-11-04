@@ -3,7 +3,7 @@
 #include "shader.hpp"
 #include "shader_object.hpp"
 
-namespace shader
+namespace alys::shader
 {
 	asm_::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
 		const std::vector<asm_::tokens::operand_creator::with_component>& operands)
@@ -259,7 +259,7 @@ namespace shader
 
 		header->program_size = static_cast<std::uint32_t>(program_size);
 
-		dxbc::CalculateDXBCChecksum(reinterpret_cast<unsigned char*>(buffer.data()),
+		utils::dxbc::CalculateDXBCChecksum(reinterpret_cast<unsigned char*>(buffer.data()),
 			static_cast<std::uint32_t>(buffer.size()), reinterpret_cast<std::uint32_t*>(&header->checksum));
 
 		return buffer;

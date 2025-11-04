@@ -2,7 +2,7 @@
 
 #include "reader.hpp"
 
-namespace shader::asm_::reader
+namespace alys::shader::asm_::reader
 {
 	operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer, bool& extended)
 	{

@@ -2,9 +2,9 @@
 
 #include "customdata.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
-	instruction_t customdata::read(utils::bit_buffer_le& input_buffer)
+	instruction_t customdata::read(alys::utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction;
 		instruction.opcode.type = input_buffer.read_bits(11);
@@ -19,7 +19,7 @@ namespace shader::asm_
 		return instruction;
 	}
 
-	void customdata::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void customdata::write(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		output_buffer.write_bits(11, D3D10_SB_OPCODE_CUSTOMDATA);
 		output_buffer.write_bits(21, instruction.customdata.data_class);

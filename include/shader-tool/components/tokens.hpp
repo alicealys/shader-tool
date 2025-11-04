@@ -3,7 +3,7 @@
 #include "definitions.hpp"
 #include "writer.hpp"
 
-namespace shader::asm_::tokens
+namespace alys::shader::asm_::tokens
 {
 	enum component_type
 	{

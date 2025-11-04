@@ -10,7 +10,7 @@
 #include "components/tokens.hpp"
 #include "shader_object.hpp"
 
-namespace shader
+namespace alys::shader
 {
 	namespace asm_
 	{

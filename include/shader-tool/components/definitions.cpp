@@ -2,7 +2,7 @@
 
 #include "definitions.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	std::unordered_map<std::uint32_t, const char*> opcode_names =
 	{

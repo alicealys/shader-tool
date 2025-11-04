@@ -2,7 +2,7 @@
 
 #include "generic.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	instruction_t general_instruction::read(utils::bit_buffer_le& input_buffer)
 	{

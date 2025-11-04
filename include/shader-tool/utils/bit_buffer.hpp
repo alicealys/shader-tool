@@ -1,6 +1,6 @@
 #pragma once
 
-namespace utils
+namespace alys::utils
 {
     class bit_buffer 
     {

@@ -7,11 +7,12 @@
 
 #include <utils/io.hpp>
 
-using namespace shader::asm_::tokens::literals;
+using namespace alys;
+using namespace alys::shader::asm_::tokens::literals;
 
 int example1()
 {
-	shader::shader_object shader(shader::pixelshader);
+	alys::shader::shader_object shader(shader::pixelshader);
 
 	shader.add_input("SV_POSITION", 0, "xyzw", 0, shader::POS, shader::format_float, "");
 	shader.add_input("COLOR", 0, "xyzw", 1, shader::NONE, shader::format_float, "xyzw");
@@ -86,5 +87,5 @@ int example1()
 		shader::asm_::print_instruction(instruction);
 	}
 
-	utils::io::write_file("ps_test.cso", shader.serialize());
+	::utils::io::write_file("ps_test.cso", shader.serialize());
 }

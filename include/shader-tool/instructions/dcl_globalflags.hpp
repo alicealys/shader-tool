@@ -2,7 +2,7 @@
 
 #include "base.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	class dcl_globalflags final : public base_instruction
 	{

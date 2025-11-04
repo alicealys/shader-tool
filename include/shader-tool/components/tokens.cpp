@@ -3,7 +3,7 @@
 #include "tokens.hpp"
 #include "writer.hpp"
 
-namespace shader::asm_::tokens
+namespace alys::shader::asm_::tokens
 {
 	operand_creator::with_component operand_creator::with_component::copy() const
 	{

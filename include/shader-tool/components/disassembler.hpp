@@ -2,7 +2,7 @@
 
 #include "definitions.hpp"
 
-namespace shader::asm_::disassembler
+namespace alys::shader::asm_::disassembler
 {
 	void print_operand(const operand_t& op);
 	void print_operands(const std::vector<operand_t>& operands);

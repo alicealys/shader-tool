@@ -2,7 +2,7 @@
 
 #include "bit_buffer.hpp"
 
-namespace utils
+namespace alys::utils
 {
     bit_buffer::bit_buffer(const std::string& buffer) 
         : buffer_(buffer)

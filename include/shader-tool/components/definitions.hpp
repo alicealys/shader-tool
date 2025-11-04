@@ -3,7 +3,7 @@
 #include "../utils/d3d11TokenizedProgramFormat.hpp"
 #include "../utils/bit_buffer.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	constexpr std::uint32_t component_x = 1 << D3D10_SB_4_COMPONENT_X;
 	constexpr std::uint32_t component_y = 1 << D3D10_SB_4_COMPONENT_Y;

@@ -2,7 +2,7 @@
 
 #include "components/definitions.hpp"
 
-namespace shader
+namespace alys::shader
 {
 	enum signature_format
 	{

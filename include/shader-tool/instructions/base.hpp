@@ -6,7 +6,7 @@
 #include "../components/writer.hpp"
 #include "../components/disassembler.hpp"
 
-namespace shader::asm_
+namespace alys::shader::asm_
 {
 	class base_instruction
 	{

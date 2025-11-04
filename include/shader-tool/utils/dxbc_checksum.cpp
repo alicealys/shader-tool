@@ -8,7 +8,7 @@
 
 // https://github.com/GPUOpen-Archive/common-src-ShaderUtils/blob/master/DX10/DXBCChecksum.cpp
 
-namespace dxbc
+namespace alys::utils::dxbc
 {
 	/* Padding */
 	static unsigned char MD5_PADDING[64] =
