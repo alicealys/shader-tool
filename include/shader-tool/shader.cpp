@@ -294,56 +294,7 @@ namespace shader
 
 			if (const auto& handler = instruction_handlers[opcode_type]; handler.get() != nullptr)
 			{
-				const auto instruction = handler->read(input_buffer);
-
-				static std::unordered_set<std::uint32_t> done;
-				if (!done.contains(instruction.opcode.type))
-				{
-					printf("{%s, {", opcode_enum_names[instruction.opcode.type]);
-					for (auto i = 0; i < instruction.operands.size(); i++)
-					{
-						if (instruction.operands[i].custom.is_custom)
-						{
-							printf("custom");
-						}
-						else
-						{
-							if (instruction.operands[i].components.type == D3D10_SB_OPERAND_0_COMPONENT)
-							{
-								printf("_0c");
-							}
-							else if (instruction.operands[i].components.type == D3D10_SB_OPERAND_1_COMPONENT)
-							{
-								printf("_1c");
-							}
-							else if (instruction.operands[i].components.type == D3D10_SB_OPERAND_4_COMPONENT)
-							{
-								switch (instruction.operands[i].components.selection_mode)
-								{
-								case D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE:
-									printf("mask");
-									break;
-								case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
-									printf("swz");
-									break;
-								case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
-									printf("scalar");
-									break;
-								}
-							}
-						}
-					
-						if (i < instruction.operands.size() - 1)
-						{
-							printf(", ");
-						}
-					}
-					printf("}},\n");
-
-					done.insert(instruction.opcode.type);
-				}
-
-				return instruction;
+				return handler->read(input_buffer);
 			}
 
 			throw std::runtime_error("unsupported instruction");

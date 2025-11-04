@@ -302,7 +302,7 @@ namespace shader::asm_::tokens
 			next.indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
 		}
 
-		next.extra_operand = std::make_shared<operand_t>(extra_operand);
+		next.indices[1].extra_operand = std::make_shared<operand_t>(extra_operand);
 		return operand_creator(next);
 	}
 

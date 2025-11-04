@@ -50,9 +50,9 @@ namespace shader::asm_::disassembler
 		case D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER:
 		{
 			printf("cb%i[", op.indices[0].value.uint32);
-			if (op.extra_operand != nullptr)
+			if (op.indices[0].extra_operand != nullptr)
 			{
-				print_operand(*op.extra_operand);
+				print_operand(*op.indices[0].extra_operand);
 				printf(" + ");
 			}
 			printf("%i]", op.indices[1].value.uint32);
@@ -61,9 +61,9 @@ namespace shader::asm_::disassembler
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER:
 		{
 			printf("icb[");
-			if (op.extra_operand != nullptr)
+			if (op.indices[0].extra_operand != nullptr)
 			{
-				print_operand(*op.extra_operand);
+				print_operand(*op.indices[0].extra_operand);
 				printf(" + ");
 			}
 			printf("%i]", op.indices[1].value.uint32);

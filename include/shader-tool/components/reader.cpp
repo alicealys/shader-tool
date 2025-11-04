@@ -88,16 +88,16 @@ namespace shader::asm_::reader
 				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
 				operand.indices[index].value.uint32 = bit_buffer.read_bytes(4);
-				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
 				operand.indices[index].value.uint64.fields.low = bit_buffer.read_bytes(4);
 				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
-				operand.extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
 				break;
 			}
 		};

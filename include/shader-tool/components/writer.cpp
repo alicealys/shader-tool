@@ -56,15 +56,15 @@ namespace shader::asm_::writer
 				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				write_operand(output_buffer, *operand.extra_operand);
+				write_operand(output_buffer, *operand.indices[index].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
 				output_buffer.write_bytes(4, operand.indices[index].value.uint32);
-				write_operand(output_buffer, *operand.extra_operand);
+				write_operand(output_buffer, *operand.indices[index].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
 				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
-				write_operand(output_buffer, *operand.extra_operand);
+				write_operand(output_buffer, *operand.indices[index].extra_operand);
 				break;
 			}
 		};
@@ -165,14 +165,14 @@ namespace shader::asm_::writer
 				length += 2;
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				length += get_operand_length(*operand.extra_operand);
+				length += get_operand_length(*operand.indices[index].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				length += get_operand_length(*operand.extra_operand);
+				length += get_operand_length(*operand.indices[index].extra_operand);
 				length += 1;
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				length += get_operand_length(*operand.extra_operand);
+				length += get_operand_length(*operand.indices[index].extra_operand);
 				length += 2;
 				break;
 			}
