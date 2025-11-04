@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../utils/bit_buffer.hpp"
+#include "../../utils/bit_buffer.hpp"
 
-#include "../components/reader.hpp"
-#include "../components/writer.hpp"
-#include "../components/disassembler.hpp"
+#include "../reader.hpp"
+#include "../writer.hpp"
+#include "../disassembler.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	class base_instruction
 	{

@@ -1,20 +1,20 @@
-#include "../std_include.hpp"
+#include "../../std_include.hpp"
 
 #include "generic.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	instruction_t general_instruction::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction{};
 		std::uint32_t opcode_length{};
-		instruction.opcode = reader::read_opcode(input_buffer, opcode_length);
+		instruction.opcode = read_opcode(input_buffer, opcode_length);
 
 		const auto opcode_op_len = 1 + instruction.opcode.extensions.size();
 		const auto end = input_buffer.total() + (opcode_length - opcode_op_len) * 8 * 4;
 		while (input_buffer.total() < end)
 		{
-			const auto operand = reader::read_operand(input_buffer);
+			const auto operand = read_operand(input_buffer);
 			instruction.operands.emplace_back(operand);
 		}
 
@@ -23,19 +23,19 @@ namespace alys::shader::asm_
 
 	void general_instruction::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		const auto length = writer::get_opcode_length(instruction);
-		writer::write_opcode(output_buffer, instruction.opcode, length);
+		const auto length = get_opcode_length(instruction);
+		write_opcode(output_buffer, instruction.opcode, length);
 		for (const auto& operand : instruction.operands)
 		{
-			writer::write_operand(output_buffer, operand);
+			write_operand(output_buffer, operand);
 		}
 	}
 
 	void general_instruction::print(const instruction_t& instruction)
 	{
-		disassembler::print_opcode(instruction.opcode);
+		print_opcode(instruction.opcode);
 		printf(" ");
-		disassembler::print_operands(instruction.operands);
+		print_operands(instruction.operands);
 		printf("\n");
 	}
 
@@ -45,10 +45,10 @@ namespace alys::shader::asm_
 		operand_t op1{};
 
 		std::uint32_t length{};
-		instruction.opcode = reader::read_opcode(input_buffer, length);
+		instruction.opcode = read_opcode(input_buffer, length);
 		assert(length == 4u);
 
-		const auto op0 = reader::read_operand(input_buffer);
+		const auto op0 = read_operand(input_buffer);
 		op1.custom.is_custom = true;
 		op1.custom.u.value = input_buffer.read_bits(15);
 
@@ -62,18 +62,18 @@ namespace alys::shader::asm_
 
 	void declaration_instruction_nametoken::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
-		const auto length = writer::get_opcode_length(instruction);
-		writer::write_opcode(output_buffer, instruction.opcode, length);
-		writer::write_operand(output_buffer, instruction.operands[0]);
+		const auto length = get_opcode_length(instruction);
+		write_opcode(output_buffer, instruction.opcode, length);
+		write_operand(output_buffer, instruction.operands[0]);
 		output_buffer.write_bits(15, instruction.operands[1].custom.u.value);
 		output_buffer.write_bits(17, 0);
 	}
 
 	void declaration_instruction_nametoken::print(const instruction_t& instruction)
 	{
-		disassembler::print_opcode(instruction.opcode);
+		print_opcode(instruction.opcode);
 		printf(" ");
-		disassembler::print_operand(instruction.operands[0]);
+		print_operand(instruction.operands[0]);
 		printf(", ");
 		printf("%s\n", get_name_token(instruction.operands[1].custom.u.value));
 	}

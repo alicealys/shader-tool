@@ -2,7 +2,7 @@
 
 #include "base.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	class customdata final : public base_instruction
 	{

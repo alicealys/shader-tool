@@ -2,7 +2,7 @@
 
 #include "base.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	class dcl_resource final : public base_instruction
 	{

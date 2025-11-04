@@ -7,7 +7,7 @@
 
 #include <utils/io.hpp>
 
-using namespace alys::shader::asm_::tokens::literals;
+using namespace alys::shader::literals;
 
 int example1()
 {
@@ -83,7 +83,7 @@ int example1()
 
 	for (const auto& instruction : shader.get_instructions())
 	{
-		alys::shader::asm_::print_instruction(instruction);
+		alys::shader::detail::print_instruction(instruction);
 	}
 
 	::utils::io::write_file("ps_test.cso", shader.serialize());

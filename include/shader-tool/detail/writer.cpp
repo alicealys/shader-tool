@@ -2,7 +2,7 @@
 
 #include "reader.hpp"
 
-namespace alys::shader::asm_::writer
+namespace alys::shader::detail
 {
 	void write_operand(utils::bit_buffer_le& output_buffer, const operand_t& operand)
 	{

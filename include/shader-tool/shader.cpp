@@ -2,20 +2,16 @@
 
 #include "shader.hpp"
 
-#include "components/reader.hpp"
-#include "components/writer.hpp"
-#include "components/disassembler.hpp"
-
-#include "instructions/generic.hpp"
-#include "instructions/dcl_resource.hpp"
-#include "instructions/dcl_globalflags.hpp"
-#include "instructions/customdata.hpp"
+#include "detail/instructions/generic.hpp"
+#include "detail/instructions/dcl_resource.hpp"
+#include "detail/instructions/dcl_globalflags.hpp"
+#include "detail/instructions/customdata.hpp"
 
 #include "shader_object.hpp"
 
 namespace alys::shader
 {
-	namespace asm_
+	namespace detail
 	{
 		namespace
 		{

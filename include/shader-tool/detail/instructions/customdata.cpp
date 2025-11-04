@@ -1,8 +1,8 @@
-#include "../std_include.hpp"
+#include "../../std_include.hpp"
 
 #include "customdata.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	instruction_t customdata::read(alys::utils::bit_buffer_le& input_buffer)
 	{

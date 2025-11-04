@@ -84,46 +84,46 @@ namespace alys::shader
 		return mask_str;
 	}
 
-	asm_::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
-		const std::vector<asm_::tokens::operand_creator::with_component>& operands)
+	detail::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
+		const std::vector<detail::operand_proxy::with_components>& operands)
 	{
 		const auto controls_ = this->controls_stack_.empty() ? controls : this->controls_stack_.front();
-		auto instruction = asm_::tokens::create_instruction(type, controls_);
+		auto instruction = detail::create_instruction(type, controls_);
 		instruction.opcode.extensions = this->current_extensions_;
 
 		this->current_extensions_.clear();
 
-		const auto& def = asm_::instruction_defs[type];
+		const auto& def = detail::instruction_defs[type];
 		if (!def.empty())
 		{
 			for (auto i = 0u; i < def.size(); i++)
 			{
 				switch (def[i])
 				{
-				case asm_::token_operand_0c:
+				case detail::token_operand_0c:
 				{
-					asm_::operand_t o = operands[i];
+					detail::operand_t o = operands[i];
 					o.components.type = D3D10_SB_OPERAND_0_COMPONENT;
 					instruction.operands.emplace_back(o);
 					break;
 				}
-				case asm_::token_operand_1c:
+				case detail::token_operand_1c:
 				{
-					asm_::operand_t o = operands[i];
+					detail::operand_t o = operands[i];
 					o.components.type = D3D10_SB_OPERAND_1_COMPONENT;
 					instruction.operands.emplace_back(o);
 					break;
 				}
-				case asm_::token_operand_4c_mask:
+				case detail::token_operand_4c_mask:
 					instruction.operands.emplace_back(operands[i].mask());
 					break;
-				case asm_::token_operand_4c_swizzle:
+				case detail::token_operand_4c_swizzle:
 					instruction.operands.emplace_back(operands[i].swz());
 					break;
-				case asm_::token_operand_4c_scalar:
+				case detail::token_operand_4c_scalar:
 					instruction.operands.emplace_back(operands[i].scalar());
 					break;
-				case asm_::token_custom:
+				case detail::token_custom:
 					instruction.operands.emplace_back(operands[i]);
 					break;
 				}
@@ -153,7 +153,7 @@ namespace alys::shader
 	void shader_object::assembler::add_extension(const std::uint32_t type, 
 		const std::uint32_t x, const std::uint32_t y, const std::uint32_t z, const std::uint32_t w)
 	{
-		asm_::opcode_extended_t extension{};
+		detail::opcode_extended_t extension{};
 		extension.type = type;
 		extension.values[0] = x;
 		extension.values[1] = y;
@@ -162,14 +162,14 @@ namespace alys::shader
 		this->current_extensions_.emplace_back(extension);
 	}
 
-	void shader_object::assembler::operator()(const asm_::instruction_t& instruction)
+	void shader_object::assembler::operator()(const detail::instruction_t& instruction)
 	{
 		this->shader_->add_instruction(instruction);
 	}
 
 	void shader_object::assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data)
 	{
-		shader::asm_::instruction_t instruction{};
+		shader::detail::instruction_t instruction{};
 		instruction.opcode.type = D3D10_SB_OPCODE_CUSTOMDATA;
 		instruction.customdata.data_class = D3D10_SB_CUSTOMDATA_DCL_IMMEDIATE_CONSTANT_BUFFER;
 		instruction.customdata.count = static_cast<std::uint32_t>(data.size()) * 4u + 2u;
@@ -178,7 +178,7 @@ namespace alys::shader
 		{
 			for (auto i = 0; i < 4; i++)
 			{
-				shader::asm_::instruction_customdata_value_t value{};
+				shader::detail::instruction_customdata_value_t value{};
 				value.f32 = vec[i];
 				instruction.customdata.values.emplace_back(value);
 			}
@@ -455,7 +455,7 @@ namespace alys::shader
 
 		for (const auto& instruction : this->instructions_)
 		{
-			asm_::write_instruction(buffer, instruction);
+			detail::write_instruction(buffer, instruction);
 		}
 
 		const auto end = buffer.total();
@@ -527,11 +527,11 @@ namespace alys::shader
 	{
 		while (chunk.total() < size * 8)
 		{
-			this->instructions_.emplace_back(asm_::read_instruction(chunk));
+			this->instructions_.emplace_back(detail::read_instruction(chunk));
 		}
 	}
 
-	void shader_object::add_instruction(const asm_::instruction_t& instruction)
+	void shader_object::add_instruction(const detail::instruction_t& instruction)
 	{
 		this->instructions_.emplace_back(instruction);
 	}
@@ -563,7 +563,7 @@ namespace alys::shader
 		this->add_signature(chunk_osgn, name, index, mask, register_, sys_value, format, rw_mask);
 	}
 
-	void shader_object::emit(const asm_::instruction_t& instruction)
+	void shader_object::emit(const detail::instruction_t& instruction)
 	{
 		this->add_instruction(instruction);
 	}
@@ -625,7 +625,7 @@ namespace alys::shader
 		return this->chunk_order_;
 	}
 
-	std::vector<asm_::instruction_t>& shader_object::get_instructions()
+	std::vector<detail::instruction_t>& shader_object::get_instructions()
 	{
 		return this->instructions_;
 	}

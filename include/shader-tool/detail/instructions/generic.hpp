@@ -2,7 +2,7 @@
 
 #include "base.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
 	class general_instruction final : public base_instruction
 	{
@@ -29,11 +29,11 @@ namespace alys::shader::asm_
 			instruction_t instruction{};
 
 			std::uint32_t length{};
-			instruction.opcode = reader::read_opcode(input_buffer, length);
+			instruction.opcode = read_opcode(input_buffer, length);
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{
-				instruction.operands.emplace_back(reader::read_operand(input_buffer));
+				instruction.operands.emplace_back(read_operand(input_buffer));
 			}
 
 			for (auto i = 0u; i < ValueCount; i++)
@@ -49,12 +49,12 @@ namespace alys::shader::asm_
 
 		void write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
-			const auto length = writer::get_opcode_length(instruction);
-			writer::write_opcode(output_buffer, instruction.opcode, length);
+			const auto length = get_opcode_length(instruction);
+			write_opcode(output_buffer, instruction.opcode, length);
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{
-				writer::write_operand(output_buffer, instruction.operands[i]);
+				write_operand(output_buffer, instruction.operands[i]);
 			}
 
 			for (auto i = 0u; i < ValueCount; i++)
@@ -65,13 +65,13 @@ namespace alys::shader::asm_
 
 		void print(const instruction_t& instruction)
 		{
-			disassembler::print_opcode(instruction.opcode);
+			print_opcode(instruction.opcode);
 
 			printf(" ");
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{
-				disassembler::print_operand(instruction.operands[i]);
+				print_operand(instruction.operands[i]);
 				if (i < (OperandCount + ValueCount) - 1)
 				{
 					printf(", ");

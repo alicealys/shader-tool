@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/definitions.hpp"
+#include "detail/definitions.hpp"
 
 namespace alys::shader
 {
@@ -71,10 +71,10 @@ namespace alys::shader
 			template <typename ...Args> \
 			void __name__(Args&&... args) \
 			{ \
-				this->operator()(this->create_instruction(__type__, __controls__, {asm_::tokens::operand_creator::with_component(std::forward<Args>(args))...})); \
+				this->operator()(this->create_instruction(__type__, __controls__, {detail::operand_proxy::with_components(std::forward<Args>(args))...})); \
 			} \
 
-			void operator()(const asm_::instruction_t& instruction);
+			void operator()(const detail::instruction_t& instruction);
 
 			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
 
@@ -205,13 +205,13 @@ namespace alys::shader
 			DEFINE_INSTRUCTION(dcl_global_flags, D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, 0);
 
 		private:
-			asm_::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, 
-				const std::vector<asm_::tokens::operand_creator::with_component>& operands);
+			detail::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, 
+				const std::vector<detail::operand_proxy::with_components>& operands);
 
 			shader::shader_object* shader_;
 
 			std::queue<std::uint32_t> controls_stack_;
-			std::vector<asm_::opcode_extended_t> current_extensions_;
+			std::vector<detail::opcode_extended_t> current_extensions_;
 
 		};
 
@@ -258,14 +258,14 @@ namespace alys::shader
 		std::unordered_map<std::uint32_t, signature>& get_signatures();
 		std::unordered_map<std::uint32_t, std::string>& get_unknown_chunks();
 		std::vector<std::uint32_t>& get_chunk_order();
-		std::vector<asm_::instruction_t>& get_instructions();
+		std::vector<detail::instruction_t>& get_instructions();
 
 		info& get_info();
 
 		void parse_instructions(utils::bit_buffer_le& data, const std::uint32_t size);
 
-		void add_instruction(const asm_::instruction_t& instruction);
-		void emit(const asm_::instruction_t& instruction);
+		void add_instruction(const detail::instruction_t& instruction);
+		void emit(const detail::instruction_t& instruction);
 
 		void add_signature(const std::uint32_t type, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 			const system_value_type sys_value, const signature_format format, const std::string& rw_mask);
@@ -292,7 +292,7 @@ namespace alys::shader
 
 		std::unordered_map<std::uint32_t, signature> signatures_;
 		info info_{};
-		std::vector<asm_::instruction_t> instructions_;
+		std::vector<detail::instruction_t> instructions_;
 		std::unordered_map<std::uint32_t, std::string> unknown_chunks_;
 		std::vector<std::uint32_t> chunk_order_;
 

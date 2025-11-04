@@ -3,13 +3,13 @@
 #include "../utils/d3d11TokenizedProgramFormat.hpp"
 #include "../utils/bit_buffer.hpp"
 
-namespace alys::shader::asm_
+namespace alys::shader::detail
 {
-	constexpr std::uint32_t component_x = 1 << D3D10_SB_4_COMPONENT_X;
-	constexpr std::uint32_t component_y = 1 << D3D10_SB_4_COMPONENT_Y;
-	constexpr std::uint32_t component_z = 1 << D3D10_SB_4_COMPONENT_Z;
-	constexpr std::uint32_t component_w = 1 << D3D10_SB_4_COMPONENT_W;
-	constexpr std::uint32_t component_all = component_x | component_y | component_z | component_w;
+	constexpr std::uint32_t component_mask_x = 1 << D3D10_SB_4_COMPONENT_X;
+	constexpr std::uint32_t component_mask_y = 1 << D3D10_SB_4_COMPONENT_Y;
+	constexpr std::uint32_t component_mask_z = 1 << D3D10_SB_4_COMPONENT_Z;
+	constexpr std::uint32_t component_mask_w = 1 << D3D10_SB_4_COMPONENT_W;
+	constexpr std::uint32_t component_mask_all = component_mask_x | component_mask_y | component_mask_z | component_mask_w;
 
 	union data_type_t
 	{

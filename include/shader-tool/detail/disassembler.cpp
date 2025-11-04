@@ -2,7 +2,7 @@
 
 #include "disassembler.hpp"
 
-namespace alys::shader::asm_::disassembler
+namespace alys::shader::detail
 {
 	void print_operand(const operand_t& op)
 	{
