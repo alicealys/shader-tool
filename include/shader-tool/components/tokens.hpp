@@ -31,6 +31,8 @@ namespace shader::asm_::tokens
 			{
 			}
 
+			with_component copy() const;
+
 			operator operand_t() const;
 
 			with_component neg() const;
@@ -55,6 +57,8 @@ namespace shader::asm_::tokens
 		};
 
 		operand_creator(const operand_t& operand);
+
+		operand_creator copy() const;
 
 		operand_creator operator[](const std::uint32_t index) const;
 		operand_creator operator[](const with_component& extra_operand) const;

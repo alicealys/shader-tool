@@ -5,6 +5,13 @@
 
 namespace shader::asm_::tokens
 {
+	operand_creator::with_component operand_creator::with_component::copy() const
+	{
+		auto next = *this;
+		next.current_ = std::make_shared<operand_t>(*this->current_);
+		return next;
+	}
+
 	operand_creator::with_component::operator operand_t() const
 	{
 		return *this->current_;
@@ -12,7 +19,8 @@ namespace shader::asm_::tokens
 
 	operand_creator::with_component operand_creator::with_component::neg() const
 	{
-		operand_creator::with_component next = *this;
+		auto next = this->copy();
+		next.current_ = std::make_shared<operand_t>(*this->current_);
 
 		if (next.current_->extensions.empty())
 		{
@@ -51,6 +59,7 @@ namespace shader::asm_::tokens
 	operand_creator::with_component operand_creator::with_component::abs() const
 	{
 		operand_creator::with_component next = *this;
+		next.current_ = std::make_shared<operand_t>(*this->current_);
 
 		if (next.current_->extensions.empty())
 		{
@@ -91,7 +100,8 @@ namespace shader::asm_::tokens
 
 	operand_creator::with_component operand_creator::with_component::mask() const
 	{
-		operand_creator::with_component next = *this;
+		auto next = this->copy();
+		next.current_ = std::make_shared<operand_t>(*this->current_);
 
 		if (!this->has_set_components_)
 		{
@@ -121,7 +131,8 @@ namespace shader::asm_::tokens
 
 	operand_creator::with_component operand_creator::with_component::swz() const
 	{
-		operand_creator::with_component next = *this;
+		auto next = this->copy();
+		next.current_ = std::make_shared<operand_t>(*this->current_);
 
 		if (!this->has_set_components_)
 		{
@@ -159,7 +170,8 @@ namespace shader::asm_::tokens
 
 	operand_creator::with_component operand_creator::with_component::scalar() const
 	{
-		operand_creator::with_component next = *this;
+		auto next = this->copy();
+		next.current_ = std::make_shared<operand_t>(*this->current_);
 
 		if (!this->has_set_components_)
 		{
@@ -279,9 +291,16 @@ namespace shader::asm_::tokens
 #endif
 	}
 
-	operand_creator operand_creator::operator[](const std::uint32_t index) const
+	operand_creator operand_creator::copy() const
 	{
 		auto next = *this;
+		next.current_ = std::make_shared<operand_t>(*this->current_);
+		return next;
+	}
+
+	operand_creator operand_creator::operator[](const std::uint32_t index) const
+	{
+		auto next = this->copy();
 		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
 		next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
 		next.current_->indices[1].value.uint32 = index;
@@ -290,7 +309,7 @@ namespace shader::asm_::tokens
 
 	operand_creator operand_creator::operator[](const operand_creator::with_component& extra_operand) const
 	{
-		auto next = *this;
+		auto next = this->copy();
 		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
 
 		if (extra_operand.offset_.has_value())
@@ -304,7 +323,7 @@ namespace shader::asm_::tokens
 			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
 		}
 
-		next.current_->indices[1].extra_operand = std::make_shared<operand_t>(extra_operand);
+		next.current_->indices[1].extra_operand = std::make_shared<operand_t>(extra_operand.scalar());
 		return next;
 	}
 
@@ -344,7 +363,7 @@ namespace shader::asm_::tokens
 
 	operand_creator::with_component operator+(const operand_creator::with_component& op, const std::uint32_t offset)
 	{
-		operand_creator::with_component next = op;
+		auto next = op.copy();
 		next.set_offset(offset);
 		return next;
 	}
