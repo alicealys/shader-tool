@@ -37,28 +37,23 @@ namespace shader::asm_
 
 	struct operand_index_t
 	{
-		std::uint32_t representation;
+		std::uint8_t representation;
 		data_type_t value;
 		std::shared_ptr<operand_t> extra_operand;
 	};
 
 	struct operand_components_t
 	{
-		std::uint32_t type;
-		std::uint32_t selection_mode;
-		std::uint32_t mask;
-		std::uint32_t names[4];
+		std::uint8_t type;
+		std::uint8_t selection_mode;
+		std::uint8_t mask;
+		std::uint8_t names[4];
 	};
 
 	struct operand_extended_t
 	{
-		std::uint32_t type;
-		std::uint32_t modifier;
-	};
-
-	struct operand_dcl_temps_t
-	{
-		std::uint32_t size;
+		std::uint8_t type;
+		std::uint8_t modifier;
 	};
 
 	struct operand_custom_t
@@ -74,8 +69,8 @@ namespace shader::asm_
 	struct operand_t
 	{
 		operand_components_t components;
-		std::uint32_t type;
-		std::uint32_t dimension;
+		std::uint16_t type;
+		std::uint8_t dimension;
 		std::vector<operand_extended_t> extensions;
 		operand_index_t indices[3];
 		data_type_t immediate_values[4];

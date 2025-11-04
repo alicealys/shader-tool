@@ -203,8 +203,9 @@ namespace shader::asm_::tokens
 	}
 
 	operand_creator::operand_creator(const operand_t& operand)
-		: current_(operand)
+		: current_(std::make_shared<operand_t>(operand))
 	{
+#ifdef SHADER_TOOL_DEFINE_OPERATOR_COMPONENTS
 		this->x.set(operand, component_x);
 		this->y.set(operand, component_y);
 		this->z.set(operand, component_z);
@@ -275,40 +276,41 @@ namespace shader::asm_::tokens
 		this->zzww.set(operand, component_z, component_z, component_w, component_w);
 		this->zwww.set(operand, component_z, component_w, component_w, component_w);
 		this->wwww.set(operand, component_w, component_w, component_w, component_w);
+#endif
 	}
 
 	operand_creator operand_creator::operator[](const std::uint32_t index) const
 	{
-		operand_t next = this->current_;
-		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
-		next.indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
-		next.indices[1].value.uint32 = index;
-		return operand_creator(next);
+		auto next = *this;
+		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
+		next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
+		next.current_->indices[1].value.uint32 = index;
+		return next;
 	}
 
 	operand_creator operand_creator::operator[](const operand_creator::with_component& extra_operand) const
 	{
-		operand_t next = this->current_;
-		next.dimension = D3D10_SB_OPERAND_INDEX_2D;
+		auto next = *this;
+		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
 
 		if (extra_operand.offset_.has_value())
 		{
-			next.indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
-			next.indices[1].value.uint32 = extra_operand.offset_.value();
+			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
+			next.current_->indices[1].value.uint32 = extra_operand.offset_.value();
 
 		}
 		else
 		{
-			next.indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
+			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
 		}
 
-		next.indices[1].extra_operand = std::make_shared<operand_t>(extra_operand);
-		return operand_creator(next);
+		next.current_->indices[1].extra_operand = std::make_shared<operand_t>(extra_operand);
+		return next;
 	}
 
-	operand_creator::with_component operand_creator::comp(const std::string& components) const
+	operand_creator::with_component operand_creator::select(const std::string& components) const
 	{
-		operand_creator::with_component next = this->current_;
+		operand_creator::with_component next = *this->current_;
 
 		auto idx = 0;
 		for (const auto& c : components)
@@ -330,12 +332,14 @@ namespace shader::asm_::tokens
 			}
 		}
 
+		next.has_set_components_ = true;
+
 		return next;
 	}
 
 	operand_creator::operator operand_t() const
 	{
-		return this->current_;
+		return *this->current_;
 	}
 
 	operand_creator::with_component operator+(const operand_creator::with_component& op, const std::uint32_t offset)
@@ -349,6 +353,1720 @@ namespace shader::asm_::tokens
 	{
 		return operand.neg();
 	}
+
+	operand_creator::with_component operand_creator::select(
+		const std::uint32_t x, const std::uint32_t y, const std::uint32_t z, const std::uint32_t w) const
+	{
+		operand_creator::with_component next = *this->current_;
+		next.components_[0] = x;
+		next.components_[1] = y;
+		next.components_[2] = z;
+		next.components_[3] = w;
+		next.has_set_components_ = true;
+		return next;
+	}
+
+#ifndef SHADER_TOOL_DEFINE_OPERATOR_COMPONENTS
+	operand_creator::with_component operand_creator::x() const
+	{
+		return this->select(component_x);
+	}
+
+	operand_creator::with_component operand_creator::y() const
+	{
+		return this->select(component_y);
+	}
+
+	operand_creator::with_component operand_creator::z() const
+	{
+		return this->select(component_z);
+	}
+
+	operand_creator::with_component operand_creator::w() const
+	{
+		return this->select(component_w);
+	}
+
+	operand_creator::with_component operand_creator::xx() const
+	{
+		return this->select(component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xy() const
+	{
+		return this->select(component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xz() const
+	{
+		return this->select(component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xw() const
+	{
+		return this->select(component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yx() const
+	{
+		return this->select(component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yy() const
+	{
+		return this->select(component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yz() const
+	{
+		return this->select(component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yw() const
+	{
+		return this->select(component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zx() const
+	{
+		return this->select(component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zy() const
+	{
+		return this->select(component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zz() const
+	{
+		return this->select(component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zw() const
+	{
+		return this->select(component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wx() const
+	{
+		return this->select(component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wy() const
+	{
+		return this->select(component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wz() const
+	{
+		return this->select(component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::ww() const
+	{
+		return this->select(component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xxx() const
+	{
+		return this->select(component_x, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xxy() const
+	{
+		return this->select(component_x, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xxz() const
+	{
+		return this->select(component_x, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xxw() const
+	{
+		return this->select(component_x, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xyx() const
+	{
+		return this->select(component_x, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xyy() const
+	{
+		return this->select(component_x, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xyz() const
+	{
+		return this->select(component_x, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xyw() const
+	{
+		return this->select(component_x, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xzx() const
+	{
+		return this->select(component_x, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xzy() const
+	{
+		return this->select(component_x, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xzz() const
+	{
+		return this->select(component_x, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xzw() const
+	{
+		return this->select(component_x, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xwx() const
+	{
+		return this->select(component_x, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xwy() const
+	{
+		return this->select(component_x, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xwz() const
+	{
+		return this->select(component_x, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xww() const
+	{
+		return this->select(component_x, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yxx() const
+	{
+		return this->select(component_y, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yxy() const
+	{
+		return this->select(component_y, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yxz() const
+	{
+		return this->select(component_y, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yxw() const
+	{
+		return this->select(component_y, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yyx() const
+	{
+		return this->select(component_y, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yyy() const
+	{
+		return this->select(component_y, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yyz() const
+	{
+		return this->select(component_y, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yyw() const
+	{
+		return this->select(component_y, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yzx() const
+	{
+		return this->select(component_y, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yzy() const
+	{
+		return this->select(component_y, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yzz() const
+	{
+		return this->select(component_y, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yzw() const
+	{
+		return this->select(component_y, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::ywx() const
+	{
+		return this->select(component_y, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::ywy() const
+	{
+		return this->select(component_y, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::ywz() const
+	{
+		return this->select(component_y, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yww() const
+	{
+		return this->select(component_y, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zxx() const
+	{
+		return this->select(component_z, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zxy() const
+	{
+		return this->select(component_z, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zxz() const
+	{
+		return this->select(component_z, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zxw() const
+	{
+		return this->select(component_z, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zyx() const
+	{
+		return this->select(component_z, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zyy() const
+	{
+		return this->select(component_z, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zyz() const
+	{
+		return this->select(component_z, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zyw() const
+	{
+		return this->select(component_z, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zzx() const
+	{
+		return this->select(component_z, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zzy() const
+	{
+		return this->select(component_z, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zzz() const
+	{
+		return this->select(component_z, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zzw() const
+	{
+		return this->select(component_z, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zwx() const
+	{
+		return this->select(component_z, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zwy() const
+	{
+		return this->select(component_z, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zwz() const
+	{
+		return this->select(component_z, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zww() const
+	{
+		return this->select(component_z, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wxx() const
+	{
+		return this->select(component_w, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wxy() const
+	{
+		return this->select(component_w, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wxz() const
+	{
+		return this->select(component_w, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wxw() const
+	{
+		return this->select(component_w, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wyx() const
+	{
+		return this->select(component_w, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wyy() const
+	{
+		return this->select(component_w, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wyz() const
+	{
+		return this->select(component_w, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wyw() const
+	{
+		return this->select(component_w, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wzx() const
+	{
+		return this->select(component_w, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wzy() const
+	{
+		return this->select(component_w, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wzz() const
+	{
+		return this->select(component_w, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wzw() const
+	{
+		return this->select(component_w, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wwx() const
+	{
+		return this->select(component_w, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wwy() const
+	{
+		return this->select(component_w, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wwz() const
+	{
+		return this->select(component_w, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::www() const
+	{
+		return this->select(component_w, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xxxx() const
+	{
+		return this->select(component_x, component_x, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xxxy() const
+	{
+		return this->select(component_x, component_x, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xxxz() const
+	{
+		return this->select(component_x, component_x, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xxxw() const
+	{
+		return this->select(component_x, component_x, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xxyx() const
+	{
+		return this->select(component_x, component_x, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xxyy() const
+	{
+		return this->select(component_x, component_x, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xxyz() const
+	{
+		return this->select(component_x, component_x, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xxyw() const
+	{
+		return this->select(component_x, component_x, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xxzx() const
+	{
+		return this->select(component_x, component_x, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xxzy() const
+	{
+		return this->select(component_x, component_x, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xxzz() const
+	{
+		return this->select(component_x, component_x, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xxzw() const
+	{
+		return this->select(component_x, component_x, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xxwx() const
+	{
+		return this->select(component_x, component_x, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xxwy() const
+	{
+		return this->select(component_x, component_x, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xxwz() const
+	{
+		return this->select(component_x, component_x, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xxww() const
+	{
+		return this->select(component_x, component_x, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xyxx() const
+	{
+		return this->select(component_x, component_y, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xyxy() const
+	{
+		return this->select(component_x, component_y, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xyxz() const
+	{
+		return this->select(component_x, component_y, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xyxw() const
+	{
+		return this->select(component_x, component_y, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xyyx() const
+	{
+		return this->select(component_x, component_y, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xyyy() const
+	{
+		return this->select(component_x, component_y, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xyyz() const
+	{
+		return this->select(component_x, component_y, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xyyw() const
+	{
+		return this->select(component_x, component_y, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xyzx() const
+	{
+		return this->select(component_x, component_y, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xyzy() const
+	{
+		return this->select(component_x, component_y, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xyzz() const
+	{
+		return this->select(component_x, component_y, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xyzw() const
+	{
+		return this->select(component_x, component_y, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xywx() const
+	{
+		return this->select(component_x, component_y, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xywy() const
+	{
+		return this->select(component_x, component_y, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xywz() const
+	{
+		return this->select(component_x, component_y, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xyww() const
+	{
+		return this->select(component_x, component_y, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xzxx() const
+	{
+		return this->select(component_x, component_z, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xzxy() const
+	{
+		return this->select(component_x, component_z, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xzxz() const
+	{
+		return this->select(component_x, component_z, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xzxw() const
+	{
+		return this->select(component_x, component_z, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xzyx() const
+	{
+		return this->select(component_x, component_z, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xzyy() const
+	{
+		return this->select(component_x, component_z, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xzyz() const
+	{
+		return this->select(component_x, component_z, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xzyw() const
+	{
+		return this->select(component_x, component_z, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xzzx() const
+	{
+		return this->select(component_x, component_z, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xzzy() const
+	{
+		return this->select(component_x, component_z, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xzzz() const
+	{
+		return this->select(component_x, component_z, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xzzw() const
+	{
+		return this->select(component_x, component_z, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xzwx() const
+	{
+		return this->select(component_x, component_z, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xzwy() const
+	{
+		return this->select(component_x, component_z, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xzwz() const
+	{
+		return this->select(component_x, component_z, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xzww() const
+	{
+		return this->select(component_x, component_z, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xwxx() const
+	{
+		return this->select(component_x, component_w, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xwxy() const
+	{
+		return this->select(component_x, component_w, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xwxz() const
+	{
+		return this->select(component_x, component_w, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xwxw() const
+	{
+		return this->select(component_x, component_w, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xwyx() const
+	{
+		return this->select(component_x, component_w, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xwyy() const
+	{
+		return this->select(component_x, component_w, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xwyz() const
+	{
+		return this->select(component_x, component_w, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xwyw() const
+	{
+		return this->select(component_x, component_w, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xwzx() const
+	{
+		return this->select(component_x, component_w, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xwzy() const
+	{
+		return this->select(component_x, component_w, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xwzz() const
+	{
+		return this->select(component_x, component_w, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xwzw() const
+	{
+		return this->select(component_x, component_w, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::xwwx() const
+	{
+		return this->select(component_x, component_w, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::xwwy() const
+	{
+		return this->select(component_x, component_w, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::xwwz() const
+	{
+		return this->select(component_x, component_w, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::xwww() const
+	{
+		return this->select(component_x, component_w, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yxxx() const
+	{
+		return this->select(component_y, component_x, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yxxy() const
+	{
+		return this->select(component_y, component_x, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yxxz() const
+	{
+		return this->select(component_y, component_x, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yxxw() const
+	{
+		return this->select(component_y, component_x, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yxyx() const
+	{
+		return this->select(component_y, component_x, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yxyy() const
+	{
+		return this->select(component_y, component_x, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yxyz() const
+	{
+		return this->select(component_y, component_x, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yxyw() const
+	{
+		return this->select(component_y, component_x, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yxzx() const
+	{
+		return this->select(component_y, component_x, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yxzy() const
+	{
+		return this->select(component_y, component_x, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yxzz() const
+	{
+		return this->select(component_y, component_x, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yxzw() const
+	{
+		return this->select(component_y, component_x, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yxwx() const
+	{
+		return this->select(component_y, component_x, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yxwy() const
+	{
+		return this->select(component_y, component_x, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yxwz() const
+	{
+		return this->select(component_y, component_x, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yxww() const
+	{
+		return this->select(component_y, component_x, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yyxx() const
+	{
+		return this->select(component_y, component_y, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yyxy() const
+	{
+		return this->select(component_y, component_y, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yyxz() const
+	{
+		return this->select(component_y, component_y, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yyxw() const
+	{
+		return this->select(component_y, component_y, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yyyx() const
+	{
+		return this->select(component_y, component_y, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yyyy() const
+	{
+		return this->select(component_y, component_y, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yyyz() const
+	{
+		return this->select(component_y, component_y, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yyyw() const
+	{
+		return this->select(component_y, component_y, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yyzx() const
+	{
+		return this->select(component_y, component_y, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yyzy() const
+	{
+		return this->select(component_y, component_y, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yyzz() const
+	{
+		return this->select(component_y, component_y, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yyzw() const
+	{
+		return this->select(component_y, component_y, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yywx() const
+	{
+		return this->select(component_y, component_y, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yywy() const
+	{
+		return this->select(component_y, component_y, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yywz() const
+	{
+		return this->select(component_y, component_y, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yyww() const
+	{
+		return this->select(component_y, component_y, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yzxx() const
+	{
+		return this->select(component_y, component_z, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yzxy() const
+	{
+		return this->select(component_y, component_z, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yzxz() const
+	{
+		return this->select(component_y, component_z, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yzxw() const
+	{
+		return this->select(component_y, component_z, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yzyx() const
+	{
+		return this->select(component_y, component_z, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yzyy() const
+	{
+		return this->select(component_y, component_z, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yzyz() const
+	{
+		return this->select(component_y, component_z, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yzyw() const
+	{
+		return this->select(component_y, component_z, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yzzx() const
+	{
+		return this->select(component_y, component_z, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yzzy() const
+	{
+		return this->select(component_y, component_z, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yzzz() const
+	{
+		return this->select(component_y, component_z, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yzzw() const
+	{
+		return this->select(component_y, component_z, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::yzwx() const
+	{
+		return this->select(component_y, component_z, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::yzwy() const
+	{
+		return this->select(component_y, component_z, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::yzwz() const
+	{
+		return this->select(component_y, component_z, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::yzww() const
+	{
+		return this->select(component_y, component_z, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::ywxx() const
+	{
+		return this->select(component_y, component_w, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::ywxy() const
+	{
+		return this->select(component_y, component_w, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::ywxz() const
+	{
+		return this->select(component_y, component_w, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::ywxw() const
+	{
+		return this->select(component_y, component_w, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::ywyx() const
+	{
+		return this->select(component_y, component_w, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::ywyy() const
+	{
+		return this->select(component_y, component_w, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::ywyz() const
+	{
+		return this->select(component_y, component_w, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::ywyw() const
+	{
+		return this->select(component_y, component_w, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::ywzx() const
+	{
+		return this->select(component_y, component_w, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::ywzy() const
+	{
+		return this->select(component_y, component_w, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::ywzz() const
+	{
+		return this->select(component_y, component_w, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::ywzw() const
+	{
+		return this->select(component_y, component_w, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::ywwx() const
+	{
+		return this->select(component_y, component_w, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::ywwy() const
+	{
+		return this->select(component_y, component_w, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::ywwz() const
+	{
+		return this->select(component_y, component_w, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::ywww() const
+	{
+		return this->select(component_y, component_w, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zxxx() const
+	{
+		return this->select(component_z, component_x, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zxxy() const
+	{
+		return this->select(component_z, component_x, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zxxz() const
+	{
+		return this->select(component_z, component_x, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zxxw() const
+	{
+		return this->select(component_z, component_x, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zxyx() const
+	{
+		return this->select(component_z, component_x, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zxyy() const
+	{
+		return this->select(component_z, component_x, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zxyz() const
+	{
+		return this->select(component_z, component_x, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zxyw() const
+	{
+		return this->select(component_z, component_x, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zxzx() const
+	{
+		return this->select(component_z, component_x, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zxzy() const
+	{
+		return this->select(component_z, component_x, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zxzz() const
+	{
+		return this->select(component_z, component_x, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zxzw() const
+	{
+		return this->select(component_z, component_x, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zxwx() const
+	{
+		return this->select(component_z, component_x, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zxwy() const
+	{
+		return this->select(component_z, component_x, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zxwz() const
+	{
+		return this->select(component_z, component_x, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zxww() const
+	{
+		return this->select(component_z, component_x, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zyxx() const
+	{
+		return this->select(component_z, component_y, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zyxy() const
+	{
+		return this->select(component_z, component_y, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zyxz() const
+	{
+		return this->select(component_z, component_y, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zyxw() const
+	{
+		return this->select(component_z, component_y, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zyyx() const
+	{
+		return this->select(component_z, component_y, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zyyy() const
+	{
+		return this->select(component_z, component_y, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zyyz() const
+	{
+		return this->select(component_z, component_y, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zyyw() const
+	{
+		return this->select(component_z, component_y, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zyzx() const
+	{
+		return this->select(component_z, component_y, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zyzy() const
+	{
+		return this->select(component_z, component_y, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zyzz() const
+	{
+		return this->select(component_z, component_y, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zyzw() const
+	{
+		return this->select(component_z, component_y, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zywx() const
+	{
+		return this->select(component_z, component_y, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zywy() const
+	{
+		return this->select(component_z, component_y, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zywz() const
+	{
+		return this->select(component_z, component_y, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zyww() const
+	{
+		return this->select(component_z, component_y, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zzxx() const
+	{
+		return this->select(component_z, component_z, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zzxy() const
+	{
+		return this->select(component_z, component_z, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zzxz() const
+	{
+		return this->select(component_z, component_z, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zzxw() const
+	{
+		return this->select(component_z, component_z, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zzyx() const
+	{
+		return this->select(component_z, component_z, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zzyy() const
+	{
+		return this->select(component_z, component_z, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zzyz() const
+	{
+		return this->select(component_z, component_z, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zzyw() const
+	{
+		return this->select(component_z, component_z, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zzzx() const
+	{
+		return this->select(component_z, component_z, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zzzy() const
+	{
+		return this->select(component_z, component_z, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zzzz() const
+	{
+		return this->select(component_z, component_z, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zzzw() const
+	{
+		return this->select(component_z, component_z, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zzwx() const
+	{
+		return this->select(component_z, component_z, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zzwy() const
+	{
+		return this->select(component_z, component_z, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zzwz() const
+	{
+		return this->select(component_z, component_z, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zzww() const
+	{
+		return this->select(component_z, component_z, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zwxx() const
+	{
+		return this->select(component_z, component_w, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zwxy() const
+	{
+		return this->select(component_z, component_w, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zwxz() const
+	{
+		return this->select(component_z, component_w, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zwxw() const
+	{
+		return this->select(component_z, component_w, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zwyx() const
+	{
+		return this->select(component_z, component_w, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zwyy() const
+	{
+		return this->select(component_z, component_w, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zwyz() const
+	{
+		return this->select(component_z, component_w, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zwyw() const
+	{
+		return this->select(component_z, component_w, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zwzx() const
+	{
+		return this->select(component_z, component_w, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zwzy() const
+	{
+		return this->select(component_z, component_w, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zwzz() const
+	{
+		return this->select(component_z, component_w, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zwzw() const
+	{
+		return this->select(component_z, component_w, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::zwwx() const
+	{
+		return this->select(component_z, component_w, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::zwwy() const
+	{
+		return this->select(component_z, component_w, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::zwwz() const
+	{
+		return this->select(component_z, component_w, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::zwww() const
+	{
+		return this->select(component_z, component_w, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wxxx() const
+	{
+		return this->select(component_w, component_x, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wxxy() const
+	{
+		return this->select(component_w, component_x, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wxxz() const
+	{
+		return this->select(component_w, component_x, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wxxw() const
+	{
+		return this->select(component_w, component_x, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wxyx() const
+	{
+		return this->select(component_w, component_x, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wxyy() const
+	{
+		return this->select(component_w, component_x, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wxyz() const
+	{
+		return this->select(component_w, component_x, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wxyw() const
+	{
+		return this->select(component_w, component_x, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wxzx() const
+	{
+		return this->select(component_w, component_x, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wxzy() const
+	{
+		return this->select(component_w, component_x, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wxzz() const
+	{
+		return this->select(component_w, component_x, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wxzw() const
+	{
+		return this->select(component_w, component_x, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wxwx() const
+	{
+		return this->select(component_w, component_x, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wxwy() const
+	{
+		return this->select(component_w, component_x, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wxwz() const
+	{
+		return this->select(component_w, component_x, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wxww() const
+	{
+		return this->select(component_w, component_x, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wyxx() const
+	{
+		return this->select(component_w, component_y, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wyxy() const
+	{
+		return this->select(component_w, component_y, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wyxz() const
+	{
+		return this->select(component_w, component_y, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wyxw() const
+	{
+		return this->select(component_w, component_y, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wyyx() const
+	{
+		return this->select(component_w, component_y, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wyyy() const
+	{
+		return this->select(component_w, component_y, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wyyz() const
+	{
+		return this->select(component_w, component_y, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wyyw() const
+	{
+		return this->select(component_w, component_y, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wyzx() const
+	{
+		return this->select(component_w, component_y, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wyzy() const
+	{
+		return this->select(component_w, component_y, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wyzz() const
+	{
+		return this->select(component_w, component_y, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wyzw() const
+	{
+		return this->select(component_w, component_y, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wywx() const
+	{
+		return this->select(component_w, component_y, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wywy() const
+	{
+		return this->select(component_w, component_y, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wywz() const
+	{
+		return this->select(component_w, component_y, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wyww() const
+	{
+		return this->select(component_w, component_y, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wzxx() const
+	{
+		return this->select(component_w, component_z, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wzxy() const
+	{
+		return this->select(component_w, component_z, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wzxz() const
+	{
+		return this->select(component_w, component_z, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wzxw() const
+	{
+		return this->select(component_w, component_z, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wzyx() const
+	{
+		return this->select(component_w, component_z, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wzyy() const
+	{
+		return this->select(component_w, component_z, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wzyz() const
+	{
+		return this->select(component_w, component_z, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wzyw() const
+	{
+		return this->select(component_w, component_z, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wzzx() const
+	{
+		return this->select(component_w, component_z, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wzzy() const
+	{
+		return this->select(component_w, component_z, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wzzz() const
+	{
+		return this->select(component_w, component_z, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wzzw() const
+	{
+		return this->select(component_w, component_z, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wzwx() const
+	{
+		return this->select(component_w, component_z, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wzwy() const
+	{
+		return this->select(component_w, component_z, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wzwz() const
+	{
+		return this->select(component_w, component_z, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wzww() const
+	{
+		return this->select(component_w, component_z, component_w, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wwxx() const
+	{
+		return this->select(component_w, component_w, component_x, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wwxy() const
+	{
+		return this->select(component_w, component_w, component_x, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wwxz() const
+	{
+		return this->select(component_w, component_w, component_x, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wwxw() const
+	{
+		return this->select(component_w, component_w, component_x, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wwyx() const
+	{
+		return this->select(component_w, component_w, component_y, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wwyy() const
+	{
+		return this->select(component_w, component_w, component_y, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wwyz() const
+	{
+		return this->select(component_w, component_w, component_y, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wwyw() const
+	{
+		return this->select(component_w, component_w, component_y, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wwzx() const
+	{
+		return this->select(component_w, component_w, component_z, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wwzy() const
+	{
+		return this->select(component_w, component_w, component_z, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wwzz() const
+	{
+		return this->select(component_w, component_w, component_z, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wwzw() const
+	{
+		return this->select(component_w, component_w, component_z, component_w);
+	}
+
+	operand_creator::with_component operand_creator::wwwx() const
+	{
+		return this->select(component_w, component_w, component_w, component_x);
+	}
+
+	operand_creator::with_component operand_creator::wwwy() const
+	{
+		return this->select(component_w, component_w, component_w, component_y);
+	}
+
+	operand_creator::with_component operand_creator::wwwz() const
+	{
+		return this->select(component_w, component_w, component_w, component_z);
+	}
+
+	operand_creator::with_component operand_creator::wwww() const
+	{
+		return this->select(component_w, component_w, component_w, component_w);
+	}
+#endif
 
 	namespace literals
 	{
@@ -664,6 +2382,11 @@ namespace shader::asm_::tokens
 		operand_creator::with_component abs(const operand_creator::with_component& operand)
 		{
 			return operand.abs();
+		}
+
+		operand_creator temp(const std::uint32_t index)
+		{
+			return tokens::create_operand(D3D10_SB_OPERAND_TYPE_TEMP, operand_components_t{}, index);
 		}
 	}
 }

@@ -28,28 +28,28 @@ namespace shader::asm_::reader
 	{
 		operand_t operand{};
 
-		operand.components.type = bit_buffer.read_bits(2);
+		operand.components.type = bit_buffer.read_bits<std::uint8_t>(2);
 
 		switch (operand.components.type)
 		{
 		case D3D10_SB_OPERAND_4_COMPONENT:
 		{
-			operand.components.selection_mode = bit_buffer.read_bits(2);
+			operand.components.selection_mode = bit_buffer.read_bits<std::uint8_t>(2);
 			if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
 			{
-				operand.components.mask = bit_buffer.read_bits(4);
+				operand.components.mask = bit_buffer.read_bits<std::uint8_t>(4);
 				bit_buffer.read_bits(4);
 			}
 			else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE)
 			{
-				operand.components.names[0] = bit_buffer.read_bits(2);
-				operand.components.names[1] = bit_buffer.read_bits(2);
-				operand.components.names[2] = bit_buffer.read_bits(2);
-				operand.components.names[3] = bit_buffer.read_bits(2);
+				operand.components.names[0] = bit_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[1] = bit_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[2] = bit_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[3] = bit_buffer.read_bits<std::uint8_t>(2);
 			}
 			else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE)
 			{
-				operand.components.names[0] = bit_buffer.read_bits(2);
+				operand.components.names[0] = bit_buffer.read_bits<std::uint8_t>(2);
 				bit_buffer.read_bits(6);
 			}
 
@@ -62,12 +62,12 @@ namespace shader::asm_::reader
 			break;
 		}
 
-		operand.type = bit_buffer.read_bits(8);
-		operand.dimension = bit_buffer.read_bits(2);
+		operand.type = bit_buffer.read_bits<std::uint8_t>(8);
+		operand.dimension = bit_buffer.read_bits<std::uint8_t>(2);
 
-		operand.indices[0].representation = bit_buffer.read_bits(3);
-		operand.indices[1].representation = bit_buffer.read_bits(3);
-		operand.indices[2].representation = bit_buffer.read_bits(3);
+		operand.indices[0].representation = bit_buffer.read_bits<std::uint8_t>(3);
+		operand.indices[1].representation = bit_buffer.read_bits<std::uint8_t>(3);
+		operand.indices[2].representation = bit_buffer.read_bits<std::uint8_t>(3);
 
 		auto extended = bit_buffer.read_bits<bool>(1);
 		while (extended)
