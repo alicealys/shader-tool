@@ -164,11 +164,6 @@ namespace alys::shader
 		this->current_extensions_.emplace_back(extension);
 	}
 
-	void shader_object::assembler::add_instruction(const asm_::instruction_t& instruction)
-	{
-		this->shader_->add_instruction(instruction);
-	}
-
 	void shader_object::assembler::operator()(const asm_::instruction_t& instruction)
 	{
 		this->shader_->add_instruction(instruction);
@@ -540,7 +535,9 @@ namespace alys::shader
 
 	void shader_object::add_instruction(const asm_::instruction_t& instruction)
 	{
-		this->instructions_.emplace_back(instruction);
+		asm_::instruction_t fixed_instruction = instruction;
+		asm_::writer::set_opcode_length(fixed_instruction);
+		this->instructions_.emplace_back(fixed_instruction);
 	}
 
 	void shader_object::add_signature(const std::uint32_t type, const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,

@@ -292,6 +292,11 @@ namespace alys::shader
 			const auto opcode_type = input_buffer.read_bits(11);
 			input_buffer.set_bit(beg);
 
+			if (opcode_type >= instruction_handlers.size())
+			{
+				throw std::runtime_error("unsupported instruction");
+			}
+
 			if (const auto& handler = instruction_handlers[opcode_type]; handler.get() != nullptr)
 			{
 				return handler->read(input_buffer);
@@ -302,6 +307,11 @@ namespace alys::shader
 
 		void write_instruction(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 		{
+			if (instruction.opcode.type >= instruction_handlers.size())
+			{
+				throw std::runtime_error("unsupported instruction");
+			}
+
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
 				return handler->write(output_buffer, instruction);
@@ -312,6 +322,11 @@ namespace alys::shader
 
 		void print_instruction(const instruction_t& instruction)
 		{
+			if (instruction.opcode.type >= instruction_handlers.size())
+			{
+				throw std::runtime_error("unsupported instruction");
+			}
+
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
 				return handler->print(instruction);
@@ -341,6 +356,7 @@ namespace alys::shader
 		{
 			if (!callback(assembler, instruction))
 			{
+				shader::asm_::writer::set_opcode_length(instruction);
 				assembler(instruction);
 			}
 		}

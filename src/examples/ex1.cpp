@@ -88,4 +88,6 @@ int example1()
 	}
 
 	::utils::io::write_file("ps_test.cso", shader.serialize());
+
+	return 0;
 }

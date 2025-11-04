@@ -118,7 +118,7 @@ namespace alys::shader::asm_::disassembler
 			}
 		};
 
-#ifdef DEBUG
+#ifdef PRINT_DETAILS
 		printf("(%i)", op.components.type);
 #endif
 
@@ -129,7 +129,7 @@ namespace alys::shader::asm_::disassembler
 			const auto mask = (op.components.mask << D3D10_SB_OPERAND_4_COMPONENT_MASK_SHIFT);
 			if ((mask & D3D10_SB_OPERAND_4_COMPONENT_MASK_MASK) != 0)
 			{
-#ifdef DEBUG
+#ifdef PRINT_DETAILS
 				printf(".mask_");
 #else
 				printf(".");
@@ -160,7 +160,7 @@ namespace alys::shader::asm_::disassembler
 		}
 		case D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE:
 		{
-#ifdef DEBUG
+#ifdef PRINT_DETAILS
 			printf(".swz_");
 #else
 			printf(".");
@@ -173,7 +173,7 @@ namespace alys::shader::asm_::disassembler
 		}
 		case D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE:
 		{
-#ifdef DEBUG
+#ifdef PRINT_DETAILS
 			printf(".sel_");
 #else
 			printf(".");
@@ -246,7 +246,7 @@ namespace alys::shader::asm_::disassembler
 			printf("%s", name);
 		}
 
-#ifdef DEBUG
+#ifdef PRINT_DETAILS
 		printf("(%i)", opcode.controls);
 #endif
 

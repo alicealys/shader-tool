@@ -74,7 +74,6 @@ namespace alys::shader
 				this->operator()(this->create_instruction(__type__, __controls__, {asm_::tokens::operand_creator::with_component(std::forward<Args>(args))...})); \
 			} \
 
-			void add_instruction(const asm_::instruction_t& instruction);
 			void operator()(const asm_::instruction_t& instruction);
 
 			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
