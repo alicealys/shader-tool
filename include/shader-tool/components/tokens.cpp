@@ -2384,9 +2384,14 @@ namespace shader::asm_::tokens
 			return operand.abs();
 		}
 
-		operand_creator temp(const std::uint32_t index)
+		operand_creator r(const std::uint32_t index)
 		{
 			return tokens::create_operand(D3D10_SB_OPERAND_TYPE_TEMP, operand_components_t{}, index);
+		}
+
+		operand_creator cb(const std::uint32_t index, const std::uint32_t slot)
+		{
+			return tokens::create_operand(D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, component_all, index, slot);
 		}
 	}
 }

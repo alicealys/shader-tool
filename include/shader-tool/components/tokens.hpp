@@ -657,6 +657,7 @@ namespace shader::asm_::tokens
 
 		operand_creator::with_component abs(const operand_creator::with_component& operand);
 
-		operand_creator temp(const std::uint32_t index);
+		operand_creator r(const std::uint32_t index);
+		operand_creator cb(const std::uint32_t index, const std::uint32_t slot);
 	}
 }
