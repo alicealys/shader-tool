@@ -10,53 +10,86 @@ shader generation:
 ```c++
 #include <std_include.hpp>
 
+#include "tool.hpp"
+
+//#define SHADER_TOOL_DEFINE_OPERATOR_COMPONENTS
 #include "shader-tool/shader.hpp"
 
-// ...
+#include <utils/io.hpp>
 
 using namespace shader::asm_::tokens::literals;
 
-void main()
+int main()
 {
-	// create pixelshader
 	shader::shader_object shader(shader::pixelshader);
 
-	// signatures
-	shader.add_input("SV_POSITION", 0, "xyzw", 0, shader::POS, shader::format_float, "xyzw");
-	shader.add_output("SV_TARGET", 0, "xyzw", 0, shader::TARGET, shader::format_float, "xyzw");
+	shader.add_input("SV_POSITION", 0, "xyzw", 0, shader::POS, shader::format_float, "");
+	shader.add_input("COLOR", 0, "xyzw", 1, shader::NONE, shader::format_float, "xyzw");
+	shader.add_input("TEXCOORD", 0, "xy", 2, shader::NONE, shader::format_float, "xy");
+	shader.add_input("TEXCOORD", 1, "xyzw", 3, shader::NONE, shader::format_float, "xyzw");
+	shader.add_input("TEXCOORD", 5, "xyz", 4, shader::NONE, shader::format_float, "xyz");
 
-	const auto a = shader.get_assembler();
+	shader.add_output("SV_TARGET", 0, "xyzw", 0, shader::TARGET, shader::format_float, "");
 
-	// add random instructions
-	a.dcl_immediate_constant_buffer(
-		{
-			{1.f, 0.f, 0.f, 0.f},
-			{0.f, 1.f, 0.f, 0.f},
-			{0.f, 0.f, 1.f, 0.f},
-			{0.f, 0.f, 0.f, 1.f},
-		}
-	);
+	auto a = shader.get_assembler();
 
-	a.dcl_constant_buffer_c(1, cb0[45]);
-	a.dcl_resource_c(D3D10_SB_RESOURCE_DIMENSION_TEXTURE2D, t0,
-		c(D3D10_SB_RETURN_TYPE_FLOAT, D3D10_SB_RETURN_TYPE_FLOAT, D3D10_SB_RETURN_TYPE_FLOAT, D3D10_SB_RETURN_TYPE_FLOAT));
-	a.dcl_temps(c(10));
-	a.dcl_global_flags_c(1);
+	a.push_controls(refactoring_allowed | early_depth_stencil);
+	a.dcl_global_flags();
+	a.pop_controls();
 
-	a.add(r0.xyzw, v0.xyzw, r1.xyzw);
-	a.add_sat(r0.xyzw, r1.xyzw, r0.xyz);
-	a.and_(r1.xyzw, r2.xyzw, r1.xyzw);
-	a.xor_(r2.xyzw, r3.xyzw, r9.x);
+	a.dcl_constant_buffer(cb1[6]);
+	a.dcl_constant_buffer(cb2[2]);
 
-	a.mov(r0.xyzw, icb0[r1.x + 3u].xyzw);
+	a.dcl_sampler(s0);
+	a.dcl_sampler(s3);
 
-	a.lt(r0.x, v0.x, l(1.f));
-	a.if_nz(r0.x);
-	a.mov(r1.xyzw, cb0[1].swz("xy"));
-	a.mul(r0.xyzw, r1.xyzw, l(1.f, 1.f, 0.5f, 1.f));
-	a.mul(r1.xyzw, r1.xyzw, cb1[44].x);
-	a.mov(o0.xyzw, r1.xyzw);
-	a.endif();
+	a.push_controls(texture2d);
+	a.dcl_resource(t0, c(t_float, t_float, t_float, t_float));
+	a.dcl_resource(t3, c(t_float, t_float, t_float, t_float));
+	a.pop_controls();
+
+	a.push_controls(linear_centroid);
+	a.dcl_input_ps(v1.xyzw());
+	a.dcl_input_ps(v2.xy());
+	a.dcl_input_ps(v3.xyzw());
+	a.dcl_input_ps(v4.xyz());
+	a.pop_controls();
+
+	a.dcl_output(o0.xyzw());
+	a.dcl_temps(c(4));
+	a.dp3(r0.x(), v3.xyzx(), v3.xyzx());
+	a.rsq(r0.x(), r0.x().scalar());
+	a.mul(r0.xyz(), r0.x(), v3.xyzx());
+	a.add(r1.xyz(), -v4.xyzx(), cb1[4].xyzx());
+	a.dp3(r0.w(), r1.xyzx(), r1.xyzx());
+	a.rsq(r1.w(), r0.w().scalar());
+	a.sqrt(r0.w(), r0.w().scalar());
+	a.mul_sat(r0.w(), r0.w().scalar(), cb1[4].w().scalar());
+
+	a.add_extension(res_dim, texture2d);
+	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
+	a.sample(r2.xyz(), r0.wwww(), t3.xyzw(), s3);
+
+	a.mul(r2.xyz(), r2.xyzx(), r2.xyzx());
+	a.mul(r1.xyz(), r1.wwww(), r1.xyzx());
+	a.dp3_sat(r0.x(), r1.xyzx(), r0.xyzx());
+	a.mul(r0.xyz(), r0.xxxx(), cb1[5].xyzx());
+
+	a.add_extension(res_dim, texture2d);
+	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
+	a.sample(r1.xyzw(), v2.xyxx(), t0.xyzw(), s0);
+
+	a.mul(r3.xyzw(), r1.xyzw(), v1.xyzw());
+	a.mad(r0.w(), -r1.w().scalar(), v1.w().scalar(), l(1.f));
+	a.add(r0.w(), -r0.w().scalar(), l(1.f));
+	a.mul(r1.xyz(), r0.wwww(), cb2[1].xyzx());
+	a.mul(r3.xyz(), r3.xyzx(), r3.xyzx());
+	a.mul(r3.xyz(), r3.xyzx(), r3.wwww());
+	a.mul(r2.xyz(), r2.xyzx(), r3.xyzx());
+	a.mad(r0.xyz(), r2.xyzx(), r0.xyzx(), -r1.xyzx());
+	a.mad(o0.xyz(), v3.wwww(), r0.xyzx(), r1.xyzx());
+	a.mov(o0.w(), l(0.f));
+	a.ret();
 
 	for (const auto& instruction : shader.get_instructions())
 	{
@@ -68,67 +101,114 @@ void main()
 ```
 output (printf)
 ```hlsl
-dcl_immediateConstantBuffer
-{
-        {1.000000, 0.000000, 0.000000, 0.000000},
-        {0.000000, 1.000000, 0.000000, 0.000000},
-        {0.000000, 0.000000, 1.000000, 0.000000},
-        {0.000000, 0.000000, 0.000000, 1.000000}
-}
-dcl_constantBuffer cb0[45].xyzw
-dcl_resource_texture2d (float,float,float,float) t0.xyzw
-dcl_temps 10
-dcl_globalFlags refactoringAllowed
-add r0.xyzw, v0.xyzw, r1.xyzw
-add_sat r0.xyzw, r1.xyzw, r0.xyz
-and r1.xyzw, r2.xyzw, r1.xyzw
-xor r2.xyzw, r3.xyzw, r9.x
-mov r0.xyzw, icb[r1.x + 3].xyzw
-lt r0.x, v0.x, l(1.000000)
-if r0.x
-mov r1.xyzw, cb0[1].xyxx
-mul r0.xyzw, r1.xyzw, l(1.000000, 1.000000, 1.000000, 1.000000)
-mul r1.xyzw, r1.xyzw, cb1[44].x
-mov o0.xyzw, r1.xyzw
-endif
+dcl_globalFlags refactoringAllowed | forceEarlyDepthStencil
+dcl_constantBuffer cb1[6].xyzw
+dcl_constantBuffer cb2[2].xyzw
+dcl_sampler s0
+dcl_sampler s3
+dcl_resource_texture2d (float,float,float,float) t0
+dcl_resource_texture2d (float,float,float,float) t3
+dcl_input_ps v1.xyzw
+dcl_input_ps v2.xy
+dcl_input_ps v3.xyzw
+dcl_input_ps v4.xyz
+dcl_output o0.xyzw
+dcl_temps 4
+dp3 r0.x, v3.xyzx, v3.xyzx
+rsq r0.x, r0.x
+mul r0.xyz, r0.xxxx, v3.xyzx
+add r1.xyz, -v4.xyzx, cb1[4].xyzx
+dp3 r0.w, r1.xyzx, r1.xyzx
+rsq r1.w, r0.w
+sqrt r0.w, r0.w
+mul_sat r0.w, r0.w, cb1[4].w
+sample(texture2d)(float,float,float,float) r2.xyz, r0.wwww, t3.xyzw, s3
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r1.xyz, r1.wwww, r1.xyzx
+dp3_sat r0.x, r1.xyzx, r0.xyzx
+mul r0.xyz, r0.xxxx, cb1[5].xyzx
+sample(texture2d)(float,float,float,float) r1.xyzw, v2.xyxx, t0.xyzw, s0
+mul r3.xyzw, r1.xyzw, v1.xyzw
+mad r0.w, -r1.w, v1.w, l(1.000000)
+add r0.w, -r0.w, l(1.000000)
+mul r1.xyz, r0.wwww, cb2[1].xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.wwww
+mul r2.xyz, r2.xyzx, r3.xyzx
+mad r0.xyz, r2.xyzx, r0.xyzx, -r1.xyzx
+mad o0.xyz, v3.wwww, r0.xyzx, r1.xyzx
+mov o0.w, l(0.000000)
+ret
 ```
 
 output (disassembled with fxcd)
 ```hlsl
+//
+// Generated by Microsoft (R) D3D Shader Disassembler
+//
+//   using 3Dmigoto v1.3.16 on Tue Nov  4 05:32:57 2025
+//
+//
+// Note: shader requires additional functionality:
+//       Early depth-stencil
+//
+//
 // Input signature:
 //
 // Name                 Index   Mask Register SysValue  Format   Used
 // -------------------- ----- ------ -------- -------- ------- ------
-// SV_POSITION              0   xyzw        0      POS   float   xyzw
+// SV_POSITION              0   xyzw        0      POS   float
+// COLOR                    0   xyzw        1     NONE   float   xyzw
+// TEXCOORD                 0   xy          2     NONE   float   xy
+// TEXCOORD                 1   xyzw        3     NONE   float   xyzw
+// TEXCOORD                 5   xyz         4     NONE   float   xyz
 //
 //
 // Output signature:
 //
 // Name                 Index   Mask Register SysValue  Format   Used
 // -------------------- ----- ------ -------- -------- ------- ------
-// SV_TARGET                0   xyzw        0   TARGET   float
+// SV_TARGET                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_immediateConstantBuffer { { 1.000000, 0, 0, 0},
-                              { 0, 1.000000, 0, 0},
-                              { 0, 0, 1.000000, 0},
-                              { 0, 0, 0, 1.000000} }
-dcl_constantbuffer CB0[45], dynamicIndexed
-dcl_resource_texture2d (float,float,float,float) t0.xyzw
-dcl_temps 10
-dcl_globalFlags refactoringAllowed
-add r0.xyzw, v0.xyzw, r1.xyzw
-add_sat r0.xyzw, r1.xyzw, r0.xyz
-and r1.xyzw, r2.xyzw, r1.xyzw
-xor r2.xyzw, r3.xyzw, r9.x
-mov r0.xyzw, icb0[r1.x + 3].xyzw
-lt r0.x, v0.x, l(1.000000)
-if_nz r0.x
-  mov r1.xyzw, cb0[1].xyxx
-  mul r0.xyzw, r1.xyzw, l(1.000000, 1.000000, 0.500000, 1.000000)
-  mul r1.xyzw, r1.xyzw, cb1[44].x
-  mov o0.xyzw, r1.xyzw
-endif
+dcl_globalFlags refactoringAllowed | forceEarlyDepthStencil
+dcl_constantbuffer CB1[6], immediateIndexed
+dcl_constantbuffer CB2[2], immediateIndexed
+dcl_sampler s0, mode_default
+dcl_sampler s3, mode_default
+dcl_resource_texture2d (float,float,float,float) t0
+dcl_resource_texture2d (float,float,float,float) t3
+dcl_input_ps linear centroid v1.xyzw
+dcl_input_ps linear centroid v2.xy
+dcl_input_ps linear centroid v3.xyzw
+dcl_input_ps linear centroid v4.xyz
+dcl_output o0.xyzw
+dcl_temps 4
+dp3 r0.x, v3.xyzx, v3.xyzx
+rsq r0.x, r0.x
+mul r0.xyz, r0.xxxx, v3.xyzx
+add r1.xyz, -v4.xyzx, cb1[4].xyzx
+dp3 r0.w, r1.xyzx, r1.xyzx
+rsq r1.w, r0.w
+sqrt r0.w, r0.w
+mul_sat r0.w, r0.w, cb1[4].w
+sample_indexable(texture2d)(float,float,float,float) r2.xyz, r0.wwww, t3.xyzw, s3
+mul r2.xyz, r2.xyzx, r2.xyzx
+mul r1.xyz, r1.wwww, r1.xyzx
+dp3_sat r0.x, r1.xyzx, r0.xyzx
+mul r0.xyz, r0.xxxx, cb1[5].xyzx
+sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v2.xyxx, t0.xyzw, s0
+mul r3.xyzw, r1.xyzw, v1.xyzw
+mad r0.w, -r1.w, v1.w, l(1.000000)
+add r0.w, -r0.w, l(1.000000)
+mul r1.xyz, r0.wwww, cb2[1].xyzx
+mul r3.xyz, r3.xyzx, r3.xyzx
+mul r3.xyz, r3.xyzx, r3.wwww
+mul r2.xyz, r2.xyzx, r3.xyzx
+mad r0.xyz, r2.xyzx, r0.xyzx, -r1.xyzx
+mad o0.xyz, v3.wwww, r0.xyzx, r1.xyzx
+mov o0.w, l(0)
+ret
 // Approximately 0 instruction slots used
 ```
 
@@ -143,7 +223,7 @@ parser:
 
 void main()
 {
-	const auto data = utils::io::read_file("...");
+	const auto data = utils::io::read_file("ps_test.cso");
 
 	auto shader = shader::shader_object::parse(data);
 	for (const auto& instruction : shader.get_instructions())

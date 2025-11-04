@@ -11,11 +11,6 @@ namespace shader::asm_
 	constexpr std::uint32_t component_w = 1 << D3D10_SB_4_COMPONENT_W;
 	constexpr std::uint32_t component_all = component_x | component_y | component_z | component_w;
 
-	constexpr std::uint32_t refactoring_allowed = 1 << 0;
-	constexpr std::uint32_t double_precision = 1 << 1;
-	constexpr std::uint32_t early_depth_stencil = 1 << 2;
-	constexpr std::uint32_t raw_and_struct_buffers = 1 << 3;
-
 	union data_type_t
 	{
 		union

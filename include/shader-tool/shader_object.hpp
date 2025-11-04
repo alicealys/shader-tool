@@ -76,7 +76,9 @@ namespace shader
 
 			void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
 
-			void set_controls(const std::uint32_t controls);
+			void push_controls(const std::uint32_t controls);
+			void pop_controls();
+
 			void add_extension(const std::uint32_t type, const std::uint32_t x = 0u, const std::uint32_t y = 0u, const std::uint32_t z = 0u, const std::uint32_t w = 0u);
 
 			DEFINE_INSTRUCTION(add, D3D10_SB_OPCODE_ADD, 0);
@@ -206,7 +208,7 @@ namespace shader
 
 			shader::shader_object* shader_;
 
-			std::optional<std::uint32_t> current_controls_;
+			std::queue<std::uint32_t> controls_stack_;
 			std::vector<asm_::opcode_extended_t> current_extensions_;
 
 		};

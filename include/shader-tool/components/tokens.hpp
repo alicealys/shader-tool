@@ -577,6 +577,46 @@ namespace shader::asm_::tokens
 		DEFINE_REGISTER(icb, 7);
 		DEFINE_REGISTER(icb, 8);
 		DEFINE_REGISTER(icb, 9);
+
+		constexpr std::uint32_t sample_ctrl = 1;
+		constexpr std::uint32_t res_dim = 2;
+		constexpr std::uint32_t res_return_type = 3;
+
+		constexpr std::uint32_t t_unorm = 1;
+		constexpr std::uint32_t t_snorm = 2;
+		constexpr std::uint32_t t_sint = 3;
+		constexpr std::uint32_t t_uint = 4;
+		constexpr std::uint32_t t_float = 5;
+		constexpr std::uint32_t t_mixed = 6;
+		constexpr std::uint32_t t_double = 7;
+		constexpr std::uint32_t t_continued = 8;
+		constexpr std::uint32_t t_unused = 9;
+
+		constexpr std::uint32_t refactoring_allowed = 1 << 0;
+		constexpr std::uint32_t double_precision = 1 << 1;
+		constexpr std::uint32_t early_depth_stencil = 1 << 2;
+		constexpr std::uint32_t raw_and_struct_buffers = 1 << 3;
+
+		constexpr std::uint32_t buffer = 1;
+		constexpr std::uint32_t texture1d = 2;
+		constexpr std::uint32_t texture2d = 3;
+		constexpr std::uint32_t texture2dms = 4;
+		constexpr std::uint32_t texture3d = 5;
+		constexpr std::uint32_t texturecube = 6;
+		constexpr std::uint32_t texture1darray = 7;
+		constexpr std::uint32_t texture2darray = 8;
+		constexpr std::uint32_t texture2dmsarray = 9;
+		constexpr std::uint32_t texturecubearray = 10;
+		constexpr std::uint32_t raw_buffer = 11;
+		constexpr std::uint32_t structured_buffer = 12;
+
+		constexpr std::uint32_t constant = 1;
+		constexpr std::uint32_t linear = 2;
+		constexpr std::uint32_t linear_centroid = 3;
+		constexpr std::uint32_t linear_noperspective = 4;
+		constexpr std::uint32_t linear_noperspective_centroid = 5;
+		constexpr std::uint32_t linear_sample = 6;
+		constexpr std::uint32_t linear_noperspective_sample = 7;
 	}
 
 	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls = 0u);

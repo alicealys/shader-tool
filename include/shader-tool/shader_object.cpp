@@ -8,11 +8,10 @@ namespace shader
 	asm_::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
 		const std::vector<asm_::tokens::operand_creator::with_component>& operands)
 	{
-		auto instruction = asm_::tokens::create_instruction(type, this->current_controls_.value_or(controls));
-
+		const auto controls_ = this->controls_stack_.empty() ? controls : this->controls_stack_.front();
+		auto instruction = asm_::tokens::create_instruction(type, controls_);
 		instruction.opcode.extensions = this->current_extensions_;
 
-		this->current_controls_.reset();
 		this->current_extensions_.clear();
 
 		const auto& def = asm_::instruction_defs[type];
@@ -64,9 +63,14 @@ namespace shader
 		return instruction;
 	}
 
-	void shader_object::assembler::set_controls(const std::uint32_t controls)
+	void shader_object::assembler::push_controls(const std::uint32_t controls)
 	{
-		this->current_controls_.emplace(controls);
+		this->controls_stack_.push(controls);
+	}
+
+	void shader_object::assembler::pop_controls()
+	{
+		this->controls_stack_.pop();
 	}
 
 	void shader_object::assembler::add_extension(const std::uint32_t type, 
