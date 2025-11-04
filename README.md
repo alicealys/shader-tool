@@ -17,7 +17,7 @@ shader generation:
 
 #include <utils/io.hpp>
 
-using namespace alys::shader::asm_::tokens::literals;
+using namespace alys::shader::literals;
 
 int example1()
 {
