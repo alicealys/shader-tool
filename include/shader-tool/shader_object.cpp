@@ -134,7 +134,7 @@ namespace alys::shader
 			return "input signature";
 		case chunk_osgn:
 		case chunk_osg5:
-			return "output_signature";
+			return "output signature";
 		case chunk_pcsg:
 			return "patch constant signature";
 		case chunk_shex:
