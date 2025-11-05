@@ -39,15 +39,14 @@ namespace alys::shader::detail
 		output_buffer.write_bits(16, 0);
 	}
 	
-	void dcl_resource::print(const instruction_t& instruction)
+	void dcl_resource::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
 		const auto& resource_return_type = instruction.operands[1].custom.u.values;
-		printf("dcl_resource_%s ", get_resource_dimension_name(instruction.opcode.controls));
-		printf("(%s,%s,%s,%s) ", get_return_type_name(resource_return_type[0]),
+		buffer.write("dcl_resource_%s ", get_resource_dimension_name(instruction.opcode.controls));
+		buffer.write("(%s,%s,%s,%s) ", get_return_type_name(resource_return_type[0]),
 			get_return_type_name(resource_return_type[1]),
 			get_return_type_name(resource_return_type[2]),
 			get_return_type_name(resource_return_type[3]));
-		print_operand(instruction.operands[0]);
-		printf("\n");
+		dump_operand(buffer, instruction.operands[0]);
 	}
 }

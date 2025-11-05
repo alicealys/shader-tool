@@ -4,8 +4,9 @@
 
 namespace alys::shader::detail
 {
-	void print_operand(const operand_t& op);
-	void print_operands(const std::vector<operand_t>& operands);
-	void print_opcode_extended(const opcode_extended_t& opcode);
-	void print_opcode(const opcode_t& opcode);
+	void dump_operand(utils::string_writer& buffer, const operand_t& op);
+	void dump_operands(utils::string_writer& buffer, const std::vector<operand_t>& operands);
+	void dump_opcode_extended(utils::string_writer& buffer, const opcode_extended_t& opcode);
+	void dump_opcode_name(utils::string_writer& buffer, const opcode_t& opcode);
+	void dump_opcode(utils::string_writer& buffer, const opcode_t& opcode);
 }

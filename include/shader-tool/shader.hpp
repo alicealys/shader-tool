@@ -2,6 +2,7 @@
 
 #include "utils/bit_buffer.hpp"
 #include "utils/dxbc_checksum.hpp"
+#include "utils/string_writer.hpp"
 
 #include "detail/definitions.hpp"
 #include "detail/reader.hpp"
@@ -17,6 +18,7 @@ namespace alys::shader
 	{
 		instruction_t read_instruction(utils::bit_buffer_le& input_buffer);
 		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction);
+		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction);
 		void print_instruction(const instruction_t& instruction);
 	}
 

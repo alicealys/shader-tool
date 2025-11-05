@@ -4,24 +4,40 @@
 
 namespace alys::shader::detail
 {
-	class general_instruction final : public base_instruction
+	class generic_instruction : public base_instruction
 	{
 	public:
 		instruction_t read(utils::bit_buffer_le&);
 		void write(utils::bit_buffer_le&, const instruction_t&);
-		void print(const instruction_t&);
+		void dump(utils::string_writer& buffer, const instruction_t&);
 	};
 
-	class declaration_instruction_nametoken final : public base_instruction
+	class general_instruction final : public generic_instruction
+	{
+	};
+
+	class conditional_instruction final : public generic_instruction
+	{
+	public:
+		void dump(utils::string_writer& buffer, const instruction_t&) override;
+	};
+
+	class arithmetic_instruction final : public generic_instruction
+	{
+	public:
+		void dump(utils::string_writer& buffer, const instruction_t&) override;
+	};
+
+	class declaration_instruction_nametoken : public base_instruction
 	{
 	public:
 		instruction_t read(utils::bit_buffer_le&);
 		void write(utils::bit_buffer_le&, const instruction_t&);
-		void print(const instruction_t&);
+		void dump(utils::string_writer& buffer, const instruction_t&);
 	};
 
 	template <size_t OperandCount, size_t ValueCount>
-	class declaration_instruction final : public base_instruction
+	class declaration_instruction : public base_instruction
 	{
 	public:
 		instruction_t read(utils::bit_buffer_le& input_buffer)
@@ -63,31 +79,29 @@ namespace alys::shader::detail
 			}
 		}
 
-		void print(const instruction_t& instruction)
+		void dump(utils::string_writer& buffer, const instruction_t& instruction)
 		{
-			print_opcode(instruction.opcode);
+			dump_opcode(buffer, instruction.opcode);
 
-			printf(" ");
+			buffer.write(" ");
 
 			for (auto i = 0u; i < OperandCount; i++)
 			{
-				print_operand(instruction.operands[i]);
+				dump_operand(buffer, instruction.operands[i]);
 				if (i < (OperandCount + ValueCount) - 1)
 				{
-					printf(", ");
+					buffer.write(", ");
 				}
 			}
 
 			for (auto i = 0u; i < ValueCount; i++)
 			{
-				printf("%i", instruction.operands[i + OperandCount].custom.u.value);
+				buffer.write("%i", instruction.operands[i + OperandCount].custom.u.value);
 				if (i < ValueCount - 1)
 				{
-					printf(", ");
+					buffer.write(", ");
 				}
 			}
-
-			printf("\n");
 		}
 	};
 }

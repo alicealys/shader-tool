@@ -55,6 +55,9 @@ namespace alys::shader
 
 	const char* get_sys_value_name(const std::uint32_t value);
 	const char* get_format_name(const std::uint32_t value);
+	const char* get_shader_name(const std::uint32_t value);
+	const char* get_shader_shorthand_name(const std::uint32_t value);
+	const char* get_chunk_name(const std::uint32_t value);
 
 	class shader_object
 	{
@@ -250,7 +253,9 @@ namespace alys::shader
 		shader_object(const shader_type type);
 
 		static shader_object parse(const std::string& data);
-		static void print_signature(const signature& signature);
+		static void dump_signature(utils::string_writer& buffer, const signature& signature);
+		void dump(utils::string_writer& buffer) const;
+		std::string dump() const;
 
 		std::string serialize();
 
@@ -261,8 +266,6 @@ namespace alys::shader
 		std::vector<detail::instruction_t>& get_instructions();
 
 		info& get_info();
-
-		void parse_instructions(utils::bit_buffer_le& data, const std::uint32_t size);
 
 		void add_instruction(const detail::instruction_t& instruction);
 		void emit(const detail::instruction_t& instruction);
@@ -276,13 +279,11 @@ namespace alys::shader
 		void add_output(const std::string& name, const std::uint32_t index, const std::string& mask, const std::uint32_t register_,
 			const system_value_type sys_value, const signature_format format, const std::string& rw_mask);
 
-		assembler get_assembler()
-		{
-			return assembler(this);
-		}
+		assembler get_assembler();
 
 	private:
 		std::uint32_t parse_signature_mask(const std::string& mask);
+		void parse_instructions(utils::bit_buffer_le& data, const std::uint32_t size);
 
 		signature parse_signature(utils::bit_buffer_le& data);
 		void parse_instructions_chunk(utils::bit_buffer_le& data, const std::uint32_t size);

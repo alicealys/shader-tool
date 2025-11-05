@@ -67,7 +67,7 @@ namespace alys::shader::detail
 		{D3D10_SB_OPCODE_NOP, "nop"},
 		{D3D10_SB_OPCODE_NOT, "not"},
 		{D3D10_SB_OPCODE_OR, "or"},
-		{D3D10_SB_OPCODE_RESINFO, "resinfo"},
+		{D3D10_SB_OPCODE_RESINFO, "resinfo_indexable"},
 		{D3D10_SB_OPCODE_RET, "ret"},
 		{D3D10_SB_OPCODE_RETC, "retc"},
 		{D3D10_SB_OPCODE_ROUND_NE, "round_ne"},
@@ -75,12 +75,12 @@ namespace alys::shader::detail
 		{D3D10_SB_OPCODE_ROUND_PI, "round_pi"},
 		{D3D10_SB_OPCODE_ROUND_Z, "round_z"},
 		{D3D10_SB_OPCODE_RSQ, "rsq"},
-		{D3D10_SB_OPCODE_SAMPLE, "sample"},
-		{D3D10_SB_OPCODE_SAMPLE_C, "sample_c"},
-		{D3D10_SB_OPCODE_SAMPLE_C_LZ, "sample_c_lz"},
-		{D3D10_SB_OPCODE_SAMPLE_L, "sample_l"},
-		{D3D10_SB_OPCODE_SAMPLE_D, "sample_d"},
-		{D3D10_SB_OPCODE_SAMPLE_B, "sample_b"},
+		{D3D10_SB_OPCODE_SAMPLE, "sample_indexable"},
+		{D3D10_SB_OPCODE_SAMPLE_C, "sample_c_indexable"},
+		{D3D10_SB_OPCODE_SAMPLE_C_LZ, "sample_c_lz_indexable"},
+		{D3D10_SB_OPCODE_SAMPLE_L, "sample_l_indexable"},
+		{D3D10_SB_OPCODE_SAMPLE_D, "sample_d_indexable"},
+		{D3D10_SB_OPCODE_SAMPLE_B, "sample_b_indexable"},
 		{D3D10_SB_OPCODE_SQRT, "sqrt"},
 		{D3D10_SB_OPCODE_SWITCH, "switch"},
 		{D3D10_SB_OPCODE_SINCOS, "sincos"},
@@ -755,23 +755,23 @@ namespace alys::shader::detail
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2D:
 			return "texture2d";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMS:
-			return "texture2dMs";
+			return "texture2dms";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE3D:
 			return "texture3d";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBE:
 			return "texturecube";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE1DARRAY:
-			return "texture1dArray";
+			return "texture1darray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DARRAY:
-			return "texture2dArray";
+			return "texture2darray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMSARRAY:
-			return "texture2dMsArray";
+			return "texture2dmsarray";
 		case D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBEARRAY:
-			return "textureCubeArray";
+			return "texturecubearray";
 		case D3D11_SB_RESOURCE_DIMENSION_RAW_BUFFER:
-			return "rawBuffer";
+			return "raw_buffer";
 		case D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER:
-			return "sturcturedBuffer";
+			return "structured_buffer";
 		}
 
 		return "unknown";
@@ -809,21 +809,21 @@ namespace alys::shader::detail
 		case D3D10_SB_NAME_POSITION:
 			return "position";
 		case D3D10_SB_NAME_CLIP_DISTANCE:
-			return "clipDistance";
+			return "clip_distance";
 		case D3D10_SB_NAME_CULL_DISTANCE:
-			return "cullDistance";
+			return "cull_distance";
 		case D3D10_SB_NAME_RENDER_TARGET_ARRAY_INDEX:
-			return "renderTargetArrayIndex";
+			return "render_target_array_index";
 		case D3D10_SB_NAME_VIEWPORT_ARRAY_INDEX:
-			return "viewportArrayIndex";
+			return "viewport_array_index";
 		case D3D10_SB_NAME_VERTEX_ID:
-			return "vertexId";
+			return "vertex_id";
 		case D3D10_SB_NAME_PRIMITIVE_ID:
-			return "primitive id";
+			return "primitiveId";
 		case D3D10_SB_NAME_INSTANCE_ID:
-			return "instanceId";
+			return "instance_id";
 		case D3D10_SB_NAME_IS_FRONT_FACE:
-			return "isFrontFace";
+			return "is_front_face";
 		case D3D10_SB_NAME_SAMPLE_INDEX:
 			return "sampleIndex";
 		case D3D11_SB_NAME_FINAL_QUAD_U_EQ_0_EDGE_TESSFACTOR:
@@ -853,6 +853,31 @@ namespace alys::shader::detail
 		}
 
 		return "undefined";
+	}
+
+	const char* get_interpolation_name(const std::uint32_t type)
+	{
+		switch (type)
+		{
+		case D3D10_SB_INTERPOLATION_UNDEFINED:
+			return "undefined";
+		case D3D10_SB_INTERPOLATION_CONSTANT:
+			return "constant";
+		case D3D10_SB_INTERPOLATION_LINEAR:
+			return "linear";
+		case D3D10_SB_INTERPOLATION_LINEAR_CENTROID:
+			return "linear centroid";
+		case D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE:
+			return "linear noperspective";
+		case D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE_CENTROID:
+			return "linear noperspective centroid";
+		case D3D10_SB_INTERPOLATION_LINEAR_SAMPLE:
+			return "linear sample";
+		case D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE_SAMPLE:
+			return "linear noperspective sample";
+		}
+
+		return "unknown";
 	}
 
 	std::uint32_t get_num_components(const std::uint32_t type)

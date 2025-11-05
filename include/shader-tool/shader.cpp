@@ -2,10 +2,14 @@
 
 #include "shader.hpp"
 
-#include "detail/instructions/generic.hpp"
-#include "detail/instructions/dcl_resource.hpp"
-#include "detail/instructions/dcl_globalflags.hpp"
 #include "detail/instructions/customdata.hpp"
+#include "detail/instructions/dcl_resource.hpp"
+#include "detail/instructions/dcl_global_flags.hpp"
+#include "detail/instructions/dcl_input_ps.hpp"
+#include "detail/instructions/dcl_input_ps_siv.hpp"
+#include "detail/instructions/dcl_constant_buffer.hpp"
+#include "detail/instructions/dcl_sampler.hpp"
+#include "detail/instructions/generic.hpp"
 
 #include "shader_object.hpp"
 
@@ -27,24 +31,24 @@ namespace alys::shader
 			{
 				/* dx10.0 opcodes */
 
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ADD);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_ADD);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_AND);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_BREAK);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_BREAKC);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_BREAKC);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CALL);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CALLC);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_CALLC);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CASE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CONTINUE);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CONTINUEC);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_CONTINUEC);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_CUT);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DEFAULT);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DERIV_RTX);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DERIV_RTY);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DISCARD);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DIV);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP2);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP3);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_DP4);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DERIV_RTX);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DERIV_RTY);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_DISCARD);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DIV);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DP2);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DP3);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_DP4);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ELSE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EMIT);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EMITTHENCUT);
@@ -52,20 +56,20 @@ namespace alys::shader
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ENDLOOP);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ENDSWITCH);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EQ);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_EXP);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_EXP);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FRC);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FTOI);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_FTOU);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_GE);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IADD);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IF);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_IADD);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_IF);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IEQ);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IGE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ILT);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMAD);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMAX);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMIN);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_IMUL);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_IMAD);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_IMAX);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_IMIN);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_IMUL);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_INE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_INEG);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ISHL);
@@ -77,50 +81,50 @@ namespace alys::shader
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LOG);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LOOP);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_LT);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAD);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MIN);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MAX);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MAD);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MIN);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MAX);
 				register_instruction_handler<customdata>(D3D10_SB_OPCODE_CUSTOMDATA);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOV);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MOVC);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_MUL);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MOV);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MOVC);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_MUL);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NOP);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_NOT);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_OR);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RESINFO);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RET);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RETC);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_NE);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_NI);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_PI);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ROUND_Z);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_RSQ);
+				register_instruction_handler<conditional_instruction>(D3D10_SB_OPCODE_RETC);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_ROUND_NE);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_ROUND_NI);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_ROUND_PI);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_ROUND_Z);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_RSQ);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_C);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_C_LZ);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_L);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_D);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SAMPLE_B);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SQRT);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_SQRT);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SWITCH);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_SINCOS);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UDIV);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_UDIV);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_ULT);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UGE);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMUL);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMAD);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMAX);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UMIN);
-				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_USHR);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_UMUL);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_UMAD);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_UMAX);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_UMIN);
+				register_instruction_handler<arithmetic_instruction>(D3D10_SB_OPCODE_USHR);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_UTOF);
 				register_instruction_handler<general_instruction>(D3D10_SB_OPCODE_XOR);
 
 				/* dx10 declarations */
 
 				register_instruction_handler<dcl_resource>(D3D10_SB_OPCODE_DCL_RESOURCE);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_SAMPLER);
+				register_instruction_handler<dcl_constant_buffer>(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER);
+				register_instruction_handler<dcl_sampler>(D3D10_SB_OPCODE_DCL_SAMPLER);
 				register_instruction_handler<declaration_instruction<1, 1>>(D3D10_SB_OPCODE_DCL_INDEX_RANGE);
 				register_instruction_handler<declaration_instruction<0, 0>>(D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY);
 				register_instruction_handler<declaration_instruction<0, 0>>(D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE);
@@ -128,15 +132,15 @@ namespace alys::shader
 				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_INPUT);
 				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_SGV);
 				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_SIV);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_INPUT_PS);
+				register_instruction_handler<dcl_input_ps>(D3D10_SB_OPCODE_DCL_INPUT_PS);
 				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_PS_SGV);
-				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV);
+				register_instruction_handler<dcl_input_ps_siv>(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV);
 				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_OUTPUT);
 				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_OUTPUT_SGV);
 				register_instruction_handler<declaration_instruction_nametoken>(D3D10_SB_OPCODE_DCL_OUTPUT_SIV);
 				register_instruction_handler<declaration_instruction<0, 1>>(D3D10_SB_OPCODE_DCL_TEMPS);
 				register_instruction_handler<declaration_instruction<0, 3>>(D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP);
-				register_instruction_handler<dcl_globalflags>(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS);
+				register_instruction_handler<dcl_global_flags>(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS);
 
 				/* dx10.1 opcodes */
 
@@ -156,10 +160,10 @@ namespace alys::shader
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EMITTHENCUT_STREAM);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_INTERFACE_CALL);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_BUFINFO);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTX_COARSE);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTX_FINE);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTY_COARSE);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DERIV_RTY_FINE);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DERIV_RTX_COARSE);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DERIV_RTX_FINE);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DERIV_RTY_COARSE);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DERIV_RTY_FINE);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_C);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_PO);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_GATHER4_PO_C);
@@ -206,16 +210,16 @@ namespace alys::shader
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_UMAX);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_IMM_ATOMIC_UMIN);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_SYNC);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DADD);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMAX);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMIN);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMUL);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DADD);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DMAX);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DMIN);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DMUL);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DEQ);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DGE);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DLT);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DNE);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMOV);
-				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DMOVC);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DMOV);
+				register_instruction_handler<arithmetic_instruction>(D3D11_SB_OPCODE_DMOVC);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_DTOF);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_FTOD);
 				register_instruction_handler<general_instruction>(D3D11_SB_OPCODE_EVAL_SNAPPED);
@@ -250,9 +254,9 @@ namespace alys::shader
 
 				/* dx11.1 opcodes */
 
-				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DDIV);
-				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DFMA);
-				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DRCP);
+				register_instruction_handler<arithmetic_instruction>(D3D11_1_SB_OPCODE_DDIV);
+				register_instruction_handler<arithmetic_instruction>(D3D11_1_SB_OPCODE_DFMA);
+				register_instruction_handler<arithmetic_instruction>(D3D11_1_SB_OPCODE_DRCP);
 				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_MSAD);
 				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DTOI);
 				register_instruction_handler<general_instruction>(D3D11_1_SB_OPCODE_DTOU);
@@ -316,7 +320,7 @@ namespace alys::shader
 			throw std::runtime_error("unsupported instruction");
 		}
 
-		void print_instruction(const instruction_t& instruction)
+		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction)
 		{
 			if (instruction.opcode.type >= instruction_handlers.size())
 			{
@@ -325,10 +329,17 @@ namespace alys::shader
 
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
-				return handler->print(instruction);
+				return handler->dump(buffer, instruction);
 			}
 
 			throw std::runtime_error("unsupported instruction");
+		}
+
+		void print_instruction(const instruction_t& instruction)
+		{
+			utils::string_writer buffer;
+			dump_instruction(buffer, instruction);
+			printf("%s\n", buffer.data());
 		}
 	}
 

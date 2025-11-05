@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t general_instruction::read(utils::bit_buffer_le& input_buffer)
+	instruction_t generic_instruction::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction{};
 		std::uint32_t opcode_length{};
@@ -21,7 +21,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void general_instruction::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void generic_instruction::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
@@ -31,12 +31,44 @@ namespace alys::shader::detail
 		}
 	}
 
-	void general_instruction::print(const instruction_t& instruction)
+	void generic_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		print_opcode(instruction.opcode);
-		printf(" ");
-		print_operands(instruction.operands);
-		printf("\n");
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
+		dump_operands(buffer, instruction.operands);
+	}
+
+	void conditional_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	{
+		dump_opcode_name(buffer, instruction.opcode);
+
+		buffer.write((instruction.opcode.controls & 128) ? "_nz" : "_z");
+
+		for (const auto& ext : instruction.opcode.extensions)
+		{
+			dump_opcode_extended(buffer, ext);
+		}
+
+		buffer.write(" ");
+		dump_operands(buffer, instruction.operands);
+	}
+
+	void arithmetic_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	{
+		dump_opcode_name(buffer, instruction.opcode);
+
+		if ((instruction.opcode.controls & 0x4) != 0)
+		{
+			buffer.write("_sat");
+		}
+
+		for (const auto& ext : instruction.opcode.extensions)
+		{
+			dump_opcode_extended(buffer, ext);
+		}
+
+		buffer.write(" ");
+		dump_operands(buffer, instruction.operands);
 	}
 
 	instruction_t declaration_instruction_nametoken::read(utils::bit_buffer_le& input_buffer)
@@ -69,12 +101,12 @@ namespace alys::shader::detail
 		output_buffer.write_bits(17, 0);
 	}
 
-	void declaration_instruction_nametoken::print(const instruction_t& instruction)
+	void declaration_instruction_nametoken::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		print_opcode(instruction.opcode);
-		printf(" ");
-		print_operand(instruction.operands[0]);
-		printf(", ");
-		printf("%s\n", get_name_token(instruction.operands[1].custom.u.value));
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
+		dump_operand(buffer, instruction.operands[0]);
+		buffer.write(", ");
+		buffer.write("%s", get_name_token(instruction.operands[1].custom.u.value));
 	}
 }

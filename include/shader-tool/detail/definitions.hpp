@@ -2,6 +2,7 @@
 
 #include "../utils/d3d11TokenizedProgramFormat.hpp"
 #include "../utils/bit_buffer.hpp"
+#include "../utils/string_writer.hpp"
 
 namespace alys::shader::detail
 {
@@ -134,6 +135,7 @@ namespace alys::shader::detail
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);
 	const char* get_name_token(const std::uint32_t type);
+	const char* get_interpolation_name(const std::uint32_t type);
 
 	std::uint32_t get_num_components(const std::uint32_t type);
 }

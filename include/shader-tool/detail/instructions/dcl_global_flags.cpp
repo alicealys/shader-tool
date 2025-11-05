@@ -1,10 +1,10 @@
 #include "../../std_include.hpp"
 
-#include "dcl_globalflags.hpp"
+#include "dcl_global_flags.hpp"
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_globalflags::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_global_flags::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction;
 		std::uint32_t length{};
@@ -13,14 +13,14 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_globalflags::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_global_flags::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		write_opcode(output_buffer, instruction.opcode, 1);
 	}
 
-	void dcl_globalflags::print(const instruction_t& instruction)
+	void dcl_global_flags::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		printf("dcl_globalFlags ");
+		buffer.write("dcl_globalFlags ");
 
 		std::vector<const char*> flags;
 
@@ -46,13 +46,11 @@ namespace alys::shader::detail
 
 		for (auto i = 0u; i < flags.size(); i++)
 		{
-			printf("%s", flags[i]);
+			buffer.write("%s", flags[i]);
 			if (i < flags.size() - 1)
 			{
-				printf(" | ");
+				buffer.write(" | ");
 			}
 		}
-
-		printf("\n");
 	}
 }
