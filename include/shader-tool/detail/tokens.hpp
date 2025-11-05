@@ -41,6 +41,7 @@ namespace alys::shader::detail
 			operand_proxy::with_components mask() const;
 			operand_proxy::with_components swz() const;
 			operand_proxy::with_components scalar() const;
+			operand_proxy::with_components swz_or_scalar() const;
 
 			void set_offset(const std::uint32_t offset);
 

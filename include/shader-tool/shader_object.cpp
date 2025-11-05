@@ -118,7 +118,7 @@ namespace alys::shader
 					instruction.operands.emplace_back(operands[i].mask());
 					break;
 				case detail::token_operand_4c_swizzle:
-					instruction.operands.emplace_back(operands[i].swz());
+					instruction.operands.emplace_back(operands[i].swz_or_scalar());
 					break;
 				case detail::token_operand_4c_scalar:
 					instruction.operands.emplace_back(operands[i].scalar());

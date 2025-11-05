@@ -257,7 +257,7 @@ workspace "shader-tool"
 			buildoptions {"/GL"}
 			linkoptions { "/IGNORE:4702", "/LTCG" }
 			defines {"NDEBUG"}
-			flags {"FatalCompileWarnings"}
+			fatalwarnings { "All" }
 		filter {}
 
 		filter "configurations:Debug"

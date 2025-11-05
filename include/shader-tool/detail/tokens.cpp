@@ -202,6 +202,24 @@ namespace alys::shader::detail
 		return next;
 	}
 
+	operand_proxy::with_components operand_proxy::with_components::swz_or_scalar() const
+	{
+		if (!this->has_set_components_)
+		{
+			return this->swz();
+		}
+
+		if (this->components_[0] != component_none &&
+			this->components_[1] == component_none &&
+			this->components_[2] == component_none &&
+			this->components_[3] == component_none)
+		{
+			return this->scalar();
+		}
+		
+		return this->swz();
+	}
+
 	void operand_proxy::with_components::set(const operand_t& operand, const std::uint32_t a, const std::uint32_t b,
 		const std::uint32_t c, const std::uint32_t d)
 	{
