@@ -81,7 +81,7 @@ namespace alys::shader
 		add_component(4, 'z');
 		add_component(8, 'w');
 
-		return mask_str;
+		return {mask_str, 4};
 	}
 
 	const char* get_shader_name(const std::uint32_t value)
@@ -272,6 +272,11 @@ namespace alys::shader
 		const auto program = reinterpret_cast<const std::uint8_t*>(data.data());
 		const auto header = reinterpret_cast<const shader_object::header*>(program);
 		const auto chunk_offsets = reinterpret_cast<const std::uint32_t*>(&header->chunk_offsets[0]);
+
+		if (header->program_size != static_cast<std::uint32_t>(data.size()))
+		{
+			throw std::runtime_error("invalid shader data");
+		}
 
 		for (auto i = 0u; i < header->chunk_count; i++)
 		{
