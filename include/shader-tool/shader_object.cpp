@@ -392,6 +392,13 @@ namespace alys::shader
 		return buffer.get_buffer();
 	}
 
+	void shader_object::print() const
+	{
+		utils::string_writer buffer;
+		buffer.set_to_console(true);
+		this->dump(buffer);
+	}
+
 	shader_object::assembler shader_object::get_assembler()
 	{
 		return assembler(this);

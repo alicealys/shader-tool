@@ -256,6 +256,7 @@ namespace alys::shader
 		static void dump_signature(utils::string_writer& buffer, const signature& signature);
 		void dump(utils::string_writer& buffer) const;
 		std::string dump() const;
+		void print() const;
 
 		std::string serialize();
 

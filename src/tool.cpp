@@ -29,10 +29,15 @@ namespace tool
 			std::string data;
 
 			const auto& path = args[1];
-			auto dest = args[1] + ".asm";
+			std::string dest;
 			if (args.size() >= 3)
 			{
 				dest = args[2];
+			}
+			else
+			{
+				const auto pos = path.find_last_of('.');
+				dest = path.substr(0, pos) + ".asm";
 			}
 
 			if (!utils::io::read_file(path, &data))
@@ -46,11 +51,33 @@ namespace tool
 			printf("\t -> %s\n", dest.data());
 		}
 
+		void print_shader(const std::vector<std::string>& args)
+		{
+			if (args.size() < 2)
+			{
+				printf("usage: print <file> [dest]\n");
+				return;
+			}
+
+			std::string data;
+
+			const auto& path = args[1];
+			if (!utils::io::read_file(path, &data))
+			{
+				throw std::runtime_error("file not found");
+			}
+
+			const auto shader = alys::shader::shader_object::parse(data);
+			shader.print();
+		}
+
 		void print_usage()
 		{
 			printf("usage: shader-tool [options]\n\n");
 			printf("\tdisassemble <path> [dest]\n");
 			printf("\t\tdisassemble a shader\n\n");
+			printf("\tprint <path>\n");
+			printf("\t\tdisassembles shader to output\n\n");
 		}
 
 		void start_unsafe(int argc, char** argv)
@@ -62,6 +89,7 @@ namespace tool
 			}
 
 			add_command("disassemble", disassemble_shader);
+			add_command("print", print_shader);
 
 			std::vector<std::string> args;
 			for (auto i = 1; i < argc; i++)

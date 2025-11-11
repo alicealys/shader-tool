@@ -27,12 +27,14 @@ namespace alys::utils
 		const auto result = format(&ap, fmt);
 		va_end(ap);
 
-		this->buffer_.append(result);
-	}
-
-	void string_writer::write(const std::string& data)
-	{
-		this->buffer_.append(data);
+		if (this->to_console_)
+		{
+			printf("%s", result.data());
+		}
+		else
+		{
+			this->buffer_.append(result);
+		}
 	}
 
 	std::string string_writer::get_buffer() const
@@ -43,5 +45,10 @@ namespace alys::utils
 	const char* string_writer::data() const
 	{
 		return this->buffer_.data();
+	}
+
+	void string_writer::set_to_console(bool to_console)
+	{
+		this->to_console_ = to_console;
 	}
 }
