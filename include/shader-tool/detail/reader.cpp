@@ -4,6 +4,14 @@
 
 namespace alys::shader::detail
 {
+	operand_t read_custom_operand(alys::utils::bit_buffer_le& bit_buffer)
+	{
+		operand_t op{};
+		op.custom.is_custom = true;
+		op.custom.u.value = bit_buffer.read_bytes(4);
+		return op;
+	}
+
 	operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer, bool& extended)
 	{
 		operand_extended_t operand{};

@@ -4,6 +4,7 @@
 
 namespace alys::shader::detail
 {
+	operand_t read_custom_operand(alys::utils::bit_buffer_le& bit_buffer);
 	operand_extended_t read_extended_operand(alys::utils::bit_buffer_le& bit_buffer, bool& extended);
 	operand_t read_operand(alys::utils::bit_buffer_le& bit_buffer);
 	opcode_extended_t read_opcode_extended(alys::utils::bit_buffer_le& input_buffer, bool& extended);

@@ -34,8 +34,12 @@ namespace alys::shader::detail
 	void generic_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
 		dump_opcode(buffer, instruction.opcode);
-		buffer.write(" ");
-		dump_operands(buffer, instruction.operands);
+
+		if (!instruction.operands.empty())
+		{
+			buffer.write(" ");
+			dump_operands(buffer, instruction.operands);
+		}
 	}
 
 	void conditional_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
@@ -49,8 +53,11 @@ namespace alys::shader::detail
 			dump_opcode_extended(buffer, ext);
 		}
 
-		buffer.write(" ");
-		dump_operands(buffer, instruction.operands);
+		if (!instruction.operands.empty())
+		{
+			buffer.write(" ");
+			dump_operands(buffer, instruction.operands);
+		}
 	}
 
 	void arithmetic_instruction::dump(utils::string_writer& buffer, const instruction_t& instruction)
@@ -67,8 +74,11 @@ namespace alys::shader::detail
 			dump_opcode_extended(buffer, ext);
 		}
 
-		buffer.write(" ");
-		dump_operands(buffer, instruction.operands);
+		if (!instruction.operands.empty())
+		{
+			buffer.write(" ");
+			dump_operands(buffer, instruction.operands);
+		}
 	}
 
 	instruction_t declaration_instruction_nametoken::read(utils::bit_buffer_le& input_buffer)

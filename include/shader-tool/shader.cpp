@@ -3,12 +3,16 @@
 #include "shader.hpp"
 
 #include "detail/instructions/customdata.hpp"
-#include "detail/instructions/dcl_resource.hpp"
+#include "detail/instructions/dcl_constant_buffer.hpp"
+#include "detail/instructions/dcl_function_body.hpp"
+#include "detail/instructions/dcl_function_table.hpp"
 #include "detail/instructions/dcl_global_flags.hpp"
 #include "detail/instructions/dcl_input_ps.hpp"
 #include "detail/instructions/dcl_input_ps_siv.hpp"
-#include "detail/instructions/dcl_constant_buffer.hpp"
+#include "detail/instructions/dcl_interface.hpp"
+#include "detail/instructions/dcl_resource.hpp"
 #include "detail/instructions/dcl_sampler.hpp"
+#include "detail/instructions/dcl_stream.hpp"
 #include "detail/instructions/generic.hpp"
 
 #include "shader_object.hpp"
@@ -231,10 +235,10 @@ namespace alys::shader
 
 				/* dx11 declarations */
 
-				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_STREAM);
-				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_FUNCTION_BODY);
-				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE);
-				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_INTERFACE);
+				register_instruction_handler<dcl_stream>(D3D11_SB_OPCODE_DCL_STREAM);
+				register_instruction_handler<dcl_function_body>(D3D11_SB_OPCODE_DCL_FUNCTION_BODY);
+				register_instruction_handler<dcl_function_table>(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE);
+				register_instruction_handler<dcl_interface>(D3D11_SB_OPCODE_DCL_INTERFACE);
 				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_INPUT_CONTROL_POINT_COUNT);
 				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_OUTPUT_CONTROL_POINT_COUNT);
 				register_instruction_handler<declaration_instruction<0, 0>>(D3D11_SB_OPCODE_DCL_TESS_DOMAIN);

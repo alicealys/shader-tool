@@ -29,46 +29,6 @@ namespace alys::shader::detail
 
 		switch (op.type)
 		{
-		case D3D10_SB_OPERAND_TYPE_INPUT:
-			buffer.write("v%i", op.indices[0].value.uint32);
-			break;
-		case D3D10_SB_OPERAND_TYPE_OUTPUT_COVERAGE_MASK:
-			buffer.write("oMask");
-			break;
-		case D3D10_SB_OPERAND_TYPE_OUTPUT:
-			buffer.write("o%i", op.indices[0].value.uint32);
-			break;
-		case D3D10_SB_OPERAND_TYPE_TEMP:
-			buffer.write("r%i", op.indices[0].value.uint32);
-			break;
-		case D3D10_SB_OPERAND_TYPE_RESOURCE:
-			buffer.write("t%i", op.indices[0].value.uint32);
-			break;
-		case D3D10_SB_OPERAND_TYPE_SAMPLER:
-			buffer.write("s%i", op.indices[0].value.uint32);
-			break;
-		case D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER:
-		{
-			buffer.write("cb%i[", op.indices[0].value.uint32);
-			if (op.indices[1].extra_operand.get() != nullptr)
-			{
-				dump_operand(buffer, *op.indices[1].extra_operand);
-				buffer.write(" + ");
-			}
-			buffer.write("%i]", op.indices[1].value.uint32);
-			break;
-		}
-		case D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER:
-		{
-			buffer.write("icb[");
-			if (op.indices[1].extra_operand.get() != nullptr)
-			{
-				dump_operand(buffer, *op.indices[1].extra_operand);
-				buffer.write(" + ");
-			}
-			buffer.write("%i]", op.indices[1].value.uint32);
-			break;
-		}
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE32:
 		{
 			buffer.write("l(");
@@ -96,7 +56,68 @@ namespace alys::shader::detail
 			buffer.write(")");
 			break;
 		default:
-			buffer.write("op%i", op.type);
+		{
+			const auto iter = operand_names.find(op.type);
+			if (iter != operand_names.end())
+			{
+				buffer.write(iter->second);
+			}
+		}
+		}
+
+		const auto dump_index = [&](const std::uint32_t index)
+		{
+			switch (op.indices[index].representation)
+			{
+			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
+				buffer.write("%i", op.indices[index].value.uint32);
+				break;
+			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
+				buffer.write("%lli", op.indices[index].value.uint64.value);
+				break;
+			case D3D10_SB_OPERAND_INDEX_RELATIVE:
+				dump_operand(buffer, *op.indices[index].extra_operand);
+				break;
+			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
+				dump_operand(buffer, *op.indices[index].extra_operand);
+				buffer.write(" + %i", op.indices[index].value.uint32);
+				break;
+			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
+				dump_operand(buffer, *op.indices[index].extra_operand);
+				buffer.write(" + %lli", op.indices[index].value.uint64.value);
+				break;
+			}
+		};
+
+		if (op.dimension >= D3D10_SB_OPERAND_INDEX_1D)
+		{
+			const auto add_brackets = op.type == D3D11_SB_OPERAND_TYPE_INPUT_CONTROL_POINT ||
+				op.type == D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT;
+			if (add_brackets)
+			{
+				buffer.write("[");
+			}
+
+			dump_index(0);
+
+			if (add_brackets)
+			{
+				buffer.write("]");
+			}
+		}
+
+		if (op.dimension >= D3D10_SB_OPERAND_INDEX_2D)
+		{
+			buffer.write("[");
+			dump_index(1);
+			buffer.write("]");
+		}
+
+		if (op.dimension == D3D10_SB_OPERAND_INDEX_3D)
+		{
+			buffer.write("[");
+			dump_index(2);
+			buffer.write("]");
 		}
 
 		const auto print_component = [&](const std::uint32_t component)

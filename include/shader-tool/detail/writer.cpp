@@ -4,6 +4,12 @@
 
 namespace alys::shader::detail
 {
+	void write_custom_operand(alys::utils::bit_buffer_le& output_buffer, const operand_t& operand)
+	{
+		assert(operand.custom.is_custom);
+		output_buffer.write_bytes(4, operand.custom.u.value);
+	}
+
 	void write_operand(utils::bit_buffer_le& output_buffer, const operand_t& operand)
 	{
 		output_buffer.write_bits(2, operand.components.type);
