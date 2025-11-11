@@ -6,10 +6,12 @@ namespace alys::shader::detail
 {
 	instruction_t dcl_global_flags::read(utils::bit_buffer_le& input_buffer)
 	{
-		instruction_t instruction;
+		instruction_t instruction{};
+
 		std::uint32_t length{};
 		instruction.opcode = read_opcode(input_buffer, length);
 		assert(length == 1u);
+
 		return instruction;
 	}
 

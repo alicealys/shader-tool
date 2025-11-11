@@ -57,6 +57,7 @@ namespace alys::shader::detail
 		bool is_custom;
 		union
 		{
+			float float32;
 			std::uint32_t value;
 			std::uint8_t values[4];
 		} u;

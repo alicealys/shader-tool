@@ -1,10 +1,10 @@
 #include "../../std_include.hpp"
 
-#include "dcl_input_ps_siv.hpp"
+#include "dcl_output_siv.hpp"
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_input_ps_siv::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_output_siv::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction{};
 		operand_t op1{};
@@ -25,7 +25,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_input_ps_siv::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_output_siv::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
@@ -34,10 +34,10 @@ namespace alys::shader::detail
 		output_buffer.write_bits(17, 0);
 	}
 
-	void dcl_input_ps_siv::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_output_siv::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_input_ps_siv");
-		buffer.write(" %s ", get_interpolation_name(instruction.opcode.controls));
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", ");
 		buffer.write("%s", get_name_token(instruction.operands[1].custom.u.value));

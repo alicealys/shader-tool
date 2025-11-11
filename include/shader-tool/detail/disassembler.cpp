@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	void dump_operand(utils::string_writer& buffer, const operand_t& op)
+	void dump_operand(utils::string_writer& buffer, const operand_t& op, bool float_imm)
 	{
 		if (!op.extensions.empty())
 		{
@@ -34,7 +34,14 @@ namespace alys::shader::detail
 			buffer.write("l(");
 			for (auto i = 0u; i < num_components; i++)
 			{
-				buffer.write("%f", op.immediate_values[0].float32);
+				if (float_imm)
+				{
+					buffer.write("%f", op.immediate_values[i].float32);
+				}
+				else
+				{
+					buffer.write("0x%X", op.immediate_values[i].uint32);
+				}
 				if (i < num_components - 1)
 				{
 					buffer.write(", ");
@@ -47,7 +54,14 @@ namespace alys::shader::detail
 			buffer.write("l(");
 			for (auto i = 0u; i < num_components; i++)
 			{
-				buffer.write("%f", op.immediate_values[0].float64);
+				if (float_imm)
+				{
+					buffer.write("%f", op.immediate_values[i].float64);
+				}
+				else
+				{
+					buffer.write("0x%X", op.immediate_values[i].uint64);
+				}
 				if (i < num_components - 1)
 				{
 					buffer.write(", ");
@@ -219,11 +233,11 @@ namespace alys::shader::detail
 		}
 	}
 
-	void dump_operands(utils::string_writer& buffer, const std::vector<operand_t>& operands)
+	void dump_operands(utils::string_writer& buffer, const std::vector<operand_t>& operands, bool float_imm)
 	{
 		for (auto i = 0; i < operands.size(); i++)
 		{
-			dump_operand(buffer, operands[i]);
+			dump_operand(buffer, operands[i], float_imm);
 
 			if (i < operands.size() - 1)
 			{

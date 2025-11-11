@@ -451,10 +451,20 @@ namespace alys::shader
 			}
 		};
 
-		write_chunk_type(chunk_isgn);
-		write_chunk_type(chunk_osgn);
-		write_chunk_type(chunk_osg5);
-		write_chunk_type(chunk_pcsg);
+		if (this->info_.program_type == domainshader)
+		{
+			write_chunk_type(chunk_isgn);
+			write_chunk_type(chunk_pcsg);
+			write_chunk_type(chunk_osgn);
+			write_chunk_type(chunk_osg5);
+		}
+		else
+		{
+			write_chunk_type(chunk_isgn);
+			write_chunk_type(chunk_osgn);
+			write_chunk_type(chunk_osg5);
+			write_chunk_type(chunk_pcsg);
+		}
 
 		for (const auto& chunk : this->unknown_chunks_)
 		{

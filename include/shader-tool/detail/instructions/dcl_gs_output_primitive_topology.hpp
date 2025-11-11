@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	class dcl_input_ps_siv final : public base_instruction
+	class dcl_gs_output_primitive_topology final : public base_instruction
 	{
 	public:
 		instruction_t read(utils::bit_buffer_le&);
