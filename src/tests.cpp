@@ -5,7 +5,6 @@
 #include <shader-tool/shader.hpp>
 
 #include <utils/io.hpp>
-#include <utils/cryptography.hpp>
 
 using namespace alys::shader::literals;
 
