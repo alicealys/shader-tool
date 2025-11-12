@@ -1,12 +1,14 @@
 #pragma once
 
-#include "generic.hpp"
+#include "base.hpp"
 
 namespace alys::shader::detail
 {
-	class dcl_sampler final : public declaration_instruction<1, 0>
+	class dcl_sampler final : public base_instruction
 	{
 	public:
-		void dump(utils::string_writer&, const instruction_t&) override;
+		instruction_t read(utils::bit_buffer_le&);
+		void write(utils::bit_buffer_le&, const instruction_t&);
+		void dump(utils::string_writer& buffer, const instruction_t&);
 	};
 }

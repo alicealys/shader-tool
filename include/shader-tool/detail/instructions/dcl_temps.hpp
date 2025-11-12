@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	class dcl_constant_buffer final : public base_instruction
+	class dcl_temps final : public base_instruction
 	{
 	public:
 		instruction_t read(utils::bit_buffer_le&);

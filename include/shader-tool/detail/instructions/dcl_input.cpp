@@ -1,10 +1,10 @@
 #include "../../std_include.hpp"
 
-#include "dcl_input_ps.hpp"
+#include "dcl_input.hpp"
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_input_ps::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_input::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction{};
 
@@ -15,16 +15,17 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_input_ps::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_input::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
 		write_operand(output_buffer, instruction.operands[0]);
 	}
 
-	void dcl_input_ps::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_input::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_input_ps %s", get_interpolation_name(instruction.opcode.controls));
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 	}
 }

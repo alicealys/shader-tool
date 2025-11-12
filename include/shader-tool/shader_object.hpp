@@ -245,6 +245,7 @@ namespace alys::shader
 			std::uint32_t minor_version;
 			std::uint32_t major_version;
 			std::uint32_t program_type;
+			std::uint32_t checksum[4];
 		};
 
 		using signature = std::vector<signature_element>;

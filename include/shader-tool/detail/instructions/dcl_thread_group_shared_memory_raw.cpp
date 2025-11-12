@@ -1,10 +1,10 @@
 #include "../../std_include.hpp"
 
-#include "dcl_unordered_access_view_structured.hpp"
+#include "dcl_thread_group_shared_memory_raw.hpp"
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_unordered_access_view_structured::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_thread_group_shared_memory_raw::read(utils::bit_buffer_le& input_buffer)
 	{
 		instruction_t instruction;
 
@@ -16,7 +16,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_unordered_access_view_structured::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_thread_group_shared_memory_raw::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
 	{
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
@@ -24,20 +24,9 @@ namespace alys::shader::detail
 		write_custom_operand(output_buffer, instruction.operands[1]);
 	}
 	
-	void dcl_unordered_access_view_structured::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_thread_group_shared_memory_raw::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		dump_opcode_name(buffer, instruction.opcode);
-
-		if (((instruction.opcode.controls >> 5) & 0x1) != 0)
-		{
-			buffer.write("_glc");
-		}
-
-		if (((instruction.opcode.controls >> 12) & 0x1) != 0)
-		{
-			buffer.write("_opc");
-		}
-
+		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", %i", instruction.operands[1].custom.u.value);

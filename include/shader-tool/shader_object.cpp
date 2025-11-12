@@ -278,6 +278,8 @@ namespace alys::shader
 			throw std::runtime_error("invalid shader data");
 		}
 
+		std::memcpy(obj.info_.checksum, header->checksum, sizeof(obj.info_.checksum));
+
 		for (auto i = 0u; i < header->chunk_count; i++)
 		{
 			const auto offset = chunk_offsets[i];

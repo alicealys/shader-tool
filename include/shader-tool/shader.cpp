@@ -9,8 +9,12 @@
 #include "detail/instructions/dcl_global_flags.hpp"
 #include "detail/instructions/dcl_gs_input_primitive.hpp"
 #include "detail/instructions/dcl_gs_output_primitive_topology.hpp"
+#include "detail/instructions/dcl_hs_fork_phase_instance_count.hpp"
+#include "detail/instructions/dcl_hs_join_phase_instance_count.hpp"
 #include "detail/instructions/dcl_hs_max_tessfactor.hpp"
+#include "detail/instructions/dcl_index_range.hpp"
 #include "detail/instructions/dcl_indexable_temp.hpp"
+#include "detail/instructions/dcl_input.hpp"
 #include "detail/instructions/dcl_input_control_point_count.hpp"
 #include "detail/instructions/dcl_input_ps.hpp"
 #include "detail/instructions/dcl_input_ps_sgv.hpp"
@@ -18,15 +22,23 @@
 #include "detail/instructions/dcl_input_sgv.hpp"
 #include "detail/instructions/dcl_input_siv.hpp"
 #include "detail/instructions/dcl_interface.hpp"
+#include "detail/instructions/dcl_max_output_vertex_count.hpp"
+#include "detail/instructions/dcl_output.hpp"
 #include "detail/instructions/dcl_output_control_point_count.hpp"
 #include "detail/instructions/dcl_output_sgv.hpp"
 #include "detail/instructions/dcl_output_siv.hpp"
 #include "detail/instructions/dcl_resource.hpp"
+#include "detail/instructions/dcl_resource_raw.hpp"
+#include "detail/instructions/dcl_resource_structured.hpp"
 #include "detail/instructions/dcl_sampler.hpp"
 #include "detail/instructions/dcl_stream.hpp"
+#include "detail/instructions/dcl_temps.hpp"
 #include "detail/instructions/dcl_tess_domain.hpp"
 #include "detail/instructions/dcl_tess_output_primitive.hpp"
 #include "detail/instructions/dcl_tess_partitioning.hpp"
+#include "detail/instructions/dcl_thread_group.hpp"
+#include "detail/instructions/dcl_thread_group_shared_memory_raw.hpp"
+#include "detail/instructions/dcl_thread_group_shared_memory_structured.hpp"
 #include "detail/instructions/dcl_unordered_access_view_raw.hpp"
 #include "detail/instructions/dcl_unordered_access_view_structured.hpp"
 #include "detail/instructions/dcl_unordered_access_view_typed.hpp"
@@ -147,20 +159,20 @@ namespace alys::shader
 				register_instruction_handler<dcl_resource>(D3D10_SB_OPCODE_DCL_RESOURCE);
 				register_instruction_handler<dcl_constant_buffer>(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER);
 				register_instruction_handler<dcl_sampler>(D3D10_SB_OPCODE_DCL_SAMPLER);
-				register_instruction_handler<declaration_instruction<1, 1>>(D3D10_SB_OPCODE_DCL_INDEX_RANGE);
+				register_instruction_handler<dcl_index_range>(D3D10_SB_OPCODE_DCL_INDEX_RANGE);
 				register_instruction_handler<dcl_gs_output_primitive_topology>(D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY);
 				register_instruction_handler<dcl_gs_input_primitive>(D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE);
-				register_instruction_handler<declaration_instruction<0, 1>>(D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_INPUT);
+				register_instruction_handler<dcl_max_output_vertex_count>(D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT);
+				register_instruction_handler<dcl_input>(D3D10_SB_OPCODE_DCL_INPUT);
 				register_instruction_handler<dcl_input_sgv>(D3D10_SB_OPCODE_DCL_INPUT_SGV);
 				register_instruction_handler<dcl_input_siv>(D3D10_SB_OPCODE_DCL_INPUT_SIV);
 				register_instruction_handler<dcl_input_ps>(D3D10_SB_OPCODE_DCL_INPUT_PS);
 				register_instruction_handler<dcl_input_ps_sgv>(D3D10_SB_OPCODE_DCL_INPUT_PS_SGV);
 				register_instruction_handler<dcl_input_ps_siv>(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D10_SB_OPCODE_DCL_OUTPUT);
+				register_instruction_handler<dcl_output>(D3D10_SB_OPCODE_DCL_OUTPUT);
 				register_instruction_handler<dcl_input_sgv>(D3D10_SB_OPCODE_DCL_OUTPUT_SGV);
 				register_instruction_handler<dcl_output_siv>(D3D10_SB_OPCODE_DCL_OUTPUT_SIV);
-				register_instruction_handler<declaration_instruction<0, 1>>(D3D10_SB_OPCODE_DCL_TEMPS);
+				register_instruction_handler<dcl_temps>(D3D10_SB_OPCODE_DCL_TEMPS);
 				register_instruction_handler<dcl_indexable_temp>(D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP);
 				register_instruction_handler<dcl_global_flags>(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS);
 
@@ -263,16 +275,16 @@ namespace alys::shader
 				register_instruction_handler<dcl_tess_partitioning>(D3D11_SB_OPCODE_DCL_TESS_PARTITIONING);
 				register_instruction_handler<dcl_tess_output_primitive>(D3D11_SB_OPCODE_DCL_TESS_OUTPUT_PRIMITIVE);
 				register_instruction_handler<dcl_hs_max_tessfactor>(D3D11_SB_OPCODE_DCL_HS_MAX_TESSFACTOR);
-				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT);
-				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT);
-				register_instruction_handler<declaration_instruction<0, 3>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP);
+				register_instruction_handler<dcl_hs_fork_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT);
+				register_instruction_handler<dcl_hs_join_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT);
+				register_instruction_handler<dcl_thread_group>(D3D11_SB_OPCODE_DCL_THREAD_GROUP);
 				register_instruction_handler<dcl_unordered_access_view_typed>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED);
 				register_instruction_handler<dcl_unordered_access_view_raw>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW);
 				register_instruction_handler<dcl_unordered_access_view_structured>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED);
-				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW);
-				register_instruction_handler<declaration_instruction<1, 2>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D11_SB_OPCODE_DCL_RESOURCE_RAW);
-				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED);
+				register_instruction_handler<dcl_thread_group_shared_memory_raw>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW);
+				register_instruction_handler<dcl_thread_group_shared_memory_structured>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED);
+				register_instruction_handler<dcl_resource_raw>(D3D11_SB_OPCODE_DCL_RESOURCE_RAW);
+				register_instruction_handler<dcl_resource_structured>(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED);
 
 				/* dx11.1 opcodes */
 

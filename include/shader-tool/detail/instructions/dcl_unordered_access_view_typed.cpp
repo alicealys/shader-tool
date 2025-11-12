@@ -39,16 +39,15 @@ namespace alys::shader::detail
 	
 	void dcl_unordered_access_view_typed::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		const auto& resource_return_type = instruction.operands[1].custom.u.values;
-		buffer.write("dcl_uav_typed");
+		dump_opcode_name(buffer, instruction.opcode);
 
-		const auto dimension = instruction.opcode.controls & 0x1F;
-		const auto glc = (instruction.opcode.controls >> 5) & 0x1;
-
-		if (glc)
+		if (((instruction.opcode.controls >> 5) & 0x1) != 0)
 		{
 			buffer.write("_glc");
 		}
+
+		const auto& resource_return_type = instruction.operands[1].custom.u.values;
+		const auto dimension = instruction.opcode.controls & 0x1F;
 
 		buffer.write("_%s", get_resource_dimension_name(dimension));
 		buffer.write(" (%s,%s,%s,%s) ", get_return_type_name(resource_return_type[0]),
