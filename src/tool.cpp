@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 
 #include "tool.hpp"
+#include "tests.hpp"
 
 #include <shader-tool/shader.hpp>
 
@@ -71,6 +72,11 @@ namespace tool
 			shader.print();
 		}
 
+		void run_tests(const std::vector<std::string>& args)
+		{
+			tests::run_tests();
+		}
+
 		void print_usage()
 		{
 			printf("usage: shader-tool [options]\n\n");
@@ -90,6 +96,7 @@ namespace tool
 
 			add_command("disassemble", disassemble_shader);
 			add_command("print", print_shader);
+			add_command("run_tests", run_tests);
 
 			std::vector<std::string> args;
 			for (auto i = 1; i < argc; i++)

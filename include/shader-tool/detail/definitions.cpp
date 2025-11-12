@@ -162,7 +162,7 @@ namespace alys::shader::detail
 		{D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT, "dcl_hs_fork_phase_instance_count"},
 		{D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT, "dcl_hs_join_phase_instance_count"},
 		{D3D11_SB_OPCODE_DCL_THREAD_GROUP, "dcl_thread_group"},
-		{D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED, "dcl_uav_view_typed"},
+		{D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED, "dcl_uav_typed"},
 		{D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW, "dcl_uav_raw"},
 		{D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED, "dcl_uav_structured"},
 		{D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW, "dcl_tgsm_raw"},

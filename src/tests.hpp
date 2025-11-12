@@ -2,5 +2,5 @@
 
 namespace tests
 {
-	void main(int argc, char** argv);
+	void run_tests();
 }
