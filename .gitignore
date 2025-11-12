@@ -149,4 +149,5 @@ user*.bat
 # Premake binary
 #premake5.exe
 
+src/tests.cpp
 generate_custom.bat

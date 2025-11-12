@@ -41,7 +41,15 @@ namespace alys::shader::detail
 				}
 				else
 				{
-					buffer.write("%i", op.immediate_values[i].int32);
+					if (op.immediate_values[i].int32 == std::numeric_limits<std::int32_t>::min() ||
+						op.immediate_values[i].int32 == std::numeric_limits<std::int32_t>::max())
+					{
+						buffer.write("0x%X", op.immediate_values[i].uint32);
+					}
+					else
+					{
+						buffer.write("%i", op.immediate_values[i].int32);
+					}
 				}
 
 				if (i < num_components - 1)
