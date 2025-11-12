@@ -8,6 +8,7 @@
 #include "detail/instructions/dcl_function_table.hpp"
 #include "detail/instructions/dcl_global_flags.hpp"
 #include "detail/instructions/dcl_gs_input_primitive.hpp"
+#include "detail/instructions/dcl_gs_instance_count.hpp"
 #include "detail/instructions/dcl_gs_output_primitive_topology.hpp"
 #include "detail/instructions/dcl_hs_fork_phase_instance_count.hpp"
 #include "detail/instructions/dcl_hs_join_phase_instance_count.hpp"
@@ -259,24 +260,23 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_EVAL_SNAPPED);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_EVAL_SAMPLE_INDEX);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_EVAL_CENTROID);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DCL_GS_INSTANCE_COUNT);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_ABORT);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DEBUG_BREAK);
 
 				/* dx11 declarations */
 
-				register_instruction_handler<dcl_stream>(D3D11_SB_OPCODE_DCL_STREAM);
-				register_instruction_handler<dcl_function_body>(D3D11_SB_OPCODE_DCL_FUNCTION_BODY);
-				register_instruction_handler<dcl_function_table>(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE);
-				register_instruction_handler<dcl_interface>(D3D11_SB_OPCODE_DCL_INTERFACE);
+				register_instruction_handler<dcl_stream>(D3D11_SB_OPCODE_DCL_STREAM); // untested
+				register_instruction_handler<dcl_function_body>(D3D11_SB_OPCODE_DCL_FUNCTION_BODY); // untested
+				register_instruction_handler<dcl_function_table>(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE); // untested
+				register_instruction_handler<dcl_interface>(D3D11_SB_OPCODE_DCL_INTERFACE); // untested
 				register_instruction_handler<dcl_input_control_point_count>(D3D11_SB_OPCODE_DCL_INPUT_CONTROL_POINT_COUNT);
 				register_instruction_handler<dcl_output_control_point_count>(D3D11_SB_OPCODE_DCL_OUTPUT_CONTROL_POINT_COUNT);
 				register_instruction_handler<dcl_tess_domain>(D3D11_SB_OPCODE_DCL_TESS_DOMAIN);
 				register_instruction_handler<dcl_tess_partitioning>(D3D11_SB_OPCODE_DCL_TESS_PARTITIONING);
 				register_instruction_handler<dcl_tess_output_primitive>(D3D11_SB_OPCODE_DCL_TESS_OUTPUT_PRIMITIVE);
 				register_instruction_handler<dcl_hs_max_tessfactor>(D3D11_SB_OPCODE_DCL_HS_MAX_TESSFACTOR);
-				register_instruction_handler<dcl_hs_fork_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT);
-				register_instruction_handler<dcl_hs_join_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT);
+				register_instruction_handler<dcl_hs_fork_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT); // untested
+				register_instruction_handler<dcl_hs_join_phase_instance_count>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT); // untested
 				register_instruction_handler<dcl_thread_group>(D3D11_SB_OPCODE_DCL_THREAD_GROUP);
 				register_instruction_handler<dcl_unordered_access_view_typed>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED);
 				register_instruction_handler<dcl_unordered_access_view_raw>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW);
@@ -285,6 +285,7 @@ namespace alys::shader
 				register_instruction_handler<dcl_thread_group_shared_memory_structured>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED);
 				register_instruction_handler<dcl_resource_raw>(D3D11_SB_OPCODE_DCL_RESOURCE_RAW);
 				register_instruction_handler<dcl_resource_structured>(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED);
+				register_instruction_handler<dcl_gs_instance_count>(D3D11_SB_OPCODE_DCL_GS_INSTANCE_COUNT); // untested
 
 				/* dx11.1 opcodes */
 
