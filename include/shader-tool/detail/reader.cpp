@@ -4,61 +4,62 @@
 
 namespace alys::shader::detail
 {
-	operand_t read_custom_operand(alys::utils::bit_buffer_le& bit_buffer)
+	operand_t read_custom_operand(alys::utils::bit_buffer_le& input_buffer)
 	{
 		operand_t op{};
 		op.custom.is_custom = true;
-		op.custom.u.value = bit_buffer.read_bytes(4);
+		op.custom.u.value = input_buffer.read_bytes(4);
 		return op;
 	}
 
-	operand_extended_t read_extended_operand(utils::bit_buffer_le& bit_buffer, bool& extended)
+	operand_extended_t read_extended_operand(utils::bit_buffer_le& input_buffer, bool& extended)
 	{
 		operand_extended_t operand{};
 
-		operand.type = bit_buffer.read_bits(6);
+		operand.type = input_buffer.read_bits(6);
 		if (operand.type == D3D10_SB_EXTENDED_OPERAND_MODIFIER)
 		{
-			operand.modifier = bit_buffer.read_bits(8);
-			bit_buffer.read_bits(17);
+			operand.modifier = input_buffer.read_bits(8);
+			operand.min_precision = input_buffer.read_bits(3);
 		}
 		else
 		{
-			bit_buffer.read_bits(25);
+			input_buffer.read_bits(11);
 		}
 
-		extended = bit_buffer.read_bits(1);
+		input_buffer.read_bits(14);
+		extended = input_buffer.read_bits(1);
 
 		return operand;
 	}
 
-	operand_t read_operand(utils::bit_buffer_le& bit_buffer)
+	operand_t read_operand(utils::bit_buffer_le& input_buffer)
 	{
 		operand_t operand{};
 
-		operand.components.type = bit_buffer.read_bits<std::uint8_t>(2);
+		operand.components.type = input_buffer.read_bits<std::uint8_t>(2);
 
 		switch (operand.components.type)
 		{
 		case D3D10_SB_OPERAND_4_COMPONENT:
 		{
-			operand.components.selection_mode = bit_buffer.read_bits<std::uint8_t>(2);
+			operand.components.selection_mode = input_buffer.read_bits<std::uint8_t>(2);
 			if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_MASK_MODE)
 			{
-				operand.components.mask = bit_buffer.read_bits<std::uint8_t>(4);
-				bit_buffer.read_bits(4);
+				operand.components.mask = input_buffer.read_bits<std::uint8_t>(4);
+				input_buffer.read_bits(4);
 			}
 			else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SWIZZLE_MODE)
 			{
-				operand.components.names[0] = bit_buffer.read_bits<std::uint8_t>(2);
-				operand.components.names[1] = bit_buffer.read_bits<std::uint8_t>(2);
-				operand.components.names[2] = bit_buffer.read_bits<std::uint8_t>(2);
-				operand.components.names[3] = bit_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[0] = input_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[1] = input_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[2] = input_buffer.read_bits<std::uint8_t>(2);
+				operand.components.names[3] = input_buffer.read_bits<std::uint8_t>(2);
 			}
 			else if (operand.components.selection_mode == D3D10_SB_OPERAND_4_COMPONENT_SELECT_1_MODE)
 			{
-				operand.components.names[0] = bit_buffer.read_bits<std::uint8_t>(2);
-				bit_buffer.read_bits(6);
+				operand.components.names[0] = input_buffer.read_bits<std::uint8_t>(2);
+				input_buffer.read_bits(6);
 			}
 
 			break;
@@ -66,21 +67,21 @@ namespace alys::shader::detail
 		case D3D10_SB_OPERAND_0_COMPONENT:
 		case D3D10_SB_OPERAND_1_COMPONENT:
 		default:
-			bit_buffer.read_bits(10);
+			input_buffer.read_bits(10);
 			break;
 		}
 
-		operand.type = bit_buffer.read_bits<std::uint8_t>(8);
-		operand.dimension = bit_buffer.read_bits<std::uint8_t>(2);
+		operand.type = input_buffer.read_bits<std::uint8_t>(8);
+		operand.dimension = input_buffer.read_bits<std::uint8_t>(2);
 
-		operand.indices[0].representation = bit_buffer.read_bits<std::uint8_t>(3);
-		operand.indices[1].representation = bit_buffer.read_bits<std::uint8_t>(3);
-		operand.indices[2].representation = bit_buffer.read_bits<std::uint8_t>(3);
+		operand.indices[0].representation = input_buffer.read_bits<std::uint8_t>(3);
+		operand.indices[1].representation = input_buffer.read_bits<std::uint8_t>(3);
+		operand.indices[2].representation = input_buffer.read_bits<std::uint8_t>(3);
 
-		auto extended = bit_buffer.read_bits<bool>(1);
+		auto extended = input_buffer.read_bits<bool>(1);
 		while (extended)
 		{
-			const auto operand_extended = read_extended_operand(bit_buffer, extended);
+			const auto operand_extended = read_extended_operand(input_buffer, extended);
 			operand.extensions.emplace_back(operand_extended);
 		}
 
@@ -89,23 +90,23 @@ namespace alys::shader::detail
 			switch (operand.indices[index].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-				operand.indices[index].value.uint32 = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint32 = input_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-				operand.indices[index].value.uint64.fields.low = bit_buffer.read_bytes(4);
-				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.low = input_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.high = input_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				operand.indices[index].value.uint32 = bit_buffer.read_bytes(4);
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].value.uint32 = input_buffer.read_bytes(4);
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				operand.indices[index].value.uint64.fields.low = bit_buffer.read_bytes(4);
-				operand.indices[index].value.uint64.fields.high = bit_buffer.read_bytes(4);
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(bit_buffer));
+				operand.indices[index].value.uint64.fields.low = input_buffer.read_bytes(4);
+				operand.indices[index].value.uint64.fields.high = input_buffer.read_bytes(4);
+				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			}
 		};
@@ -131,7 +132,7 @@ namespace alys::shader::detail
 		{
 			for (auto i = 0u; i < num_components; i++)
 			{
-				operand.immediate_values[i].uint32 = bit_buffer.read_bytes(4);
+				operand.immediate_values[i].uint32 = input_buffer.read_bytes(4);
 			}
 		}
 
@@ -139,7 +140,7 @@ namespace alys::shader::detail
 		{
 			for (auto i = 0u; i < num_components; i++)
 			{
-				operand.immediate_values[i].uint64.value = bit_buffer.read_bytes<std::uint64_t>(8);
+				operand.immediate_values[i].uint64.value = input_buffer.read_bytes<std::uint64_t>(8);
 			}
 		}
 
@@ -162,7 +163,15 @@ namespace alys::shader::detail
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
 			opcode.values[0] = input_buffer.read_bits(5);
-			input_buffer.read_bits(20);
+			if (opcode.values[0] == D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER)
+			{
+				opcode.values[1] = input_buffer.read_bits(12);
+				input_buffer.read_bits(8);
+			}
+			else
+			{
+				input_buffer.read_bits(20);
+			}
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
 			opcode.values[0] = input_buffer.read_bits(4);

@@ -7,27 +7,31 @@
 #include "detail/instructions/dcl_function_body.hpp"
 #include "detail/instructions/dcl_function_table.hpp"
 #include "detail/instructions/dcl_global_flags.hpp"
+#include "detail/instructions/dcl_gs_input_primitive.hpp"
+#include "detail/instructions/dcl_gs_output_primitive_topology.hpp"
+#include "detail/instructions/dcl_hs_max_tessfactor.hpp"
+#include "detail/instructions/dcl_indexable_temp.hpp"
 #include "detail/instructions/dcl_input_control_point_count.hpp"
 #include "detail/instructions/dcl_input_ps.hpp"
+#include "detail/instructions/dcl_input_ps_sgv.hpp"
 #include "detail/instructions/dcl_input_ps_siv.hpp"
+#include "detail/instructions/dcl_input_sgv.hpp"
+#include "detail/instructions/dcl_input_siv.hpp"
 #include "detail/instructions/dcl_interface.hpp"
 #include "detail/instructions/dcl_output_control_point_count.hpp"
+#include "detail/instructions/dcl_output_sgv.hpp"
+#include "detail/instructions/dcl_output_siv.hpp"
 #include "detail/instructions/dcl_resource.hpp"
 #include "detail/instructions/dcl_sampler.hpp"
 #include "detail/instructions/dcl_stream.hpp"
 #include "detail/instructions/dcl_tess_domain.hpp"
 #include "detail/instructions/dcl_tess_output_primitive.hpp"
 #include "detail/instructions/dcl_tess_partitioning.hpp"
-#include "detail/instructions/dcl_indexable_temp.hpp"
-#include "detail/instructions/dcl_hs_max_tessfactor.hpp"
-#include "detail/instructions/dcl_gs_input_primitive.hpp"
-#include "detail/instructions/dcl_gs_output_primitive_topology.hpp"
-#include "detail/instructions/dcl_output_siv.hpp"
-#include "detail/instructions/dcl_output_sgv.hpp"
-#include "detail/instructions/dcl_input_siv.hpp"
-#include "detail/instructions/dcl_input_ps_sgv.hpp"
-#include "detail/instructions/dcl_input_sgv.hpp"
+#include "detail/instructions/dcl_unordered_access_view_raw.hpp"
+#include "detail/instructions/dcl_unordered_access_view_structured.hpp"
+#include "detail/instructions/dcl_unordered_access_view_typed.hpp"
 #include "detail/instructions/generic.hpp"
+#include "detail/instructions/sync.hpp"
 
 #include "shader_object.hpp"
 
@@ -50,7 +54,7 @@ namespace alys::shader
 				/* dx10.0 opcodes */
 
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D10_SB_OPCODE_ADD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_AND);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_AND);
 				register_instruction_handler<general_instruction<flag_none>>(D3D10_SB_OPCODE_BREAK);
 				register_instruction_handler<general_instruction<flag_conditional>>(D3D10_SB_OPCODE_BREAKC);
 				register_instruction_handler<general_instruction<flag_none>>(D3D10_SB_OPCODE_CALL);
@@ -79,20 +83,20 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_FTOI);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_FTOU);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_GE);
-				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D10_SB_OPCODE_IADD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IADD);
 				register_instruction_handler<general_instruction<flag_conditional>>(D3D10_SB_OPCODE_IF);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IEQ);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IGE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_ILT);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IMAD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IMIN);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_IMUL);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_INE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_INEG);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_ISHL);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_ISHR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_ITOF);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IEQ);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IGE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_ILT);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IMAD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IMIN);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_IMUL);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_INE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_INEG);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_ISHL);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_ISHR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_ITOF);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_LABEL);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_LD);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_LD_MS);
@@ -127,16 +131,16 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D10_SB_OPCODE_SQRT);
 				register_instruction_handler<general_instruction<flag_none>>(D3D10_SB_OPCODE_SWITCH);
 				register_instruction_handler<general_instruction<flag_none>>(D3D10_SB_OPCODE_SINCOS);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UDIV);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_ULT);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UGE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UMUL);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UMAD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UMIN);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_USHR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_UTOF);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D10_SB_OPCODE_XOR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UDIV);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_ULT);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UGE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UMUL);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UMAD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UMIN);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_USHR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_UTOF);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D10_SB_OPCODE_XOR);
 
 				/* dx10 declarations */
 
@@ -188,16 +192,16 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_RCP);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_F32TOF16);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_F16TOF32);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_UADDC);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_USUBB);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_COUNTBITS);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_FIRSTBIT_HI);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_FIRSTBIT_LO);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_FIRSTBIT_SHI);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_UBFE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IBFE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_BFI);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_BFREV);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_UADDC);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_USUBB);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_COUNTBITS);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_FIRSTBIT_HI);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_FIRSTBIT_LO);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_FIRSTBIT_SHI);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_UBFE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IBFE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_BFI);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_BFREV);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_SWAPC);
 
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_LD_UAV_TYPED);
@@ -206,36 +210,36 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_STORE_RAW);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_LD_STRUCTURED);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_STORE_STRUCTURED);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_AND);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_OR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_XOR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_CMP_STORE);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_IADD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_IMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_IMIN);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_UMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_ATOMIC_UMIN);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_ALLOC);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_CONSUME);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_IADD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_AND);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_OR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_XOR);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_EXCH);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_CMP_EXCH);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_IMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_IMIN);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_UMAX);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_SB_OPCODE_IMM_ATOMIC_UMIN);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_SYNC);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_AND);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_OR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_XOR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_CMP_STORE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_IADD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_IMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_IMIN);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_UMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_ATOMIC_UMIN);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_ALLOC);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_CONSUME);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_IADD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_AND);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_OR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_XOR);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_EXCH);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_CMP_EXCH);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_IMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_IMIN);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_UMAX);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_IMM_ATOMIC_UMIN);
+				register_instruction_handler<sync>(D3D11_SB_OPCODE_SYNC);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DADD);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DMAX);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DMIN);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DMUL);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DEQ);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DGE);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DLT);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_DNE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_DEQ);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_DGE);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_DLT);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_DNE);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DMOV);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DMOVC);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_SB_OPCODE_DTOF);
@@ -262,9 +266,9 @@ namespace alys::shader
 				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT);
 				register_instruction_handler<declaration_instruction<0, 1>>(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT);
 				register_instruction_handler<declaration_instruction<0, 3>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP);
-				register_instruction_handler<dcl_resource>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED);
-				register_instruction_handler<declaration_instruction<1, 0>>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW);
-				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED);
+				register_instruction_handler<dcl_unordered_access_view_typed>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED);
+				register_instruction_handler<dcl_unordered_access_view_raw>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW);
+				register_instruction_handler<dcl_unordered_access_view_structured>(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED);
 				register_instruction_handler<declaration_instruction<1, 1>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW);
 				register_instruction_handler<declaration_instruction<1, 2>>(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED);
 				register_instruction_handler<declaration_instruction<1, 0>>(D3D11_SB_OPCODE_DCL_RESOURCE_RAW);
@@ -275,11 +279,11 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_1_SB_OPCODE_DDIV);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_1_SB_OPCODE_DFMA);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_1_SB_OPCODE_DRCP);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_1_SB_OPCODE_MSAD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_1_SB_OPCODE_MSAD);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_1_SB_OPCODE_DTOI);
 				register_instruction_handler<general_instruction<flag_precise>>(D3D11_1_SB_OPCODE_DTOU);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_1_SB_OPCODE_ITOD);
-				register_instruction_handler<general_instruction<flag_precise | flag_integer>>(D3D11_1_SB_OPCODE_UTOD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_1_SB_OPCODE_ITOD);
+				register_instruction_handler<general_instruction<flag_precise>>(D3D11_1_SB_OPCODE_UTOD);
 
 				/* wddm 1.3 opcodes */
 

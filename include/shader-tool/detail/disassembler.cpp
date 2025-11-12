@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	void dump_operand(utils::string_writer& buffer, const operand_t& op, bool float_imm)
+	void dump_operand(utils::string_writer& buffer, const operand_t& op)
 	{
 		if (!op.extensions.empty())
 		{
@@ -34,14 +34,16 @@ namespace alys::shader::detail
 			buffer.write("l(");
 			for (auto i = 0u; i < num_components; i++)
 			{
-				if (float_imm)
+				const auto type = std::fpclassify(op.immediate_values[i].float32);
+				if (type == FP_NORMAL)
 				{
 					buffer.write("%f", op.immediate_values[i].float32);
 				}
 				else
 				{
-					buffer.write("0x%X", op.immediate_values[i].uint32);
+					buffer.write("%i", op.immediate_values[i].int32);
 				}
+
 				if (i < num_components - 1)
 				{
 					buffer.write(", ");
@@ -54,14 +56,16 @@ namespace alys::shader::detail
 			buffer.write("l(");
 			for (auto i = 0u; i < num_components; i++)
 			{
-				if (float_imm)
+				const auto type = std::fpclassify(op.immediate_values[i].float64);
+				if (type == FP_NORMAL)
 				{
 					buffer.write("%f", op.immediate_values[i].float64);
 				}
 				else
 				{
-					buffer.write("0x%X", op.immediate_values[i].uint64);
+					buffer.write("%lli", op.immediate_values[i].int64);
 				}
+
 				if (i < num_components - 1)
 				{
 					buffer.write(", ");
@@ -233,11 +237,11 @@ namespace alys::shader::detail
 		}
 	}
 
-	void dump_operands(utils::string_writer& buffer, const std::vector<operand_t>& operands, bool float_imm)
+	void dump_operands(utils::string_writer& buffer, const std::vector<operand_t>& operands)
 	{
 		for (auto i = 0; i < operands.size(); i++)
 		{
-			dump_operand(buffer, operands[i], float_imm);
+			dump_operand(buffer, operands[i]);
 
 			if (i < operands.size() - 1)
 			{
@@ -254,7 +258,14 @@ namespace alys::shader::detail
 			buffer.write("(%i,%i,%i)", opcode.values[0], opcode.values[1], opcode.values[2]);
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
-			buffer.write("(%s)", get_resource_dimension_name(opcode.values[0]));
+			if (opcode.values[0] == D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER)
+			{
+				buffer.write("(%s, stride=%i)", get_resource_dimension_name(opcode.values[0]), opcode.values[1]);
+			}
+			else
+			{
+				buffer.write("(%s)", get_resource_dimension_name(opcode.values[0]));
+			}
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
 			buffer.write("(%s,%s,%s,%s)",

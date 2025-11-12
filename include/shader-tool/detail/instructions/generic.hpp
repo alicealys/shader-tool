@@ -10,7 +10,6 @@ namespace alys::shader::detail
 		flag_conditional = (1 << 0),
 		flag_saturate = (1 << 1),
 		flag_precise = (1 << 2),
-		flag_integer = (1 << 3),
 	};
 
 	template <std::uint32_t Flags = flag_none>
@@ -104,7 +103,7 @@ namespace alys::shader::detail
 			if (!instruction.operands.empty())
 			{
 				buffer.write(" ");
-				dump_operands(buffer, instruction.operands, (Flags & flag_integer) == 0);
+				dump_operands(buffer, instruction.operands);
 			}
 		}
 	};

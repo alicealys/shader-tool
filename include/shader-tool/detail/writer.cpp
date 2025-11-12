@@ -46,7 +46,8 @@ namespace alys::shader::detail
 		{
 			output_buffer.write_bits(6, operand.extensions[i].type);
 			output_buffer.write_bits(8, operand.extensions[i].modifier);
-			output_buffer.write_bits(17, 0);
+			output_buffer.write_bits(3, operand.extensions[i].min_precision);
+			output_buffer.write_bits(14, 0);
 			const auto is_not_last = i < operand.extensions.size() - 1;
 			output_buffer.write_bits(1, is_not_last);
 		}
@@ -124,7 +125,15 @@ namespace alys::shader::detail
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
 			output_buffer.write_bits(5, opcode.values[0]);
-			output_buffer.write_bits(20, 0);
+			if (opcode.values[0] == D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER)
+			{
+				output_buffer.write_bits(12, opcode.values[1]);
+				output_buffer.write_bits(8, 0);
+			}
+			else
+			{
+				output_buffer.write_bits(20, 0);
+			}
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
 			output_buffer.write_bits(4, opcode.values[0]);

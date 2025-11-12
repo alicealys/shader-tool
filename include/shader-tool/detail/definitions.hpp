@@ -24,7 +24,18 @@ namespace alys::shader::detail
 			std::uint64_t value;
 		} uint64;
 
+		union
+		{
+			union
+			{
+				std::int32_t low;
+				std::int32_t high;
+			} fields;
+			std::int64_t value;
+		} int64;
+
 		std::uint32_t uint32;
+		std::int32_t int32;
 		float float32;
 		double float64;
 	};
@@ -50,6 +61,7 @@ namespace alys::shader::detail
 	{
 		std::uint8_t type;
 		std::uint8_t modifier;
+		std::uint8_t min_precision;
 	};
 
 	struct operand_custom_t
