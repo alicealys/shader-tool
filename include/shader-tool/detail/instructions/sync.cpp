@@ -22,7 +22,7 @@ namespace alys::shader::detail
 
 	void sync::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("sync");
+		dump_opcode(buffer, instruction.opcode);
 
 		if ((instruction.opcode.controls & (1 << 0)) != 0)
 		{

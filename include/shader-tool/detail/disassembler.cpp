@@ -103,6 +103,7 @@ namespace alys::shader::detail
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
 				dump_operand(buffer, *op.indices[index].extra_operand);
+				buffer.write(" + 0");
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
 				dump_operand(buffer, *op.indices[index].extra_operand);
@@ -117,8 +118,11 @@ namespace alys::shader::detail
 
 		if (op.dimension >= D3D10_SB_OPERAND_INDEX_1D)
 		{
-			const auto add_brackets = op.type == D3D11_SB_OPERAND_TYPE_INPUT_CONTROL_POINT ||
-				op.type == D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT;
+			const auto add_brackets = 
+				op.type == D3D11_SB_OPERAND_TYPE_INPUT_CONTROL_POINT ||
+				op.type == D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT || 
+				op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER;
+
 			if (add_brackets)
 			{
 				buffer.write("[");

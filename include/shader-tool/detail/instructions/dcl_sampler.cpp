@@ -24,7 +24,8 @@ namespace alys::shader::detail
 
 	void dcl_sampler::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_sampler ");
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", ");
 

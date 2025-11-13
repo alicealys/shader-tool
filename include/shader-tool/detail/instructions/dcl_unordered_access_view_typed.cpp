@@ -39,7 +39,7 @@ namespace alys::shader::detail
 	
 	void dcl_unordered_access_view_typed::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		dump_opcode_name(buffer, instruction.opcode);
+		dump_opcode(buffer, instruction.opcode);
 
 		if (((instruction.opcode.controls >> 5) & 0x1) != 0)
 		{

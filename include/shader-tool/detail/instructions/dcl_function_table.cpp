@@ -45,7 +45,8 @@ namespace alys::shader::detail
 	void dcl_function_table::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
 		assert(instruction.operands.size() >= 2 && instruction.operands.size() == (2 + instruction.operands[1].custom.u.value));
-		buffer.write("dcl_function_table ft%i = {", instruction.operands[0].custom.u.value);
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ft%i = {", instruction.operands[0].custom.u.value);
 
 		const auto table_length = instruction.operands[1].custom.u.value;
 		for (auto i = 0u; i < table_length; i++)

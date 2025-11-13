@@ -30,7 +30,8 @@ namespace alys::shader::detail
 
 	void dcl_indexable_temp::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_indexableTemp x%i[%i], %i", 
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" x%i[%i], %i", 
 			instruction.operands[0].custom.u.value,
 			instruction.operands[1].custom.u.value,
 			instruction.operands[2].custom.u.value

@@ -52,7 +52,7 @@ namespace alys::shader::detail
 	{
 		assert(instruction.operands.size() >= 3);
 
-		buffer.write("dcl_interface");
+		dump_opcode(buffer, instruction.opcode);
 		if ((instruction.opcode.controls & 1) != 0)
 		{
 			buffer.write("_dynamicindexed");

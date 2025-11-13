@@ -36,7 +36,7 @@ namespace alys::shader::detail
 
 	void dcl_input_ps_siv::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_input_ps_siv");
+		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" %s ", get_interpolation_name(instruction.opcode.controls));
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", ");

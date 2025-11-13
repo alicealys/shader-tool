@@ -24,6 +24,7 @@ namespace alys::shader::detail
 
 	void dcl_function_body::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_function_body fb%i", instruction.operands[0].custom.u.value);
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" fb%i", instruction.operands[0].custom.u.value);
 	}
 }

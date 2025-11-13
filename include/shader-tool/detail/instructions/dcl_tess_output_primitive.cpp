@@ -22,7 +22,8 @@ namespace alys::shader::detail
 
 	void dcl_tess_output_primitive::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_tessellator_output_primitive ");
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		switch (instruction.opcode.controls)
 		{
 		case D3D11_SB_TESSELLATOR_OUTPUT_POINT:

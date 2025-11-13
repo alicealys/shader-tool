@@ -45,17 +45,27 @@ namespace alys::shader::detail
 		{
 			buffer.write("dcl_immediateConstantBuffer ");
 			const auto const_count = (instruction.customdata.count - 2) / 4;
-			buffer.write("\n{\n");
+
+			buffer.write(" {");
+
 			for (auto i = 0u; i < const_count; i++)
 			{
 				const auto values = &instruction.customdata.values[i * 4];
-				buffer.write("\t{%f, %f, %f, %f}", values[0].f32, values[1].f32, values[2].f32, values[3].f32);
+
+				if (i > 0)
+				{
+					buffer.write("                              ");
+				}
+
+				buffer.write(" { %f, %f, %f, %f}", values[0].f32, values[1].f32, values[2].f32, values[3].f32);
+
 				if (i < const_count - 1)
 				{
 					buffer.write(",\n");
 				}
 			}
-			buffer.write("\n}");
+
+			buffer.write(" }");
 		}
 		}
 	}

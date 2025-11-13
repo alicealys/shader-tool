@@ -95,7 +95,7 @@ namespace alys::shader::detail
 		{D3D10_SB_OPCODE_UTOF, "utof"},
 		{D3D10_SB_OPCODE_XOR, "xor"},
 		{D3D10_SB_OPCODE_DCL_RESOURCE, "dcl_resource"},
-		{D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, "dcl_constantBuffer"},
+		{D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, "dcl_constantbuffer"},
 		{D3D10_SB_OPCODE_DCL_SAMPLER, "dcl_sampler"},
 		{D3D10_SB_OPCODE_DCL_INDEX_RANGE, "dcl_indexRange"},
 		{D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, "dcl_outputTopology"},

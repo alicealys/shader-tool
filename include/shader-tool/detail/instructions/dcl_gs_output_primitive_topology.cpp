@@ -22,7 +22,8 @@ namespace alys::shader::detail
 
 	void dcl_gs_output_primitive_topology::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_outputTopology ");
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		switch (instruction.opcode.controls)
 		{
 			case D3D10_SB_PRIMITIVE_TOPOLOGY_POINTLIST:

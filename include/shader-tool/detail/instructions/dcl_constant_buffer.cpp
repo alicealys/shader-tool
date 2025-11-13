@@ -24,7 +24,8 @@ namespace alys::shader::detail
 
 	void dcl_constant_buffer::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_constantbuffer CB%i[%i], ", 
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" CB%i[%i], ", 
 			instruction.operands[0].indices[0].value.uint32,
 			instruction.operands[0].indices[1].value.uint32);
 

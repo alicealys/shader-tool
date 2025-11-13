@@ -22,7 +22,8 @@ namespace alys::shader::detail
 
 	void dcl_global_flags::dump(utils::string_writer& buffer, const instruction_t& instruction)
 	{
-		buffer.write("dcl_globalFlags ");
+		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 
 		std::vector<const char*> flags;
 
