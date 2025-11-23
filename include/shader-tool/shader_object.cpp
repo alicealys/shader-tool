@@ -154,46 +154,46 @@ namespace alys::shader
 		this->current_extensions_.clear();
 
 		const auto& def = detail::instruction_defs[type];
-		if (!def.empty())
+		if (def.empty())
 		{
-			for (auto i = 0u; i < def.size(); i++)
-			{
-				switch (def[i])
-				{
-				case detail::token_operand_0c:
-				{
-					detail::operand_t o = operands[i];
-					o.components.type = D3D10_SB_OPERAND_0_COMPONENT;
-					instruction.operands.emplace_back(o);
-					break;
-				}
-				case detail::token_operand_1c:
-				{
-					detail::operand_t o = operands[i];
-					o.components.type = D3D10_SB_OPERAND_1_COMPONENT;
-					instruction.operands.emplace_back(o);
-					break;
-				}
-				case detail::token_operand_4c_mask:
-					instruction.operands.emplace_back(operands[i].mask());
-					break;
-				case detail::token_operand_4c_swizzle:
-					instruction.operands.emplace_back(operands[i].swz_or_scalar());
-					break;
-				case detail::token_operand_4c_scalar:
-					instruction.operands.emplace_back(operands[i].scalar());
-					break;
-				case detail::token_custom:
-					instruction.operands.emplace_back(operands[i]);
-					break;
-				}
-			}
+			throw std::runtime_error("create_instruction: missing def");
 		}
-		else
+
+		if (def.size() != operands.size())
 		{
-			for (const auto& operand : operands)
+			throw std::runtime_error("create_instruction: invalid operand count");
+		}
+
+		for (auto i = 0u; i < def.size(); i++)
+		{
+			switch (def[i])
 			{
-				instruction.operands.emplace_back(operand);
+			case detail::token_operand_0c:
+			{
+				detail::operand_t o = operands[i];
+				o.components.type = D3D10_SB_OPERAND_0_COMPONENT;
+				instruction.operands.emplace_back(o);
+				break;
+			}
+			case detail::token_operand_1c:
+			{
+				detail::operand_t o = operands[i];
+				o.components.type = D3D10_SB_OPERAND_1_COMPONENT;
+				instruction.operands.emplace_back(o);
+				break;
+			}
+			case detail::token_operand_4c_mask:
+				instruction.operands.emplace_back(operands[i].mask());
+				break;
+			case detail::token_operand_4c_swizzle:
+				instruction.operands.emplace_back(operands[i].swz_or_scalar());
+				break;
+			case detail::token_operand_4c_scalar:
+				instruction.operands.emplace_back(operands[i].scalar());
+				break;
+			case detail::token_custom:
+				instruction.operands.emplace_back(operands[i]);
+				break;
 			}
 		}
 

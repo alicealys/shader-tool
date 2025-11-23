@@ -121,7 +121,7 @@ namespace alys::shader::detail
 			const auto add_brackets = 
 				op.type == D3D11_SB_OPERAND_TYPE_INPUT_CONTROL_POINT ||
 				op.type == D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT || 
-				op.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER;
+				op.indices[0].representation >= D3D10_SB_OPERAND_INDEX_RELATIVE;
 
 			if (add_brackets)
 			{
