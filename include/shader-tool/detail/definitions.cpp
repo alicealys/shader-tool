@@ -538,8 +538,7 @@ namespace alys::shader::detail
 	constexpr auto scalar = token_operand_4c_scalar;
 	constexpr auto custom = token_custom;
 
-	std::array<instruction_operands_t, D3D10_SB_NUM_OPCODES> instruction_defs;
-	std::unordered_map<std::uint32_t, instruction_operands_t> instruction_def_map
+	std::unordered_map<std::uint32_t, instruction_operands_t> instruction_defs
 	{
 		{D3D10_SB_OPCODE_ADD, {mask, swz, swz}},
 		{D3D10_SB_OPCODE_AND, {mask, swz, swz}},
@@ -778,16 +777,6 @@ namespace alys::shader::detail
 		//{D3DWDDM1_3_SB_OPCODE_CHECK_ACCESS_FULLY_MAPPED, {}},
 		//{D3DWDDM1_3_SB_OPCODE_RESERVED0, {}}
 	};
-	
-	void initialize_instruction_defs()
-	{
-		for (const auto& [op, def] : instruction_def_map)
-		{
-			instruction_defs[op] = def;
-		}
-	}
-
-	initializer _(initialize_instruction_defs);
 
 	const char* get_resource_dimension_name(const std::uint32_t dimension)
 	{

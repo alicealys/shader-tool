@@ -146,7 +146,7 @@ namespace alys::shader::detail
 
 	extern std::unordered_map<std::uint32_t, const char*> operand_names;
 
-	extern std::array<instruction_operands_t, D3D10_SB_NUM_OPCODES> instruction_defs;
+	extern std::unordered_map<std::uint32_t, instruction_operands_t> instruction_defs;
 
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);

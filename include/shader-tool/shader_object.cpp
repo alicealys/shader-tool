@@ -153,20 +153,20 @@ namespace alys::shader
 
 		this->current_extensions_.clear();
 
-		const auto& def = detail::instruction_defs[type];
-		if (def.empty())
+		const auto& iter = detail::instruction_defs.find(type);
+		if (iter == detail::instruction_defs.end())
 		{
-			throw std::runtime_error("create_instruction: missing def");
+			throw std::runtime_error(std::format("create_instruction: missing def for '%s'", detail::opcode_names[type]));
 		}
 
-		if (def.size() != operands.size())
+		if (iter->second.size() != operands.size())
 		{
 			throw std::runtime_error("create_instruction: invalid operand count");
 		}
 
-		for (auto i = 0u; i < def.size(); i++)
+		for (auto i = 0u; i < iter->second.size(); i++)
 		{
-			switch (def[i])
+			switch (iter->second[i])
 			{
 			case detail::token_operand_0c:
 			{
