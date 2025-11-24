@@ -1,15 +1,12 @@
 #include <std_include.hpp>
 
-#include "tool.hpp"
-
-//#define SHADER_TOOL_DEFINE_OPERATOR_COMPONENTS
 #include <shader-tool/shader.hpp>
 
 #include <utils/io.hpp>
 
 using namespace alys::shader::literals;
 
-int example1()
+void example1()
 {
 	alys::shader::shader_object shader(alys::shader::pixelshader);
 
@@ -23,12 +20,10 @@ int example1()
 
 	auto a = shader.get_assembler();
 
-	a.push_controls(refactoring_allowed | early_depth_stencil);
-	a.dcl_global_flags();
-	a.pop_controls();
+	a.dcl_globalFlags(refactoring_allowed | early_depth_stencil);
 
-	a.dcl_constant_buffer(cb1[6]);
-	a.dcl_constant_buffer(cb2[2]);
+	a.dcl_constantbuffer(cb1[6]);
+	a.dcl_constantbuffer(cb2[2]);
 
 	a.dcl_sampler(s0);
 	a.dcl_sampler(s3);
@@ -46,19 +41,19 @@ int example1()
 	a.pop_controls();
 
 	a.dcl_output(o0.xyzw());
-	a.dcl_temps(c(4));
+	a.dcl_temps(4);
 	a.dp3(r0.x(), v3.xyzx(), v3.xyzx());
-	a.rsq(r0.x(), r0.x().scalar());
+	a.rsq(r0.x(), r0.x());
 	a.mul(r0.xyz(), r0.x(), v3.xyzx());
 	a.add(r1.xyz(), -v4.xyzx(), cb1[4].xyzx());
 	a.dp3(r0.w(), r1.xyzx(), r1.xyzx());
-	a.rsq(r1.w(), r0.w().scalar());
-	a.sqrt(r0.w(), r0.w().scalar());
-	a.mul_sat(r0.w(), r0.w().scalar(), cb1[4].w().scalar());
+	a.rsq(r1.w(), r0.w());
+	a.sqrt(r0.w(), r0.w());
+	a.mul_sat(r0.w(), r0.w(), cb1[4].w());
 
 	a.add_extension(res_dim, texture2d);
 	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
-	a.sample(r2.xyz(), r0.wwww(), t3.xyzw(), s3);
+	a.sample_indexable(r2.xyz(), r0.wwww(), t3.xyzw(), s3);
 
 	a.mul(r2.xyz(), r2.xyzx(), r2.xyzx());
 	a.mul(r1.xyz(), r1.wwww(), r1.xyzx());
@@ -67,11 +62,11 @@ int example1()
 
 	a.add_extension(res_dim, texture2d);
 	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
-	a.sample(r1.xyzw(), v2.xyxx(), t0.xyzw(), s0);
+	a.sample_indexable(r1.xyzw(), v2.xyxx(), t0.xyzw(), s0);
 
 	a.mul(r3.xyzw(), r1.xyzw(), v1.xyzw());
-	a.mad(r0.w(), -r1.w().scalar(), v1.w().scalar(), l(1.f));
-	a.add(r0.w(), -r0.w().scalar(), l(1.f));
+	a.mad(r0.w(), -r1.w(), v1.w(), l(1.f));
+	a.add(r0.w(), -r0.w(), l(1.f));
 	a.mul(r1.xyz(), r0.wwww(), cb2[1].xyzx());
 	a.mul(r3.xyz(), r3.xyzx(), r3.xyzx());
 	a.mul(r3.xyz(), r3.xyzx(), r3.wwww());
@@ -81,12 +76,7 @@ int example1()
 	a.mov(o0.w(), l(0.f));
 	a.ret();
 
-	for (const auto& instruction : shader.get_instructions())
-	{
-		alys::shader::detail::print_instruction(instruction);
-	}
+	shader.print();
 
-	::utils::io::write_file("ps_test.cso", shader.serialize());
-
-	return 0;
+	utils::io::write_file("ps_test.cso", shader.serialize());
 }

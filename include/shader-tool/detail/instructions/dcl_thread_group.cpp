@@ -34,4 +34,9 @@ namespace alys::shader::detail
 			instruction.operands[1].custom.u.value,
 			instruction.operands[2].custom.u.value);
 	}
+
+	std::uint32_t dcl_thread_group::get_flags()
+	{
+		return flag_declaration;
+	}
 }

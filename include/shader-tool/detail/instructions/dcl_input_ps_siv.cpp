@@ -42,4 +42,9 @@ namespace alys::shader::detail
 		buffer.write(", ");
 		buffer.write("%s", get_name_token(instruction.operands[1].custom.u.value));
 	}
+
+	std::uint32_t dcl_input_ps_siv::get_flags()
+	{
+		return flag_declaration;
+	}
 }

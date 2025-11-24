@@ -37,4 +37,9 @@ namespace alys::shader::detail
 				break;
 		}
 	}
+
+	std::uint32_t dcl_gs_output_primitive_topology::get_flags()
+	{
+		return flag_declaration;
+	}
 }

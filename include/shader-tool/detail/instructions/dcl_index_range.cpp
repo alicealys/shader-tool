@@ -31,4 +31,9 @@ namespace alys::shader::detail
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", %i", instruction.operands[1].custom.u.value);
 	}
+
+	std::uint32_t dcl_index_range::get_flags()
+	{
+		return flag_declaration;
+	}
 }

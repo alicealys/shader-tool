@@ -16,6 +16,7 @@ namespace alys::shader
 {
 	namespace detail
 	{
+		void generate_instruction_methods(utils::string_writer& buffer);
 		instruction_t read_instruction(utils::bit_buffer_le& input_buffer);
 		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction);
 		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction);

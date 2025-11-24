@@ -75,4 +75,9 @@ namespace alys::shader::detail
 
 		buffer.write("}");
 	}
+
+	std::uint32_t dcl_interface::get_flags()
+	{
+		return flag_declaration;
+	}
 }

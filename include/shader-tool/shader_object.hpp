@@ -86,130 +86,751 @@ namespace alys::shader
 
 			void add_extension(const std::uint32_t type, const std::uint32_t x = 0u, const std::uint32_t y = 0u, const std::uint32_t z = 0u, const std::uint32_t w = 0u);
 
-			DEFINE_INSTRUCTION(add, D3D10_SB_OPCODE_ADD, 0);
-			DEFINE_INSTRUCTION(add_sat, D3D10_SB_OPCODE_ADD, 4);
-			DEFINE_INSTRUCTION(and_, D3D10_SB_OPCODE_AND, 0);
-			DEFINE_INSTRUCTION(break_, D3D10_SB_OPCODE_BREAK, 0);
-			DEFINE_INSTRUCTION(breakc, D3D10_SB_OPCODE_BREAKC, 0);
-			DEFINE_INSTRUCTION(call, D3D10_SB_OPCODE_CALL, 0);
-			DEFINE_INSTRUCTION(callc, D3D10_SB_OPCODE_CALLC, 0);
-			DEFINE_INSTRUCTION(case_, D3D10_SB_OPCODE_CASE, 0);
-			DEFINE_INSTRUCTION(continue_, D3D10_SB_OPCODE_CONTINUE, 0);
-			DEFINE_INSTRUCTION(continuec, D3D10_SB_OPCODE_CONTINUEC, 0);
-			DEFINE_INSTRUCTION(cut, D3D10_SB_OPCODE_CUT, 0);
-			DEFINE_INSTRUCTION(default_, D3D10_SB_OPCODE_DEFAULT, 0);
-			DEFINE_INSTRUCTION(deriv_rtx, D3D10_SB_OPCODE_DERIV_RTX, 0);
-			DEFINE_INSTRUCTION(deriv_rty, D3D10_SB_OPCODE_DERIV_RTY, 0);
-			DEFINE_INSTRUCTION(discard, D3D10_SB_OPCODE_DISCARD, 0);
-			DEFINE_INSTRUCTION(div, D3D10_SB_OPCODE_DIV, 0);
-			DEFINE_INSTRUCTION(div_sat, D3D10_SB_OPCODE_DIV, 4);
-			DEFINE_INSTRUCTION(dp2, D3D10_SB_OPCODE_DP2, 0);
-			DEFINE_INSTRUCTION(dp2_sat, D3D10_SB_OPCODE_DP2, 4);
-			DEFINE_INSTRUCTION(dp3, D3D10_SB_OPCODE_DP3, 0);
-			DEFINE_INSTRUCTION(dp3_sat, D3D10_SB_OPCODE_DP3, 4);
-			DEFINE_INSTRUCTION(dp4, D3D10_SB_OPCODE_DP4, 0);
-			DEFINE_INSTRUCTION(dp4_sat, D3D10_SB_OPCODE_DP4, 4);
-			DEFINE_INSTRUCTION(else_, D3D10_SB_OPCODE_ELSE, 0);
-			DEFINE_INSTRUCTION(emit, D3D10_SB_OPCODE_EMIT, 0);
-			DEFINE_INSTRUCTION(emitthencut, D3D10_SB_OPCODE_EMITTHENCUT, 0);
-			DEFINE_INSTRUCTION(endif, D3D10_SB_OPCODE_ENDIF, 0);
-			DEFINE_INSTRUCTION(endloop, D3D10_SB_OPCODE_ENDLOOP, 0);
-			DEFINE_INSTRUCTION(endswitch, D3D10_SB_OPCODE_ENDSWITCH, 0);
-			DEFINE_INSTRUCTION(eq, D3D10_SB_OPCODE_EQ, 0);
-			DEFINE_INSTRUCTION(exp, D3D10_SB_OPCODE_EXP, 0);
-			DEFINE_INSTRUCTION(frc, D3D10_SB_OPCODE_FRC, 0);
-			DEFINE_INSTRUCTION(ftoi, D3D10_SB_OPCODE_FTOI, 0);
-			DEFINE_INSTRUCTION(ftou, D3D10_SB_OPCODE_FTOU, 0);
-			DEFINE_INSTRUCTION(ge, D3D10_SB_OPCODE_GE, 0);
-			DEFINE_INSTRUCTION(iadd, D3D10_SB_OPCODE_IADD, 0);
-			DEFINE_INSTRUCTION(if_nz, D3D10_SB_OPCODE_IF, 128);
-			DEFINE_INSTRUCTION(if_z, D3D10_SB_OPCODE_IF, 0);
-			DEFINE_INSTRUCTION(ieq, D3D10_SB_OPCODE_IEQ, 0);
-			DEFINE_INSTRUCTION(ige, D3D10_SB_OPCODE_IGE, 0);
-			DEFINE_INSTRUCTION(ilt, D3D10_SB_OPCODE_ILT, 0);
-			DEFINE_INSTRUCTION(imad, D3D10_SB_OPCODE_IMAD, 0);
-			DEFINE_INSTRUCTION(imax, D3D10_SB_OPCODE_IMAX, 0);
-			DEFINE_INSTRUCTION(imin, D3D10_SB_OPCODE_IMIN, 0);
-			DEFINE_INSTRUCTION(imul, D3D10_SB_OPCODE_IMUL, 0);
-			DEFINE_INSTRUCTION(ine, D3D10_SB_OPCODE_INE, 0);
-			DEFINE_INSTRUCTION(ineg, D3D10_SB_OPCODE_INEG, 0);
-			DEFINE_INSTRUCTION(ishl, D3D10_SB_OPCODE_ISHL, 0);
-			DEFINE_INSTRUCTION(ishr, D3D10_SB_OPCODE_ISHR, 0);
-			DEFINE_INSTRUCTION(itof, D3D10_SB_OPCODE_ITOF, 0);
-			DEFINE_INSTRUCTION(label, D3D10_SB_OPCODE_LABEL, 0);
-			DEFINE_INSTRUCTION(ld, D3D10_SB_OPCODE_LD, 0);
-			DEFINE_INSTRUCTION(ld_ms, D3D10_SB_OPCODE_LD_MS, 0);
-			DEFINE_INSTRUCTION(log, D3D10_SB_OPCODE_LOG, 0);
-			DEFINE_INSTRUCTION(loop, D3D10_SB_OPCODE_LOOP, 0);
-			DEFINE_INSTRUCTION(lt, D3D10_SB_OPCODE_LT, 0);
-			DEFINE_INSTRUCTION(mad, D3D10_SB_OPCODE_MAD, 0);
-			DEFINE_INSTRUCTION(mad_sat, D3D10_SB_OPCODE_MAD, 4);
-			DEFINE_INSTRUCTION(min, D3D10_SB_OPCODE_MIN, 0);
-			DEFINE_INSTRUCTION(min_sat, D3D10_SB_OPCODE_MIN, 4);
-			DEFINE_INSTRUCTION(max, D3D10_SB_OPCODE_MAX, 0);
-			DEFINE_INSTRUCTION(max_sat, D3D10_SB_OPCODE_MAX, 4);
-			DEFINE_INSTRUCTION(mov, D3D10_SB_OPCODE_MOV, 0);
-			DEFINE_INSTRUCTION(mov_sat, D3D10_SB_OPCODE_MOV, 4);
-			DEFINE_INSTRUCTION(movc, D3D10_SB_OPCODE_MOVC, 0);
-			DEFINE_INSTRUCTION(movc_sat, D3D10_SB_OPCODE_MOVC, 4);
-			DEFINE_INSTRUCTION(mul, D3D10_SB_OPCODE_MUL, 0);
-			DEFINE_INSTRUCTION(mul_sat, D3D10_SB_OPCODE_MUL, 4);
-			DEFINE_INSTRUCTION(ne, D3D10_SB_OPCODE_NE, 0);
-			DEFINE_INSTRUCTION(nop, D3D10_SB_OPCODE_NOP, 0);
-			DEFINE_INSTRUCTION(not_, D3D10_SB_OPCODE_NOT, 0);
-			DEFINE_INSTRUCTION(or_, D3D10_SB_OPCODE_OR, 0);
-			DEFINE_INSTRUCTION(resinfo, D3D10_SB_OPCODE_RESINFO, 0);
-			DEFINE_INSTRUCTION(ret, D3D10_SB_OPCODE_RET, 0);
-			DEFINE_INSTRUCTION(retc_z, D3D10_SB_OPCODE_RETC, 0);
-			DEFINE_INSTRUCTION(retc_nz, D3D10_SB_OPCODE_RETC, 128);
-			DEFINE_INSTRUCTION(round_ne, D3D10_SB_OPCODE_ROUND_NE, 0);
-			DEFINE_INSTRUCTION(round_ni, D3D10_SB_OPCODE_ROUND_NI, 0);
-			DEFINE_INSTRUCTION(round_pi, D3D10_SB_OPCODE_ROUND_PI, 0);
-			DEFINE_INSTRUCTION(round_z, D3D10_SB_OPCODE_ROUND_Z, 0);
-			DEFINE_INSTRUCTION(rsq, D3D10_SB_OPCODE_RSQ, 0);
-			DEFINE_INSTRUCTION(sample, D3D10_SB_OPCODE_SAMPLE, 0);
-			DEFINE_INSTRUCTION(sample_c, D3D10_SB_OPCODE_SAMPLE_C, 0);
-			DEFINE_INSTRUCTION(sample_c_lz, D3D10_SB_OPCODE_SAMPLE_C_LZ, 0);
-			DEFINE_INSTRUCTION(sample_l, D3D10_SB_OPCODE_SAMPLE_L, 0);
-			DEFINE_INSTRUCTION(sample_d, D3D10_SB_OPCODE_SAMPLE_D, 0);
-			DEFINE_INSTRUCTION(sample_b, D3D10_SB_OPCODE_SAMPLE_B, 0);
-			DEFINE_INSTRUCTION(sqrt, D3D10_SB_OPCODE_SQRT, 0);
-			DEFINE_INSTRUCTION(sqrt_sat, D3D10_SB_OPCODE_SQRT, 4);
-			DEFINE_INSTRUCTION(switch_, D3D10_SB_OPCODE_SWITCH, 0);
-			DEFINE_INSTRUCTION(sincos, D3D10_SB_OPCODE_SINCOS, 0);
-			DEFINE_INSTRUCTION(udiv, D3D10_SB_OPCODE_UDIV, 0);
-			DEFINE_INSTRUCTION(ult, D3D10_SB_OPCODE_ULT, 0);
-			DEFINE_INSTRUCTION(uge, D3D10_SB_OPCODE_UGE, 0);
-			DEFINE_INSTRUCTION(umul, D3D10_SB_OPCODE_UMUL, 0);
-			DEFINE_INSTRUCTION(umad, D3D10_SB_OPCODE_UMAD, 0);
-			DEFINE_INSTRUCTION(umax, D3D10_SB_OPCODE_UMAX, 0);
-			DEFINE_INSTRUCTION(umin, D3D10_SB_OPCODE_UMIN, 0);
-			DEFINE_INSTRUCTION(ushr, D3D10_SB_OPCODE_USHR, 0);
-			DEFINE_INSTRUCTION(utof, D3D10_SB_OPCODE_UTOF, 0);
-			DEFINE_INSTRUCTION(xor_, D3D10_SB_OPCODE_XOR, 0);
-			DEFINE_INSTRUCTION(dcl_resource, D3D10_SB_OPCODE_DCL_RESOURCE, 0);
-			DEFINE_INSTRUCTION(dcl_constant_buffer, D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, 0);
-			DEFINE_INSTRUCTION(dcl_sampler, D3D10_SB_OPCODE_DCL_SAMPLER, 0);
-			DEFINE_INSTRUCTION(dcl_index_range, D3D10_SB_OPCODE_DCL_INDEX_RANGE, 0);
-			DEFINE_INSTRUCTION(dcl_gs_output_primitive_topology, D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, 0);
-			DEFINE_INSTRUCTION(dcl_gs_input_primitive, D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE, 0);
-			DEFINE_INSTRUCTION(dcl_max_output_vertex_count, D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT, 0);
-			DEFINE_INSTRUCTION(dcl_input, D3D10_SB_OPCODE_DCL_INPUT, 0);
-			DEFINE_INSTRUCTION(dcl_input_sgv, D3D10_SB_OPCODE_DCL_INPUT_SGV, 0);
-			DEFINE_INSTRUCTION(dcl_input_siv, D3D10_SB_OPCODE_DCL_INPUT_SIV, 0);
-			DEFINE_INSTRUCTION(dcl_input_ps, D3D10_SB_OPCODE_DCL_INPUT_PS, 0);
-			DEFINE_INSTRUCTION(dcl_input_ps_sgv, D3D10_SB_OPCODE_DCL_INPUT_PS_SGV, 0);
-			DEFINE_INSTRUCTION(dcl_input_ps_siv, D3D10_SB_OPCODE_DCL_INPUT_PS_SIV, 0);
-			DEFINE_INSTRUCTION(dcl_output, D3D10_SB_OPCODE_DCL_OUTPUT, 0);
-			DEFINE_INSTRUCTION(dcl_output_sgv, D3D10_SB_OPCODE_DCL_OUTPUT_SGV, 0);
-			DEFINE_INSTRUCTION(dcl_output_siv, D3D10_SB_OPCODE_DCL_OUTPUT_SIV, 0);
-			DEFINE_INSTRUCTION(dcl_temps, D3D10_SB_OPCODE_DCL_TEMPS, 0);
-			DEFINE_INSTRUCTION(dcl_indexable_temp, D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP, 0);
-			DEFINE_INSTRUCTION(dcl_global_flags, D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, 0);
+			void round_ne_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NE, 4, {op0, op1}));
+			}
+
+			// shader::generate_instruction_methods
+
+			void round_ne(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NE, 0, {op0, op1}));
+			}
+
+			void add_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ADD, 4, {op0, op1, op2}));
+			}
+
+			void add(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ADD, 0, {op0, op1, op2}));
+			}
+
+			void and_(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_AND, 0, {op0, op1, op2}));
+			}
+
+			void break_()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAK, 0, {}));
+			}
+
+			void breakc_nz(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAKC, 128, {op0}));
+			}
+
+			void breakc_z(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAKC, 0, {op0}));
+			}
+
+			void call(const detail::arg::as_0c& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALL, 0, {op0}));
+			}
+
+			void callc_nz(const detail::arg::as_scalar& op0, const detail::arg::as_0c& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALLC, 128, {op0, op1}));
+			}
+
+			void callc_z(const detail::arg::as_scalar& op0, const detail::arg::as_0c& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALLC, 0, {op0, op1}));
+			}
+
+			void case_(const detail::arg::as_1c& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CASE, 0, {op0}));
+			}
+
+			void continue_()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUE, 0, {}));
+			}
+
+			void continuec_nz(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUEC, 128, {op0}));
+			}
+
+			void continuec_z(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUEC, 0, {op0}));
+			}
+
+			void cut()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_CUT, 0, {}));
+			}
+
+			void default_()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DEFAULT, 0, {}));
+			}
+
+			void deriv_rtx_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTX, 4, {op0, op1}));
+			}
+
+			void deriv_rtx(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTX, 0, {op0, op1}));
+			}
+
+			void deriv_rty_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTY, 4, {op0, op1}));
+			}
+
+			void deriv_rty(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTY, 0, {op0, op1}));
+			}
+
+			void discard_nz(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DISCARD, 128, {op0}));
+			}
+
+			void discard_z(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DISCARD, 0, {op0}));
+			}
+
+			void div_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DIV, 4, {op0, op1, op2}));
+			}
+
+			void div(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DIV, 0, {op0, op1, op2}));
+			}
+
+			void dp2_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP2, 4, {op0, op1, op2}));
+			}
+
+			void dp2(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP2, 0, {op0, op1, op2}));
+			}
+
+			void dp3_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP3, 4, {op0, op1, op2}));
+			}
+
+			void dp3(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP3, 0, {op0, op1, op2}));
+			}
+
+			void dp4_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP4, 4, {op0, op1, op2}));
+			}
+
+			void dp4(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP4, 0, {op0, op1, op2}));
+			}
+
+			void else_()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ELSE, 0, {}));
+			}
+
+			void emit()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_EMIT, 0, {}));
+			}
+
+			void emitthencut()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_EMITTHENCUT, 0, {}));
+			}
+
+			void endif()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDIF, 0, {}));
+			}
+
+			void endloop()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDLOOP, 0, {}));
+			}
+
+			void endswitch()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDSWITCH, 0, {}));
+			}
+
+			void eq(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_EQ, 0, {op0, op1, op2}));
+			}
+
+			void exp_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_EXP, 4, {op0, op1}));
+			}
+
+			void exp(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_EXP, 0, {op0, op1}));
+			}
+
+			void frc(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_FRC, 0, {op0, op1}));
+			}
+
+			void ftoi(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_FTOI, 0, {op0, op1}));
+			}
+
+			void ftou(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_FTOU, 0, {op0, op1}));
+			}
+
+			void ge(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_GE, 0, {op0, op1, op2}));
+			}
+
+			void iadd(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IADD, 0, {op0, op1, op2}));
+			}
+
+			void if_nz(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IF, 128, {op0}));
+			}
+
+			void if_z(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IF, 0, {op0}));
+			}
+
+			void ieq(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IEQ, 0, {op0, op1, op2}));
+			}
+
+			void ige(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IGE, 0, {op0, op1, op2}));
+			}
+
+			void ilt(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ILT, 0, {op0, op1, op2}));
+			}
+
+			void imad(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMAD, 0, {op0, op1, op2, op3}));
+			}
+
+			void imax(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMAX, 0, {op0, op1, op2}));
+			}
+
+			void imin(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMIN, 0, {op0, op1, op2}));
+			}
+
+			void imul(const detail::arg::as_mask& op0, const detail::arg::as_mask& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMUL, 0, {op0, op1, op2, op3}));
+			}
+
+			void ine(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_INE, 0, {op0, op1}));
+			}
+
+			void ineg(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_INEG, 0, {op0, op1}));
+			}
+
+			void ishl(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_scalar& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ISHL, 0, {op0, op1, op2}));
+			}
+
+			void ishr(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_scalar& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ISHR, 0, {op0, op1, op2}));
+			}
+
+			void itof(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ITOF, 0, {op0, op1}));
+			}
+
+			void label(const detail::arg::as_0c& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LABEL, 0, {op0}));
+			}
+
+			void ld(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LD, 0, {op0, op1, op2}));
+			}
+
+			void ld_ms(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_scalar& op2, const detail::arg::as_1c& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LD_MS, 0, {op0, op1, op2, op3}));
+			}
+
+			void log(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LOG, 0, {op0, op1}));
+			}
+
+			void loop()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LOOP, 0, {}));
+			}
+
+			void lt(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_LT, 0, {op0, op1, op2}));
+			}
+
+			void mad_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAD, 4, {op0, op1, op2, op3}));
+			}
+
+			void mad(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAD, 0, {op0, op1, op2, op3}));
+			}
+
+			void min_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MIN, 4, {op0, op1, op2}));
+			}
+
+			void min(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MIN, 0, {op0, op1, op2}));
+			}
+
+			void max_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAX, 4, {op0, op1, op2}));
+			}
+
+			void max(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAX, 0, {op0, op1, op2}));
+			}
+
+			void mov_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOV, 4, {op0, op1}));
+			}
+
+			void mov(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOV, 0, {op0, op1}));
+			}
+
+			void movc_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOVC, 4, {op0, op1, op2, op3}));
+			}
+
+			void movc(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOVC, 0, {op0, op1, op2, op3}));
+			}
+
+			void mul_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MUL, 4, {op0, op1, op2}));
+			}
+
+			void mul(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_MUL, 0, {op0, op1, op2}));
+			}
+
+			void ne(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_NE, 0, {op0, op1, op2}));
+			}
+
+			void nop()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_NOP, 0, {}));
+			}
+
+			void not_(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_NOT, 0, {op0, op1}));
+			}
+
+			void or_(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_OR, 0, {op0, op1, op2}));
+			}
+
+			void resinfo_indexable(const detail::arg::as_mask& op0, const detail::arg::as_scalar& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 0, {op0, op1, op2}));
+			}
+
+			void ret()
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RET, 0, {}));
+			}
+
+			void retc_nz(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RETC, 128, {op0}));
+			}
+
+			void retc_z(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RETC, 0, {op0}));
+			}
+
+			void round_ni_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NI, 4, {op0, op1}));
+			}
+
+			void round_ni(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NI, 0, {op0, op1}));
+			}
+
+			void round_pi_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_PI, 4, {op0, op1}));
+			}
+
+			void round_pi(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_PI, 0, {op0, op1}));
+			}
+
+			void round_z_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_Z, 4, {op0, op1}));
+			}
+
+			void round_z(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_Z, 0, {op0, op1}));
+			}
+
+			void rsq_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RSQ, 4, {op0, op1}));
+			}
+
+			void rsq(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_RSQ, 0, {op0, op1}));
+			}
+
+			void sample_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE, 0, {op0, op1, op2, op3}));
+			}
+
+			void sample_c_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3, const detail::arg::as_0c& op4, const detail::arg::as_0c& op5)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_C, 0, {op0, op1, op2, op3, op4, op5}));
+			}
+
+			void sample_c_lz_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3, const detail::arg::as_0c& op4, const detail::arg::as_0c& op5)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_C_LZ, 0, {op0, op1, op2, op3, op4, op5}));
+			}
+
+			void sample_l_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3, const detail::arg::as_scalar& op4)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_L, 0, {op0, op1, op2, op3, op4}));
+			}
+
+			void sample_d_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3, const detail::arg::as_swz& op4, const detail::arg::as_swz& op5)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_D, 0, {op0, op1, op2, op3, op4, op5}));
+			}
+
+			void sample_b_indexable(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_0c& op3, const detail::arg::as_scalar& op4)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_B, 0, {op0, op1, op2, op3, op4}));
+			}
+
+			void sqrt_sat(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SQRT, 4, {op0, op1}));
+			}
+
+			void sqrt(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SQRT, 0, {op0, op1}));
+			}
+
+			void switch_(const detail::arg::as_scalar& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SWITCH, 0, {op0}));
+			}
+
+			void sincos(const detail::arg::as_mask& op0, const detail::arg::as_mask& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_SINCOS, 0, {op0, op1, op2}));
+			}
+
+			void udiv(const detail::arg::as_mask& op0, const detail::arg::as_mask& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UDIV, 0, {op0, op1, op2, op3}));
+			}
+
+			void ult(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_ULT, 0, {op0, op1, op2}));
+			}
+
+			void uge(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UGE, 0, {op0, op1, op2}));
+			}
+
+			void umul(const detail::arg::as_mask& op0, const detail::arg::as_mask& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMUL, 0, {op0, op1, op2, op3}));
+			}
+
+			void umad(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2, const detail::arg::as_swz& op3)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMAD, 0, {op0, op1, op2, op3}));
+			}
+
+			void umax(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMAX, 0, {op0, op1, op2}));
+			}
+
+			void umin(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMIN, 0, {op0, op1, op2}));
+			}
+
+			void ushr(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_scalar& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_USHR, 0, {op0, op1, op2}));
+			}
+
+			void utof(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_UTOF, 0, {op0, op1}));
+			}
+
+			void xor_(const detail::arg::as_mask& op0, const detail::arg::as_swz& op1, const detail::arg::as_swz& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_XOR, 0, {op0, op1, op2}));
+			}
+
+			void dcl_resource(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_RESOURCE, 0, {op0, op1}));
+			}
+
+			void dcl_constantbuffer(const detail::arg::as_swz& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, 0, {op0}));
+			}
+
+			void dcl_sampler(const detail::arg::as_0c& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_SAMPLER, 0, {op0}));
+			}
+
+			void dcl_indexRange(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INDEX_RANGE, 0, {op0, op1}));
+			}
+
+			void dcl_outputTopology(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, controls, {}));
+			}
+
+			void dcl_inputPrimitive(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE, controls, {}));
+			}
+
+			void dcl_maxOutputVertexCount(const detail::arg::as_custom& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT, 0, {op0}));
+			}
+
+			void dcl_input(const detail::arg::as_mask& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT, 0, {op0}));
+			}
+
+			void dcl_input_sgv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_SGV, 0, {op0, op1}));
+			}
+
+			void dcl_input_siv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_SIV, 0, {op0, op1}));
+			}
+
+			void dcl_input_ps(const detail::arg::as_mask& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS, 0, {op0}));
+			}
+
+			void dcl_input_ps_sgv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS_SGV, 0, {op0, op1}));
+			}
+
+			void dcl_input_ps_siv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV, 0, {op0, op1}));
+			}
+
+			void dcl_output(const detail::arg::as_mask& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT, 0, {op0}));
+			}
+
+			void dcl_output_sgv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT_SGV, 0, {op0, op1}));
+			}
+
+			void dcl_output_siv(const detail::arg::as_mask& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT_SIV, 0, {op0, op1}));
+			}
+
+			void dcl_temps(const detail::arg::as_custom& op0)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_TEMPS, 0, {op0}));
+			}
+
+			void dcl_indexableTemp(const detail::arg::as_custom& op0, const detail::arg::as_custom& op1, const detail::arg::as_custom& op2)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP, 0, {op0, op1, op2}));
+			}
+
+			void dcl_globalFlags(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, controls, {}));
+			}
+
+			void dcl_input_control_point_count(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INPUT_CONTROL_POINT_COUNT, controls, {}));
+			}
+
+			void dcl_output_control_point_count(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_OUTPUT_CONTROL_POINT_COUNT, controls, {}));
+			}
+
+			void dcl_tessellator_domain(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_DOMAIN, controls, {}));
+			}
+
+			void dcl_tessellator_partitioning(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_PARTITIONING, controls, {}));
+			}
+
+			void dcl_tessellator_output_primitive(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_OUTPUT_PRIMITIVE, controls, {}));
+			}
+
+			void dcl_hs_max_tessfactor(const detail::arg::as_custom& op0)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_MAX_TESSFACTOR, 0, {op0}));
+			}
+
+			void dcl_hs_fork_phase_instance_count(const detail::arg::as_custom& op0)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT, 0, {op0}));
+			}
+
+			void dcl_hs_join_phase_instance_count(const std::uint32_t controls = 0u)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT, controls, {}));
+			}
+
+			void dcl_thread_group(const detail::arg::as_custom& op0, const detail::arg::as_custom& op1, const detail::arg::as_custom& op2)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP, 0, {op0, op1, op2}));
+			}
+
+			void dcl_uav_typed(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED, 0, {op0, op1}));
+			}
+
+			void dcl_uav_raw(const detail::arg::as_0c& op0)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW, 0, {op0}));
+			}
+
+			void dcl_uav_structured(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED, 0, {op0, op1}));
+			}
+
+			void dcl_tgsm_raw(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW, 0, {op0, op1}));
+			}
+
+			void dcl_tgsm_structured(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1, const detail::arg::as_custom& op2)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED, 0, {op0, op1, op2}));
+			}
+
+			void dcl_resource_raw(const detail::arg::as_0c& op0)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_RESOURCE_RAW, 0, {op0}));
+			}
+
+			void dcl_resource_structured(const detail::arg::as_0c& op0, const detail::arg::as_custom& op1)
+			{
+				this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED, 0, {op0, op1}));
+			}
 
 		private:
-			detail::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls, 
-				const std::vector<detail::operand_proxy::with_components>& operands);
+			detail::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls,
+				const std::vector<detail::operand_t>& operands);
 
 			shader::shader_object* shader_;
 

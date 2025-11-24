@@ -42,4 +42,9 @@ namespace alys::shader::detail
 			break;
 		}
 	}
+
+	std::uint32_t dcl_sampler::get_flags()
+	{
+		return flag_declaration;
+	}
 }

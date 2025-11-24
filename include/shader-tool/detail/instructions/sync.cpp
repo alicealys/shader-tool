@@ -44,4 +44,9 @@ namespace alys::shader::detail
 			buffer.write("_uglobal");
 		}
 	}
+
+	std::uint32_t sync::get_flags()
+	{
+		return flag_none;
+	}
 }

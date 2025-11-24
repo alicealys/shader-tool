@@ -39,4 +39,9 @@ namespace alys::shader::detail
 			break;
 		}
 	}
+
+	std::uint32_t dcl_constant_buffer::get_flags()
+	{
+		return flag_declaration;
+	}
 }

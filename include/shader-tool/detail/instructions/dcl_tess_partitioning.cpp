@@ -40,4 +40,9 @@ namespace alys::shader::detail
 			break;
 		}
 	}
+
+	std::uint32_t dcl_tess_partitioning::get_flags()
+	{
+		return flag_declaration;
+	}
 }

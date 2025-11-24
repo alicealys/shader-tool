@@ -50,4 +50,9 @@ namespace alys::shader::detail
 			get_return_type_name(resource_return_type[3]));
 		dump_operand(buffer, instruction.operands[0]);
 	}
+
+	std::uint32_t dcl_resource::get_flags()
+	{
+		return flag_declaration;
+	}
 }

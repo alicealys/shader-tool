@@ -321,6 +321,115 @@ namespace alys::shader
 			initializer _(initialize);
 		}
 
+		void generate_instruction_methods(utils::string_writer& buffer)
+		{
+			for (const auto& [type, ops] : instruction_defs)
+			{
+				const auto name = opcode_names[type];
+				const auto& instruction = instruction_handlers[type];
+				const auto flags = instruction->get_flags();
+
+				const auto do_instruction = [&](const std::string& name_, const std::uint32_t controls)
+				{
+					buffer.write("void %s", name_.data());
+
+					static const std::unordered_set<std::string> reserved_tokens =
+					{
+						"xor",
+						"and",
+						"or",
+						"and",
+						"not",
+						"default",
+						"switch",
+						"case",
+						"break",
+						"continue",
+						"else",
+						"if",
+					};
+
+					if (reserved_tokens.contains(name_))
+					{
+						buffer.write("_");
+					}
+
+					buffer.write("(");
+
+					if (ops.size() == 0 && (flags & flag_declaration))
+					{
+						buffer.write("const std::uint32_t controls = 0u");
+						buffer.write(")\n");
+						buffer.write("{\n");
+						buffer.write("\tthis->operator()(this->create_instruction(%s, controls, {}));\n", opcode_enum_names[type]);
+					}
+					else
+					{
+						for (auto i = 0u; i < ops.size(); i++)
+						{
+							switch (ops[i])
+							{
+							case token_operand_0c:
+								buffer.write("const detail::arg::as_0c& op%i", i);
+								break;
+							case token_operand_1c:
+								buffer.write("const detail::arg::as_1c& op%i", i);
+								break;
+							case token_operand_4c_swizzle:
+								buffer.write("const detail::arg::as_swz& op%i", i);
+								break;
+							case token_operand_4c_mask:
+								buffer.write("const detail::arg::as_mask& op%i", i);
+								break;
+							case token_operand_4c_scalar:
+								buffer.write("const detail::arg::as_scalar& op%i", i);
+								break;
+							case token_custom:
+								buffer.write("const detail::arg::as_custom& op%i", i);
+								break;
+							}
+
+							if (i < ops.size() - 1)
+							{
+								buffer.write(", ");
+							}
+						}
+
+						buffer.write(")\n");
+						buffer.write("{\n");
+						buffer.write("\tthis->operator()(this->create_instruction(%s, %i, {", opcode_enum_names[type], controls);
+						for (auto i = 0u; i < ops.size(); i++)
+						{
+							buffer.write("op%i", i);
+							if (i < ops.size() - 1)
+							{
+								buffer.write(", ");
+							}
+						}
+
+						buffer.write("}));\n");
+					}
+
+					buffer.write("}\n\n");
+				};
+
+				if ((flags & flag_conditional) != 0)
+				{
+					do_instruction(std::format("{}_nz", name), 128);
+					do_instruction(std::format("{}_z", name), 0);
+				}
+				else if ((flags & flag_saturate) != 0)
+				{
+					do_instruction(std::format("{}_sat", name), 4);
+					do_instruction(std::format("{}", name), 0);
+				}
+				else
+				{
+					do_instruction(std::format("{}", name), 0);
+				}
+			}
+		}
+
 		instruction_t read_instruction(alys::utils::bit_buffer_le& input_buffer)
 		{
 			const auto beg = input_buffer.total();

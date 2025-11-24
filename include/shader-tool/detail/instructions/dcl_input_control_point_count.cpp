@@ -25,4 +25,9 @@ namespace alys::shader::detail
 		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" %i", instruction.opcode.controls);
 	}
+
+	std::uint32_t dcl_input_control_point_count::get_flags()
+	{
+		return flag_declaration;
+	}
 }

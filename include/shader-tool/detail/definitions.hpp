@@ -63,16 +63,18 @@ namespace alys::shader::detail
 		std::uint8_t modifier;
 		std::uint8_t min_precision;
 	};
+	 
+	union operand_custom_value_t
+	{
+		float float32;
+		std::uint32_t value;
+		std::uint8_t values[4];
+	};
 
 	struct operand_custom_t
 	{
 		bool is_custom;
-		union
-		{
-			float float32;
-			std::uint32_t value;
-			std::uint8_t values[4];
-		} u;
+		operand_custom_value_t u;
 	};
 
 	struct operand_t

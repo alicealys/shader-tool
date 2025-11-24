@@ -69,4 +69,9 @@ namespace alys::shader::detail
 		}
 		}
 	}
+
+	std::uint32_t customdata::get_flags()
+	{
+		return flag_none;
+	}
 }

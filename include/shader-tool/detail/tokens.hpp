@@ -489,6 +489,163 @@ namespace alys::shader::detail
 
 	};
 
+	class arg
+	{
+	public:
+		class as_0c
+		{
+		public:
+			as_0c(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_0c(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
+		class as_1c
+		{
+		public:
+			as_1c(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_1c(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+		};
+
+		class as_mask
+		{
+		public:
+			as_mask(const operand_proxy::with_components& op)
+				: op_(op.mask())
+			{
+			}
+
+			as_mask(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_mask(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
+		class as_swz
+		{
+		public:
+			as_swz(const operand_proxy::with_components& op)
+				: op_(op.swz_or_scalar())
+			{
+			}
+
+			as_swz(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_swz(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
+		class as_scalar
+		{
+		public:
+			as_scalar(const operand_proxy::with_components& op)
+				: op_(op.scalar())
+			{
+			}
+
+			as_scalar(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_scalar(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
+		class as_custom
+		{
+		public:
+			as_custom(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			as_custom(const std::uint32_t value)
+			{
+				this->op_.custom.is_custom = true;
+				this->op_.custom.u.value = value;
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+	};
+
 	operand_proxy::with_components operator+(const operand_proxy::with_components& op, const std::uint32_t offset);
 	operand_proxy::with_components operator-(const operand_proxy::with_components& operand);
 

@@ -144,58 +144,16 @@ namespace alys::shader
 		return "unknown";
 	}
 
-	detail::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls, 
-		const std::vector<detail::operand_proxy::with_components>& operands)
+	detail::instruction_t shader_object::assembler::create_instruction(const std::uint32_t type, const std::uint32_t controls,
+		const std::vector<detail::operand_t>& operands)
 	{
 		const auto controls_ = this->controls_stack_.empty() ? controls : this->controls_stack_.front();
+
 		auto instruction = detail::create_instruction(type, controls_);
 		instruction.opcode.extensions = this->current_extensions_;
+		instruction.operands = operands;
 
 		this->current_extensions_.clear();
-
-		const auto& iter = detail::instruction_defs.find(type);
-		if (iter == detail::instruction_defs.end())
-		{
-			throw std::runtime_error(std::format("create_instruction: missing def for '%s'", detail::opcode_names[type]));
-		}
-
-		if (iter->second.size() != operands.size())
-		{
-			throw std::runtime_error("create_instruction: invalid operand count");
-		}
-
-		for (auto i = 0u; i < iter->second.size(); i++)
-		{
-			switch (iter->second[i])
-			{
-			case detail::token_operand_0c:
-			{
-				detail::operand_t o = operands[i];
-				o.components.type = D3D10_SB_OPERAND_0_COMPONENT;
-				instruction.operands.emplace_back(o);
-				break;
-			}
-			case detail::token_operand_1c:
-			{
-				detail::operand_t o = operands[i];
-				o.components.type = D3D10_SB_OPERAND_1_COMPONENT;
-				instruction.operands.emplace_back(o);
-				break;
-			}
-			case detail::token_operand_4c_mask:
-				instruction.operands.emplace_back(operands[i].mask());
-				break;
-			case detail::token_operand_4c_swizzle:
-				instruction.operands.emplace_back(operands[i].swz_or_scalar());
-				break;
-			case detail::token_operand_4c_scalar:
-				instruction.operands.emplace_back(operands[i].scalar());
-				break;
-			case detail::token_custom:
-				instruction.operands.emplace_back(operands[i]);
-				break;
-			}
-		}
 
 		return instruction;
 	}

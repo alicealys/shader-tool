@@ -27,4 +27,9 @@ namespace alys::shader::detail
 		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" %i", instruction.operands[0].custom.u.value);
 	}
+
+	std::uint32_t dcl_max_output_vertex_count::get_flags()
+	{
+		return flag_declaration;
+	}
 }

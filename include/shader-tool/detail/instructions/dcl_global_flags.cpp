@@ -53,4 +53,9 @@ namespace alys::shader::detail
 			}
 		}
 	}
+
+	std::uint32_t dcl_global_flags::get_flags()
+	{
+		return flag_declaration;
+	}
 }

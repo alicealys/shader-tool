@@ -37,4 +37,9 @@ namespace alys::shader::detail
 			instruction.operands[2].custom.u.value
 		);
 	}
+
+	std::uint32_t dcl_indexable_temp::get_flags()
+	{
+		return flag_declaration;
+	}
 }

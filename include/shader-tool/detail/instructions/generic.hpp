@@ -4,14 +4,6 @@
 
 namespace alys::shader::detail
 {
-	enum instruction_flags
-	{
-		flag_none = 0,
-		flag_conditional = (1 << 0),
-		flag_saturate = (1 << 1),
-		flag_precise = (1 << 2),
-	};
-
 	template <std::uint32_t Flags = flag_none>
 	class general_instruction final : public base_instruction
 	{
@@ -105,6 +97,11 @@ namespace alys::shader::detail
 				buffer.write(" ");
 				dump_operands(buffer, instruction.operands);
 			}
+		}
+
+		std::uint32_t get_flags()
+		{
+			return Flags;
 		}
 	};
 }

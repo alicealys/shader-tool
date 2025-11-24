@@ -84,6 +84,7 @@ namespace alys::shader::literals
 	detail::operand_t c(const std::uint32_t value)
 	{
 		detail::operand_t operand{};
+		operand.custom.is_custom = true;
 		operand.custom.u.value = value;
 		return operand;
 	}
@@ -91,6 +92,7 @@ namespace alys::shader::literals
 	detail::operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w)
 	{
 		detail::operand_t operand{};
+		operand.custom.is_custom = true;
 		operand.custom.u.values[0] = x;
 		operand.custom.u.values[1] = y;
 		operand.custom.u.values[2] = z;

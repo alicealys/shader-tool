@@ -37,4 +37,9 @@ namespace alys::shader::detail
 				break;
 		}
 	}
+
+	std::uint32_t dcl_tess_domain::get_flags()
+	{
+		return flag_declaration;
+	}
 }

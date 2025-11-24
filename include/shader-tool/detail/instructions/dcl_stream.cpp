@@ -28,4 +28,9 @@ namespace alys::shader::detail
 		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 	}
+
+	std::uint32_t dcl_stream::get_flags()
+	{
+		return flag_declaration;
+	}
 }

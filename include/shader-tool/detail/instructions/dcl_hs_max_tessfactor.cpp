@@ -26,4 +26,9 @@ namespace alys::shader::detail
 	{
 		buffer.write("dcl_hs_max_tessfactor %f", instruction.operands[0].custom.u.float32);
 	}
+
+	std::uint32_t dcl_hs_max_tessfactor::get_flags()
+	{
+		return flag_declaration;
+	}
 }
