@@ -22,23 +22,20 @@ void example1()
 
 	a.dcl_globalFlags(refactoring_allowed | early_depth_stencil);
 
-	a.dcl_constantbuffer(cb1[6]);
-	a.dcl_constantbuffer(cb2[2]);
+	a.dcl_constantbuffer(cb1[6], immediate_indexed);
+	a.dcl_constantbuffer(cb2[2], immediate_indexed);
 
 	a.dcl_sampler(s0);
 	a.dcl_sampler(s3);
 
-	a.push_controls(texture2d);
-	a.dcl_resource(t0, c(t_float, t_float, t_float, t_float));
-	a.dcl_resource(t3, c(t_float, t_float, t_float, t_float));
+	a.dcl_resource(t0, texture2d, c(t_float, t_float, t_float, t_float));
+	a.dcl_resource(t3, texture2d, c(t_float, t_float, t_float, t_float));
 	a.pop_controls();
 
-	a.push_controls(linear_centroid);
-	a.dcl_input_ps(v1.xyzw());
-	a.dcl_input_ps(v2.xy());
-	a.dcl_input_ps(v3.xyzw());
-	a.dcl_input_ps(v4.xyz());
-	a.pop_controls();
+	a.dcl_input_ps(v1.xyzw(), linear_centroid);
+	a.dcl_input_ps(v2.xy(), linear_centroid);
+	a.dcl_input_ps(v3.xyzw(), linear_centroid);
+	a.dcl_input_ps(v4.xyz(), linear_centroid);
 
 	a.dcl_output(o0.xyzw());
 	a.dcl_temps(4);

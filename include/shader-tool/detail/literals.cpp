@@ -112,6 +112,6 @@ namespace alys::shader::literals
 
 	detail::operand_proxy cb(const std::uint32_t index, const std::uint32_t slot)
 	{
-		return detail::create_operand(D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, detail::component_mask_all, index, slot);
+		return detail::create_operand(D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, "xyzw", index, slot);
 	}
 }

@@ -93,45 +93,51 @@ namespace alys::shader::literals
 	DEFINE_REGISTER(icb, 8);
 	DEFINE_REGISTER(icb, 9);
 
-	constexpr std::uint32_t sample_ctrl = 1;
-	constexpr std::uint32_t res_dim = 2;
-	constexpr std::uint32_t res_return_type = 3;
+	constexpr std::uint32_t sample_ctrl = D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS;
+	constexpr std::uint32_t res_dim = D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM;
+	constexpr std::uint32_t res_return_type = D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE;
 
-	constexpr std::uint32_t t_unorm = 1;
-	constexpr std::uint32_t t_snorm = 2;
-	constexpr std::uint32_t t_sint = 3;
-	constexpr std::uint32_t t_uint = 4;
-	constexpr std::uint32_t t_float = 5;
-	constexpr std::uint32_t t_mixed = 6;
-	constexpr std::uint32_t t_double = 7;
-	constexpr std::uint32_t t_continued = 8;
-	constexpr std::uint32_t t_unused = 9;
+	constexpr std::uint8_t t_unorm = D3D10_SB_RETURN_TYPE_UNORM;
+	constexpr std::uint8_t t_snorm = D3D10_SB_RETURN_TYPE_SNORM;
+	constexpr std::uint8_t t_sint = D3D10_SB_RETURN_TYPE_SINT;
+	constexpr std::uint8_t t_uint = D3D10_SB_RETURN_TYPE_UINT;
+	constexpr std::uint8_t t_float = D3D10_SB_RETURN_TYPE_FLOAT;
+	constexpr std::uint8_t t_mixed = D3D10_SB_RETURN_TYPE_MIXED;
+	constexpr std::uint8_t t_double = D3D11_SB_RETURN_TYPE_DOUBLE;
+	constexpr std::uint8_t t_continued = D3D11_SB_RETURN_TYPE_CONTINUED;
 
 	constexpr std::uint32_t refactoring_allowed = 1 << 0;
 	constexpr std::uint32_t double_precision = 1 << 1;
 	constexpr std::uint32_t early_depth_stencil = 1 << 2;
 	constexpr std::uint32_t raw_and_struct_buffers = 1 << 3;
 
-	constexpr std::uint32_t buffer = 1;
-	constexpr std::uint32_t texture1d = 2;
-	constexpr std::uint32_t texture2d = 3;
-	constexpr std::uint32_t texture2dms = 4;
-	constexpr std::uint32_t texture3d = 5;
-	constexpr std::uint32_t texturecube = 6;
-	constexpr std::uint32_t texture1darray = 7;
-	constexpr std::uint32_t texture2darray = 8;
-	constexpr std::uint32_t texture2dmsarray = 9;
-	constexpr std::uint32_t texturecubearray = 10;
-	constexpr std::uint32_t raw_buffer = 11;
-	constexpr std::uint32_t structured_buffer = 12;
+	constexpr std::uint32_t buffer = D3D10_SB_RESOURCE_DIMENSION_BUFFER;
+	constexpr std::uint32_t texture1d = D3D10_SB_RESOURCE_DIMENSION_TEXTURE1D;
+	constexpr std::uint32_t texture2d = D3D10_SB_RESOURCE_DIMENSION_TEXTURE2D;
+	constexpr std::uint32_t texture2dms = D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMS;
+	constexpr std::uint32_t texture3d = D3D10_SB_RESOURCE_DIMENSION_TEXTURE3D;
+	constexpr std::uint32_t texturecube = D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBE;
+	constexpr std::uint32_t texture1darray = D3D10_SB_RESOURCE_DIMENSION_TEXTURE1DARRAY;
+	constexpr std::uint32_t texture2darray = D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DARRAY;
+	constexpr std::uint32_t texture2dmsarray = D3D10_SB_RESOURCE_DIMENSION_TEXTURE2DMSARRAY;
+	constexpr std::uint32_t texturecubearray = D3D10_SB_RESOURCE_DIMENSION_TEXTURECUBEARRAY;
+	constexpr std::uint32_t raw_buffer = D3D11_SB_RESOURCE_DIMENSION_RAW_BUFFER;
+	constexpr std::uint32_t structured_buffer = D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER;
 
-	constexpr std::uint32_t constant = 1;
-	constexpr std::uint32_t linear = 2;
-	constexpr std::uint32_t linear_centroid = 3;
-	constexpr std::uint32_t linear_noperspective = 4;
-	constexpr std::uint32_t linear_noperspective_centroid = 5;
-	constexpr std::uint32_t linear_sample = 6;
-	constexpr std::uint32_t linear_noperspective_sample = 7;
+	constexpr std::uint32_t constant = D3D10_SB_INTERPOLATION_CONSTANT;
+	constexpr std::uint32_t linear = D3D10_SB_INTERPOLATION_LINEAR;
+	constexpr std::uint32_t linear_centroid = D3D10_SB_INTERPOLATION_LINEAR_CENTROID;
+	constexpr std::uint32_t linear_noperspective = D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE;
+	constexpr std::uint32_t linear_noperspective_centroid = D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE_CENTROID;
+	constexpr std::uint32_t linear_sample = D3D10_SB_INTERPOLATION_LINEAR_SAMPLE;
+	constexpr std::uint32_t linear_noperspective_sample = D3D10_SB_INTERPOLATION_LINEAR_NOPERSPECTIVE_SAMPLE;
+
+	constexpr std::uint32_t immediate_indexed = D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED;
+	constexpr std::uint32_t dynamic_indexed = D3D10_SB_CONSTANT_BUFFER_DYNAMIC_INDEXED;
+
+	constexpr std::uint32_t mode_default = D3D10_SB_SAMPLER_MODE_DEFAULT;
+	constexpr std::uint32_t mode_comparison = D3D10_SB_SAMPLER_MODE_COMPARISON;
+	constexpr std::uint32_t mode_mono = D3D10_SB_SAMPLER_MODE_MONO;
 
 	template <typename ...Args>
 	detail::operand_t l(Args&&... args)

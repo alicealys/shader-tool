@@ -489,6 +489,34 @@ namespace alys::shader::detail
 
 	};
 
+	operand_proxy::with_components operator+(const operand_proxy::with_components& op, const std::uint32_t offset);
+	operand_proxy::with_components operator-(const operand_proxy::with_components& operand);
+
+	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls = 0u);
+	instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls = 0u);
+
+	operand_t create_literal_operand(const float value);
+	operand_t create_literal_operand(const float x, const float y, const float z, const float w);
+
+	std::uint32_t get_swizzle_component(const char c);
+	void parse_swizzle_components(operand_components_t& components, const std::string& swz);
+
+	operand_t create_operand(const std::uint32_t type, const operand_components_t& operand_components, const std::vector<std::uint32_t>& indices);
+	operand_t create_operand(const std::uint32_t type, const std::vector<std::uint32_t>& components, const std::vector<std::uint32_t>& indices);
+	operand_t create_operand(const std::uint32_t type, const std::string& component_names, const std::vector<std::uint32_t>& indices);
+	operand_t create_operand(const std::uint32_t type, const std::uint32_t component_mask, const std::vector<std::uint32_t>& indices);
+
+	template <typename T, typename ...Args>
+	operand_t create_operand(const std::uint32_t type, const T& components, Args&&... args)
+	{
+		return create_operand(type, components, {std::forward<Args>(args)...});
+	}
+
+	std::vector<std::uint32_t> find_operands(const instruction_t& instruction, const std::uint32_t beg,
+		const std::function<bool(const operand_t&)>& cb);
+
+	operand_proxy get_proxy(const operand_t& operand);
+
 	class arg
 	{
 	public:
@@ -501,6 +529,29 @@ namespace alys::shader::detail
 			}
 
 			as_0c(const operand_t& op)
+				: op_(op)
+			{
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
+		class as_register
+		{
+		public:
+			as_register(const operand_proxy& op)
+				: op_(op)
+			{
+			}
+
+			as_register(const operand_t& op)
 				: op_(op)
 			{
 			}
@@ -537,16 +588,29 @@ namespace alys::shader::detail
 			operand_t op_{};
 		};
 
+		class as_literal
+		{
+		public:
+			as_literal(const float value)
+			{
+				this->op_ = create_literal_operand(value);
+			}
+
+			operator operand_t() const
+			{
+				return this->op_;
+			}
+
+		private:
+			operand_t op_{};
+
+		};
+
 		class as_mask
 		{
 		public:
 			as_mask(const operand_proxy::with_components& op)
 				: op_(op.mask())
-			{
-			}
-
-			as_mask(const operand_proxy& op)
-				: op_(op)
 			{
 			}
 
@@ -601,11 +665,6 @@ namespace alys::shader::detail
 			{
 			}
 
-			as_scalar(const operand_proxy& op)
-				: op_(op)
-			{
-			}
-
 			as_scalar(const operand_t& op)
 				: op_(op)
 			{
@@ -635,6 +694,15 @@ namespace alys::shader::detail
 				this->op_.custom.u.value = value;
 			}
 
+			as_custom(const std::array<std::uint8_t, 4> values)
+			{
+				this->op_.custom.is_custom = true;
+				this->op_.custom.u.values[0] = values[0];
+				this->op_.custom.u.values[1] = values[1];
+				this->op_.custom.u.values[2] = values[2];
+				this->op_.custom.u.values[3] = values[3];
+			}
+
 			operator operand_t() const
 			{
 				return this->op_;
@@ -645,32 +713,4 @@ namespace alys::shader::detail
 
 		};
 	};
-
-	operand_proxy::with_components operator+(const operand_proxy::with_components& op, const std::uint32_t offset);
-	operand_proxy::with_components operator-(const operand_proxy::with_components& operand);
-
-	opcode_t create_opcode(const std::uint32_t type, const std::uint32_t controls = 0u);
-	instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls = 0u);
-
-	operand_t create_literal_operand(const float value);
-	operand_t create_literal_operand(const float x, const float y, const float z, const float w);
-
-	std::uint32_t get_swizzle_component(const char c);
-	void parse_swizzle_components(operand_components_t& components, const std::string& swz);
-
-	operand_t create_operand(const std::uint32_t type, const operand_components_t& operand_components, const std::vector<std::uint32_t>& indices);
-	operand_t create_operand(const std::uint32_t type, const std::vector<std::uint32_t>& components, const std::vector<std::uint32_t>& indices);
-	operand_t create_operand(const std::uint32_t type, const std::string& component_names, const std::vector<std::uint32_t>& indices);
-	operand_t create_operand(const std::uint32_t type, const std::uint32_t component_mask, const std::vector<std::uint32_t>& indices);
-
-	template <typename T, typename ...Args>
-	operand_t create_operand(const std::uint32_t type, const T& components, Args&&... args)
-	{
-		return create_operand(type, components, {std::forward<Args>(args)...});
-	}
-
-	std::vector<std::uint32_t> find_operands(const instruction_t& instruction, const std::uint32_t beg,
-		const std::function<bool(const operand_t&)>& cb);
-
-	operand_proxy get_proxy(const operand_t& operand);
 }
