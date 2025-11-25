@@ -1,10 +1,10 @@
 #pragma once
 
-#include "tokens.hpp"
+#include "operand_proxy.hpp"
 
-#define DEFINE_REGISTER(__name__, __index__) extern const detail::operand_proxy __name__##__index__;
-#define DEFINE_REGISTER_C(__name__, __index__, __type__) const detail::operand_proxy __name__##__index__ = detail::create_operand(__type__, detail::operand_components_t{}, __index__##u)
-#define DEFINE_REGISTER_C_SWZ(__name__, __swz__, __index__, __type__) const detail::operand_proxy __name__##__index__ = detail::create_operand(__type__, __swz__, __index__##u)
+#define DEFINE_REGISTER(__name__, __index__) extern const operand_proxy __name__##__index__;
+#define DEFINE_REGISTER_C(__name__, __index__, __type__) const operand_proxy __name__##__index__ = detail::create_operand(__type__, detail::operand_components_t{}, __index__##u)
+#define DEFINE_REGISTER_C_SWZ(__name__, __swz__, __index__, __type__) const operand_proxy __name__##__index__ = detail::create_operand(__type__, __swz__, __index__##u)
 
 #define DEFINE_TEMP_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_TEMP);
 #define DEFINE_INPUT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_INPUT);
@@ -148,8 +148,8 @@ namespace alys::shader::literals
 	detail::operand_t c(const std::uint32_t value);
 	detail::operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w);
 
-	detail::operand_proxy::with_components abs(const detail::operand_proxy::with_components& operand);
+	operand_proxy::with_components abs(const operand_proxy::with_components& operand);
 
-	detail::operand_proxy r(const std::uint32_t index);
-	detail::operand_proxy cb(const std::uint32_t index, const std::uint32_t slot);
+	operand_proxy r(const std::uint32_t index);
+	operand_proxy cb(const std::uint32_t index, const std::uint32_t slot);
 }

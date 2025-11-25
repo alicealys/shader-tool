@@ -9,7 +9,8 @@
 #include "detail/writer.hpp"
 #include "detail/disassembler.hpp"
 #include "detail/tokens.hpp"
-#include "detail/literals.hpp"
+#include "operand_proxy.hpp"
+#include "literals.hpp"
 #include "shader_object.hpp"
 
 namespace alys::shader

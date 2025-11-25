@@ -1,5 +1,6 @@
-#include "../std_include.hpp"
+#include "std_include.hpp"
 
+#include "detail/tokens.hpp"
 #include "literals.hpp"
 
 namespace alys::shader::literals
@@ -100,17 +101,17 @@ namespace alys::shader::literals
 		return operand;
 	}
 
-	detail::operand_proxy::with_components abs(const detail::operand_proxy::with_components& operand)
+	operand_proxy::with_components abs(const operand_proxy::with_components& operand)
 	{
 		return operand.abs();
 	}
 
-	detail::operand_proxy r(const std::uint32_t index)
+	operand_proxy r(const std::uint32_t index)
 	{
 		return detail::create_operand(D3D10_SB_OPERAND_TYPE_TEMP, detail::operand_components_t{}, index);
 	}
 
-	detail::operand_proxy cb(const std::uint32_t index, const std::uint32_t slot)
+	operand_proxy cb(const std::uint32_t index, const std::uint32_t slot)
 	{
 		return detail::create_operand(D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, "xyzw", index, slot);
 	}
