@@ -23,7 +23,7 @@ namespace alys::shader
 		void print_instruction(const instruction_t& instruction);
 	}
 
-	using instruction_cb = std::function<bool(shader::shader_object::assembler&, detail::instruction_t&)>;
+	using instruction_cb = std::function<bool(shader::assembler&, detail::instruction_t&)>;
 
 	std::string patch_shader(const std::string& shader_data, const instruction_cb& callback);
 }
