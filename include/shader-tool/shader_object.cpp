@@ -264,6 +264,7 @@ namespace alys::shader
 			{
 			case D3D10_SB_OPCODE_IF:
 			case D3D10_SB_OPCODE_LOOP:
+			case D3D10_SB_OPCODE_SWITCH:
 				print_indents(indent_count++);
 				break;
 			case D3D10_SB_OPCODE_ELSE:
@@ -271,6 +272,7 @@ namespace alys::shader
 				break;
 			case D3D10_SB_OPCODE_ENDLOOP:
 			case D3D10_SB_OPCODE_ENDIF:
+			case D3D10_SB_OPCODE_ENDSWITCH:
 				print_indents(--indent_count);
 				break;
 			default:
@@ -564,6 +566,9 @@ namespace alys::shader
 		chunk.read_bytes(1); /* unk */
 		this->info_.program_type = chunk.read_bytes(2);
 		chunk.read_bytes(4); /* num dwords */
+
+		assert(this->info_.major_version == 5);
+		assert(this->info_.minor_version == 0);
 
 		this->parse_instructions(chunk, size);
 	}

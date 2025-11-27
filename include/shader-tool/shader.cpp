@@ -44,6 +44,7 @@
 #include "detail/instructions/dcl_unordered_access_view_structured.hpp"
 #include "detail/instructions/dcl_unordered_access_view_typed.hpp"
 #include "detail/instructions/generic.hpp"
+#include "detail/instructions/interface_call.hpp"
 #include "detail/instructions/sync.hpp"
 
 #include "shader_object.hpp"
@@ -193,7 +194,7 @@ namespace alys::shader
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_EMIT_STREAM);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_CUT_STREAM);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_EMITTHENCUT_STREAM);
-				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_INTERFACE_CALL);
+				register_instruction_handler<interface_call>(D3D11_SB_OPCODE_INTERFACE_CALL);
 				register_instruction_handler<general_instruction<flag_none>>(D3D11_SB_OPCODE_BUFINFO);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DERIV_RTX_COARSE);
 				register_instruction_handler<general_instruction<flag_saturate | flag_precise>>(D3D11_SB_OPCODE_DERIV_RTX_FINE);

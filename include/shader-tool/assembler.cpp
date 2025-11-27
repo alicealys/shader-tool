@@ -46,7 +46,7 @@ namespace alys::shader
 		this->shader_->add_instruction(instruction);
 	}
 
-	void assembler::dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data)
+	void assembler::dcl_immediateConstantBuffer(const std::vector<std::array<float, 4>>& data)
 	{
 		shader::detail::instruction_t instruction{};
 		instruction.opcode.type = D3D10_SB_OPCODE_CUSTOMDATA;

@@ -82,6 +82,28 @@ namespace alys::shader::literals
 	DEFINE_ICB_REGISTER(icb, 8);
 	DEFINE_ICB_REGISTER(icb, 9);
 
+	DEFINE_FP_REGISTER(fp, 0);
+	DEFINE_FP_REGISTER(fp, 1);
+	DEFINE_FP_REGISTER(fp, 2);
+	DEFINE_FP_REGISTER(fp, 3);
+	DEFINE_FP_REGISTER(fp, 4);
+	DEFINE_FP_REGISTER(fp, 5);
+	DEFINE_FP_REGISTER(fp, 6);
+	DEFINE_FP_REGISTER(fp, 7);
+	DEFINE_FP_REGISTER(fp, 8);
+	DEFINE_FP_REGISTER(fp, 9);
+
+	DEFINE_FB_REGISTER(fb, 0);
+	DEFINE_FB_REGISTER(fb, 1);
+	DEFINE_FB_REGISTER(fb, 2);
+	DEFINE_FB_REGISTER(fb, 3);
+	DEFINE_FB_REGISTER(fb, 4);
+	DEFINE_FB_REGISTER(fb, 5);
+	DEFINE_FB_REGISTER(fb, 6);
+	DEFINE_FB_REGISTER(fb, 7);
+	DEFINE_FB_REGISTER(fb, 8);
+	DEFINE_FB_REGISTER(fb, 9);
+
 	detail::operand_t c(const std::uint32_t value)
 	{
 		detail::operand_t operand{};

@@ -170,7 +170,7 @@ namespace alys::shader
 
 		void operator()(const detail::instruction_t& instruction);
 
-		void dcl_immediate_constant_buffer(const std::vector<std::array<float, 4>>& data);
+		void dcl_immediateConstantBuffer(const std::vector<std::array<float, 4>>& data);
 
 		void push_controls(const std::uint32_t controls);
 		void pop_controls();
@@ -2337,6 +2337,18 @@ namespace alys::shader
 		}
 
 		/*
+			Interface function call.
+
+			fcall fp#[arrayIndex][callSite]
+			@param fpN fp#
+			@param arrayIndex arrayIndex
+		*/
+		void fcall(const as_register& fbN, const as_custom& arrayIndex)
+		{
+			this->operator()(this->create_instruction(D3D11_SB_OPCODE_INTERFACE_CALL, 0, {arrayIndex, fbN}));
+		}
+
+		/*
 			Finds the first bit set in a number, either from LSB or MSB.
 
 			firstbit{_hi|_lo|_shi} dest[.mask], src0[.swizzle]
@@ -3138,6 +3150,107 @@ namespace alys::shader
 		void dcl_temps(const as_custom& N)
 		{
 			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_TEMPS, 0, {N}));
+		}
+
+		/*
+			Declare a function body.
+
+			dcl_function_body fb#
+			@param fbN fb#
+		*/
+		void dcl_function_body(const as_custom& fbN)
+		{
+			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_FUNCTION_BODY, 0, {fbN}));
+		}
+
+		/*
+			Declare a function table.
+
+			dcl_function_table ft# = {fb#, fb#, ...}
+			@param ftN = ft#
+			@param entries {fb#, fb#, ...}
+		*/
+		void dcl_function_table(const as_custom& ftN, const std::vector<as_custom>& entries)
+		{
+			const as_custom table_length = static_cast<std::uint32_t>(entries.size());
+			
+			std::vector<detail::operand_t> operands;
+			operands.emplace_back(ftN);
+			operands.emplace_back(table_length);
+
+			for (const auto& entry : entries)
+			{
+				operands.emplace_back(entry);
+			}
+
+			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE, 0, operands));
+		}
+
+		/*
+			Declare function table pointers (interfaces).
+
+			dcl_interface fp#[arraySize][numCallSites] = {ft#, ft#, ...}
+			@param fpN fp#
+			@param arraySize arraySize
+			@param numCallSites numCallSites
+			@param entries {ft#, ft#, ...}
+		*/
+		void dcl_interface(const as_custom& fpN, const std::uint8_t arraySize, const std::uint32_t numCallSites, const std::vector<as_custom>& entries)
+		{
+			std::vector<detail::operand_t> operands;
+
+			detail::operand_t lengths{};
+			lengths.custom.is_custom = true;
+			lengths.custom.u.values[0] = static_cast<std::uint8_t>(entries.size());
+			lengths.custom.u.values[1] = arraySize;
+
+			detail::operand_t table_length{};
+			table_length.custom.is_custom = true;
+			table_length.custom.u.value = numCallSites;
+
+			operands.emplace_back(fpN);
+			operands.emplace_back(table_length);
+			operands.emplace_back(lengths);
+
+			for (const auto& entry : entries)
+			{
+				operands.emplace_back(entry);
+			}
+
+			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INTERFACE, 0, operands));
+		}
+
+		/*
+			Declare function table pointers (interfaces).
+
+			dcl_interface_dynamicindexed fp#[arraySize][numCallSites] = {ft#, ft#, ...}
+			@param fpN = {ft# fp#arraySize[numCallSites] = {ft#
+			@param ftN ft#
+			@param op2 ...}
+		*/
+		void dcl_interface_dynamicindexed(const as_custom& fpN, const std::uint8_t arraySize, const std::uint8_t numCallSites, const std::vector<as_custom>& entries)
+		{
+			std::vector<detail::operand_t> operands;
+
+			detail::operand_t lengths{};
+			lengths.custom.is_custom = true;
+			lengths.custom.u.values[0] = arraySize;
+			lengths.custom.u.values[1] = numCallSites;
+
+			detail::operand_t table_length{};
+			table_length.custom.is_custom = true;
+			table_length.custom.u.value = static_cast<std::uint32_t>(entries.size());
+
+			operands.emplace_back(fpN);
+			operands.emplace_back(table_length);
+			operands.emplace_back(lengths);
+
+			for (const auto& entry : entries)
+			{
+				operands.emplace_back(entry);
+			}
+
+			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INTERFACE, 1, operands));
 		}
 
 		/*

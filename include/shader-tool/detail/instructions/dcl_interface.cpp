@@ -11,8 +11,8 @@ namespace alys::shader::detail
 		std::uint32_t length{};
 		instruction.opcode = read_opcode(input_buffer, length);
 
-		const auto id = read_custom_operand(input_buffer);
-		const auto table_length = read_custom_operand(input_buffer);
+		instruction.operands.emplace_back(read_custom_operand(input_buffer));
+		instruction.operands.emplace_back(read_custom_operand(input_buffer));
 
 		operand_t lengths{};
 		lengths.custom.is_custom = true;
@@ -20,7 +20,7 @@ namespace alys::shader::detail
 		lengths.custom.u.values[1] = input_buffer.read_bits(16); // ArrayLength
 		instruction.operands.emplace_back(lengths);
 
-		for (auto i = 0u; i < table_length.custom.u.value; i++)
+		for (auto i = 0u; i < lengths.custom.u.values[0]; i++)
 		{
 			instruction.operands.emplace_back(read_custom_operand(input_buffer));
 		}
@@ -41,7 +41,7 @@ namespace alys::shader::detail
 		output_buffer.write_bits(16, instruction.operands[2].custom.u.values[0]);
 		output_buffer.write_bits(16, instruction.operands[2].custom.u.values[1]);
 
-		const auto table_length = instruction.operands[1].custom.u.value;
+		const auto table_length = instruction.operands[2].custom.u.values[0];
 		for (auto i = 0u; i < table_length; i++)
 		{
 			write_custom_operand(output_buffer, instruction.operands[i + 3]);
@@ -60,10 +60,11 @@ namespace alys::shader::detail
 
 		buffer.write(" ");
 		buffer.write("fp%i", instruction.operands[0].custom.u.value);
-		buffer.write("[%i]", instruction.operands[2].custom.u.values[0]);
 		buffer.write("[%i]", instruction.operands[2].custom.u.values[1]);
+		buffer.write("[%i]", instruction.operands[1].custom.u.value);
+		buffer.write(" = {");
 
-		const auto table_length = instruction.operands[1].custom.u.value;
+		const auto table_length = instruction.operands[2].custom.u.values[0];
 		for (auto i = 0u; i < table_length; i++)
 		{
 			buffer.write("ft%i", instruction.operands[i + 3].custom.u.value);

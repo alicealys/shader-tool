@@ -11,6 +11,9 @@
 #define DEFINE_OUTPUT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_OUTPUT);
 #define DEFINE_SAMPLER_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_SAMPLER);
 #define DEFINE_RESOURCE_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D10_SB_OPERAND_TYPE_RESOURCE);
+#define DEFINE_FP_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D11_SB_OPERAND_TYPE_INTERFACE);
+#define DEFINE_FB_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D11_SB_OPERAND_TYPE_FUNCTION_BODY);
+#define DEFINE_FT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D11_SB_OPERAND_TYPE_FUNCTION_TABLE);
 #define DEFINE_CB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
 #define DEFINE_ICB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER);
 
@@ -92,6 +95,28 @@ namespace alys::shader::literals
 	DEFINE_REGISTER(icb, 7);
 	DEFINE_REGISTER(icb, 8);
 	DEFINE_REGISTER(icb, 9);
+
+	DEFINE_REGISTER(fb, 0);
+	DEFINE_REGISTER(fb, 1);
+	DEFINE_REGISTER(fb, 2);
+	DEFINE_REGISTER(fb, 3);
+	DEFINE_REGISTER(fb, 4);
+	DEFINE_REGISTER(fb, 5);
+	DEFINE_REGISTER(fb, 6);
+	DEFINE_REGISTER(fb, 7);
+	DEFINE_REGISTER(fb, 8);
+	DEFINE_REGISTER(fb, 9);
+
+	DEFINE_REGISTER(fp, 0);
+	DEFINE_REGISTER(fp, 1);
+	DEFINE_REGISTER(fp, 2);
+	DEFINE_REGISTER(fp, 3);
+	DEFINE_REGISTER(fp, 4);
+	DEFINE_REGISTER(fp, 5);
+	DEFINE_REGISTER(fp, 6);
+	DEFINE_REGISTER(fp, 7);
+	DEFINE_REGISTER(fp, 8);
+	DEFINE_REGISTER(fp, 9);
 
 	constexpr std::uint32_t sample_ctrl = D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS;
 	constexpr std::uint32_t res_dim = D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM;

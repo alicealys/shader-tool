@@ -248,29 +248,56 @@ namespace alys::shader
 	operand_proxy operand_proxy::operator[](const std::uint32_t index) const
 	{
 		auto next = this->copy();
-		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
-		next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
-		next.current_->indices[1].value.uint32 = index;
+
+		assert(next.current_->dimension < D3D10_SB_OPERAND_INDEX_3D);
+
+		if (next.current_->dimension == D3D10_SB_OPERAND_INDEX_2D)
+		{
+			next.current_->dimension = D3D10_SB_OPERAND_INDEX_3D;
+			next.current_->indices[2].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
+			next.current_->indices[2].value.uint32 = index;
+		}
+		else
+		{
+			next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
+			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32;
+			next.current_->indices[1].value.uint32 = index;
+		}
+
 		return next;
 	}
 
 	operand_proxy operand_proxy::operator[](const operand_proxy::with_components& extra_operand) const
 	{
 		auto next = this->copy();
-		next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
+
+		assert(next.current_->dimension < D3D10_SB_OPERAND_INDEX_3D);
+
+		auto index = 0;
+
+		if (next.current_->dimension == D3D10_SB_OPERAND_INDEX_2D)
+		{
+			next.current_->dimension = D3D10_SB_OPERAND_INDEX_3D;
+			index = 2;
+		}
+		else
+		{
+			next.current_->dimension = D3D10_SB_OPERAND_INDEX_2D;
+			index = 1;
+		}
 
 		if (extra_operand.offset_.has_value())
 		{
-			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
-			next.current_->indices[1].value.uint32 = extra_operand.offset_.value();
+			next.current_->indices[index].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
+			next.current_->indices[index].value.uint32 = extra_operand.offset_.value();
 
 		}
 		else
 		{
-			next.current_->indices[1].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
+			next.current_->indices[index].representation = D3D10_SB_OPERAND_INDEX_RELATIVE;
 		}
 
-		next.current_->indices[1].extra_operand = std::make_shared<detail::operand_t>(extra_operand.scalar());
+		next.current_->indices[index].extra_operand = std::make_shared<detail::operand_t>(extra_operand.scalar());
 		return next;
 	}
 
