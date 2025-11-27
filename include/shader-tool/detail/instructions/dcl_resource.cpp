@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_resource::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_resource::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction;
 
@@ -27,7 +27,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_resource::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_resource::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
@@ -39,7 +39,7 @@ namespace alys::shader::detail
 		output_buffer.write_bits(16, 0);
 	}
 	
-	void dcl_resource::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_resource::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		const auto& resource_return_type = instruction.operands[1].custom.u.values;
 		dump_opcode(buffer, instruction.opcode);

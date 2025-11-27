@@ -280,7 +280,8 @@ namespace alys::shader
 				break;
 			}
 
-			detail::dump_instruction(buffer, instruction);
+			const auto version = this->calculate_version(this->info_);
+			detail::dump_instruction(buffer, instruction, version);
 
 			buffer.write("\n");
 		}
@@ -500,9 +501,11 @@ namespace alys::shader
 		buffer.write_bytes(2, this->info_.program_type);
 		buffer.write_bytes(4, 0); /* num dwords */
 
+		const auto version = this->calculate_version(this->info_);
+
 		for (const auto& instruction : this->instructions_)
 		{
-			detail::write_instruction(buffer, instruction);
+			detail::write_instruction(buffer, instruction, version);
 		}
 
 		const auto end = buffer.total();
@@ -567,17 +570,18 @@ namespace alys::shader
 		this->info_.program_type = chunk.read_bytes(2);
 		chunk.read_bytes(4); /* num dwords */
 
-		assert(this->info_.major_version == 5);
-		assert(this->info_.minor_version == 0);
+		assert((this->info_.major_version == 5 && this->info_.minor_version == 0) || 
+			(this->info_.major_version == 5 && this->info_.minor_version == 1));
 
 		this->parse_instructions(chunk, size);
 	}
 
 	void shader_object::parse_instructions(utils::bit_buffer_le& chunk, const std::uint32_t size)
 	{
+		const auto version = this->calculate_version(this->info_);
 		while (chunk.total() < size * 8)
 		{
-			this->instructions_.emplace_back(detail::read_instruction(chunk));
+			this->instructions_.emplace_back(detail::read_instruction(chunk, version));
 		}
 	}
 
@@ -678,5 +682,10 @@ namespace alys::shader
 	std::vector<detail::instruction_t>& shader_object::get_instructions()
 	{
 		return this->instructions_;
+	}
+
+	std::uint32_t shader_object::calculate_version(const info& info) const
+	{
+		return info.major_version * 10 + info.minor_version;
 	}
 }

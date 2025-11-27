@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_hs_max_tessfactor::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_hs_max_tessfactor::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction{};
 
@@ -16,13 +16,13 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_hs_max_tessfactor::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_hs_max_tessfactor::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		write_opcode(output_buffer, instruction.opcode, 2u);
 		write_custom_operand(output_buffer, instruction.operands[0]);
 	}
 
-	void dcl_hs_max_tessfactor::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_hs_max_tessfactor::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		buffer.write("dcl_hs_max_tessfactor %f", instruction.operands[0].custom.u.float32);
 	}

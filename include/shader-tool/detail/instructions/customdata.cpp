@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t customdata::read(alys::utils::bit_buffer_le& input_buffer)
+	instruction_t customdata::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction;
 		instruction.opcode.type = input_buffer.read_bits(11);
@@ -19,7 +19,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void customdata::write(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void customdata::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		output_buffer.write_bits(11, D3D10_SB_OPCODE_CUSTOMDATA);
 		output_buffer.write_bits(21, instruction.customdata.data_class);
@@ -31,7 +31,7 @@ namespace alys::shader::detail
 		}
 	}
 
-	void customdata::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void customdata::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		switch (instruction.customdata.data_class)
 		{

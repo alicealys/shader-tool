@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_tess_domain::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_tess_domain::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction{};
 
@@ -15,12 +15,12 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_tess_domain::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_tess_domain::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		write_opcode(output_buffer, instruction.opcode, 1);
 	}
 
-	void dcl_tess_domain::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_tess_domain::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" ");

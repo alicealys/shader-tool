@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t sync::read(utils::bit_buffer_le& input_buffer)
+	instruction_t sync::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction{};
 
@@ -15,12 +15,12 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void sync::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void sync::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		write_opcode(output_buffer, instruction.opcode, 1);
 	}
 
-	void sync::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void sync::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		dump_opcode(buffer, instruction.opcode);
 

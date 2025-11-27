@@ -138,6 +138,8 @@ namespace alys::shader
 		std::string serialize_signature(const std::uint32_t type, const signature& elements);
 		std::string serialize_instructions();
 
+		std::uint32_t calculate_version(const info& info) const;
+
 		std::unordered_map<std::uint32_t, signature> signatures_;
 		info info_{};
 		std::vector<detail::instruction_t> instructions_;

@@ -4,7 +4,7 @@
 
 namespace alys::shader::detail
 {
-	instruction_t dcl_indexable_temp::read(utils::bit_buffer_le& input_buffer)
+	instruction_t dcl_indexable_temp::read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 	{
 		instruction_t instruction{};
 
@@ -19,7 +19,7 @@ namespace alys::shader::detail
 		return instruction;
 	}
 
-	void dcl_indexable_temp::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+	void dcl_indexable_temp::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		assert(instruction.operands.size() == 3);
 		write_opcode(output_buffer, instruction.opcode, 4u);
@@ -28,7 +28,7 @@ namespace alys::shader::detail
 		write_custom_operand(output_buffer, instruction.operands[2]);
 	}
 
-	void dcl_indexable_temp::dump(utils::string_writer& buffer, const instruction_t& instruction)
+	void dcl_indexable_temp::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		dump_opcode(buffer, instruction.opcode);
 		buffer.write(" x%i[%i], %i", 

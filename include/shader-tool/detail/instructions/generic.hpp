@@ -7,7 +7,7 @@ namespace alys::shader::detail
 	template <std::uint32_t Flags = flag_none>
 	class general_instruction final : public base_instruction
 	{
-		instruction_t read(utils::bit_buffer_le& input_buffer)
+		instruction_t read(utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 		{
 			instruction_t instruction{};
 			std::uint32_t opcode_length{};
@@ -24,7 +24,7 @@ namespace alys::shader::detail
 			return instruction;
 		}
 
-		void write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+		void write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 		{
 			const auto length = get_opcode_length(instruction);
 			write_opcode(output_buffer, instruction.opcode, length);
@@ -34,7 +34,7 @@ namespace alys::shader::detail
 			}
 		}
 
-		void dump(utils::string_writer& buffer, const instruction_t& instruction)
+		void dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 		{
 			dump_opcode_name(buffer, instruction.opcode);
 

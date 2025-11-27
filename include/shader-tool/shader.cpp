@@ -431,7 +431,7 @@ namespace alys::shader
 			}
 		}
 
-		instruction_t read_instruction(alys::utils::bit_buffer_le& input_buffer)
+		instruction_t read_instruction(alys::utils::bit_buffer_le& input_buffer, const std::uint32_t version)
 		{
 			const auto beg = input_buffer.total();
 			const auto opcode_type = input_buffer.read_bits(11);
@@ -444,13 +444,13 @@ namespace alys::shader
 
 			if (const auto& handler = instruction_handlers[opcode_type]; handler.get() != nullptr)
 			{
-				return handler->read(input_buffer);
+				return handler->read(input_buffer, version);
 			}
 
 			throw std::runtime_error("unsupported instruction");
 		}
 
-		void write_instruction(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction)
+		void write_instruction(alys::utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 		{
 			if (instruction.opcode.type >= instruction_handlers.size())
 			{
@@ -459,13 +459,13 @@ namespace alys::shader
 
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
-				return handler->write(output_buffer, instruction);
+				return handler->write(output_buffer, instruction, version);
 			}
 
 			throw std::runtime_error("unsupported instruction");
 		}
 
-		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction)
+		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 		{
 			if (instruction.opcode.type >= instruction_handlers.size())
 			{
@@ -474,16 +474,16 @@ namespace alys::shader
 
 			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
 			{
-				return handler->dump(buffer, instruction);
+				return handler->dump(buffer, instruction, version);
 			}
 
 			throw std::runtime_error("unsupported instruction");
 		}
 
-		void print_instruction(const instruction_t& instruction)
+		void print_instruction(const instruction_t& instruction, const std::uint32_t version)
 		{
 			utils::string_writer buffer;
-			dump_instruction(buffer, instruction);
+			dump_instruction(buffer, instruction, version);
 			printf("%s\n", buffer.data());
 		}
 	}

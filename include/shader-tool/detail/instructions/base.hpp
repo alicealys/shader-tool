@@ -25,9 +25,9 @@ namespace alys::shader::detail
 		{
 		}
 
-		virtual instruction_t read(utils::bit_buffer_le&) = 0;
-		virtual void write(utils::bit_buffer_le&, const instruction_t&) = 0;
-		virtual void dump(utils::string_writer&, const instruction_t&) = 0;
+		virtual instruction_t read(utils::bit_buffer_le&, const std::uint32_t version) = 0;
+		virtual void write(utils::bit_buffer_le&, const instruction_t&, const std::uint32_t version) = 0;
+		virtual void dump(utils::string_writer&, const instruction_t&, const std::uint32_t version) = 0;
 		virtual std::uint32_t get_flags() = 0;
 	};
 }

@@ -7,9 +7,9 @@ namespace alys::shader::detail
 	class dcl_resource_raw final : public base_instruction
 	{
 	public:
-		instruction_t read(utils::bit_buffer_le&);
-		void write(utils::bit_buffer_le&, const instruction_t&);
-		void dump(utils::string_writer& buffer, const instruction_t&);
+		instruction_t read(utils::bit_buffer_le&, const std::uint32_t version);
+		void write(utils::bit_buffer_le&, const instruction_t&, const std::uint32_t version);
+		void dump(utils::string_writer& buffer, const instruction_t&, const std::uint32_t version);
 		std::uint32_t get_flags();
 	};
 }
