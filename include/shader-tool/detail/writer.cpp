@@ -47,7 +47,8 @@ namespace alys::shader::detail
 			output_buffer.write_bits(6, operand.extensions[i].type);
 			output_buffer.write_bits(8, operand.extensions[i].modifier);
 			output_buffer.write_bits(3, operand.extensions[i].min_precision);
-			output_buffer.write_bits(14, 0);
+			output_buffer.write_bits(1, operand.extensions[i].non_uniform);
+			output_buffer.write_bits(13, 0);
 			const auto is_not_last = i < operand.extensions.size() - 1;
 			output_buffer.write_bits(1, is_not_last);
 		}

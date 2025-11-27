@@ -205,6 +205,7 @@ namespace alys::shader
 				obj.signatures_[type] = obj.parse_signature(input_buffer);
 				break;
 			case chunk_shex:
+			case chunk_shdr:
 				obj.parse_instructions_chunk(input_buffer, chunk_size);
 				break;
 			default:
@@ -493,7 +494,15 @@ namespace alys::shader
 	{
 		utils::bit_buffer_le buffer;
 
-		buffer.write_bytes(4, chunk_shex);
+		if (this->info_.major_version >= 5)
+		{
+			buffer.write_bytes(4, chunk_shex);
+		}
+		else
+		{
+			buffer.write_bytes(4, chunk_shdr);
+		}
+
 		buffer.write_bytes(4, 0); /* len */
 		buffer.write_bits(4, this->info_.minor_version);
 		buffer.write_bits(4, this->info_.major_version);
@@ -569,9 +578,6 @@ namespace alys::shader
 		chunk.read_bytes(1); /* unk */
 		this->info_.program_type = chunk.read_bytes(2);
 		chunk.read_bytes(4); /* num dwords */
-
-		assert((this->info_.major_version == 5 && this->info_.minor_version == 0) || 
-			(this->info_.major_version == 5 && this->info_.minor_version == 1));
 
 		this->parse_instructions(chunk, size);
 	}

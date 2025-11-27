@@ -52,6 +52,7 @@ namespace alys::shader
 		chunk_pcsg = 'GSCP',
 		chunk_osg5 = '5GSO',
 		chunk_shex = 'XEHS',
+		chunk_shdr = 'RDHS',
 	};
 
 	const char* get_sys_value_name(const std::uint32_t value);

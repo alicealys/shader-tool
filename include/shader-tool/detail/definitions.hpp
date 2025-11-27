@@ -62,6 +62,7 @@ namespace alys::shader::detail
 		std::uint8_t type;
 		std::uint8_t modifier;
 		std::uint8_t min_precision;
+		std::uint8_t non_uniform : 1;
 	};
 	 
 	union operand_custom_value_t

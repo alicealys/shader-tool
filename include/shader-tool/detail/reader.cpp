@@ -21,13 +21,14 @@ namespace alys::shader::detail
 		{
 			operand.modifier = input_buffer.read_bits(8);
 			operand.min_precision = input_buffer.read_bits(3);
+			operand.non_uniform = input_buffer.read_bits(1);
 		}
 		else
 		{
-			input_buffer.read_bits(11);
+			input_buffer.read_bits(12);
 		}
 
-		input_buffer.read_bits(14);
+		input_buffer.read_bits(13);
 		extended = input_buffer.read_bits(1);
 
 		return operand;

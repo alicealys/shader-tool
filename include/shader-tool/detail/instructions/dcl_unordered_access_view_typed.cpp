@@ -22,6 +22,11 @@ namespace alys::shader::detail
 
 		instruction.operands.emplace_back(operand);
 
+		if (version >= 51)
+		{
+			instruction.operands.emplace_back(read_custom_operand(input_buffer));
+		}
+
 		return instruction;
 	}
 
@@ -35,6 +40,11 @@ namespace alys::shader::detail
 		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[2]);
 		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[3]);
 		output_buffer.write_bits(16, 0);
+
+		if (version >= 51)
+		{
+			write_custom_operand(output_buffer, instruction.operands[2]);
+		}
 	}
 	
 	void dcl_unordered_access_view_typed::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
@@ -54,7 +64,19 @@ namespace alys::shader::detail
 			get_return_type_name(resource_return_type[1]),
 			get_return_type_name(resource_return_type[2]),
 			get_return_type_name(resource_return_type[3]));
-		dump_operand(buffer, instruction.operands[0]);
+
+		if (version >= 51)
+		{
+			buffer.write("u%i[%i:%i], space=%i",
+				instruction.operands[0].indices[0].value.uint32,
+				instruction.operands[0].indices[1].value.uint32,
+				instruction.operands[0].indices[2].value.uint32,
+				instruction.operands[2].custom.u.value);
+		}
+		else
+		{
+			dump_operand(buffer, instruction.operands[0]);
+		}
 	}
 
 	std::uint32_t dcl_unordered_access_view_typed::get_flags()
