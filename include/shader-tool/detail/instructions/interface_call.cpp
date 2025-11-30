@@ -27,6 +27,7 @@ namespace alys::shader::detail
 	void interface_call::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		dump_opcode(buffer, instruction.opcode);
+		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[1]);
 		buffer.write("[%i]", instruction.operands[0].custom.u.value);
 	}

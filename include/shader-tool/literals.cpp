@@ -116,10 +116,10 @@ namespace alys::shader::literals
 	{
 		detail::operand_t operand{};
 		operand.custom.is_custom = true;
-		operand.custom.u.values[0] = x;
-		operand.custom.u.values[1] = y;
-		operand.custom.u.values[2] = z;
-		operand.custom.u.values[3] = w;
+		operand.custom.u.values8[0] = x;
+		operand.custom.u.values8[1] = y;
+		operand.custom.u.values8[2] = z;
+		operand.custom.u.values8[3] = w;
 		return operand;
 	}
 

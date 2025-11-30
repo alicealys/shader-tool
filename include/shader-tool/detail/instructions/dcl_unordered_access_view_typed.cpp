@@ -14,10 +14,10 @@ namespace alys::shader::detail
 
 		operand_t operand{};
 		operand.custom.is_custom = true;
-		operand.custom.u.values[0] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
-		operand.custom.u.values[1] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
-		operand.custom.u.values[2] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
-		operand.custom.u.values[3] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
+		operand.custom.u.values8[0] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
+		operand.custom.u.values8[1] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
+		operand.custom.u.values8[2] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
+		operand.custom.u.values8[3] = static_cast<std::uint8_t>(input_buffer.read_bits(4));
 		input_buffer.read_bits(16);
 
 		instruction.operands.emplace_back(operand);
@@ -35,10 +35,10 @@ namespace alys::shader::detail
 		const auto length = get_opcode_length(instruction);
 		write_opcode(output_buffer, instruction.opcode, length);
 		write_operand(output_buffer, instruction.operands[0]);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[0]);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[1]);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[2]);
-		output_buffer.write_bits(4, instruction.operands[1].custom.u.values[3]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values8[0]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values8[1]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values8[2]);
+		output_buffer.write_bits(4, instruction.operands[1].custom.u.values8[3]);
 		output_buffer.write_bits(16, 0);
 
 		if (version >= 51)
@@ -56,7 +56,7 @@ namespace alys::shader::detail
 			buffer.write("_glc");
 		}
 
-		const auto& resource_return_type = instruction.operands[1].custom.u.values;
+		const auto& resource_return_type = instruction.operands[1].custom.u.values8;
 		const auto dimension = instruction.opcode.controls & 0x1F;
 
 		buffer.write("_%s", get_resource_dimension_name(dimension));

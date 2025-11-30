@@ -69,7 +69,8 @@ namespace alys::shader::detail
 	{
 		float float32;
 		std::uint32_t value;
-		std::uint8_t values[4];
+		std::uint16_t values16[2];
+		std::uint8_t values8[4];
 	};
 
 	struct operand_custom_t

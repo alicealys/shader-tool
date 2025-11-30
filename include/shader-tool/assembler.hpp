@@ -146,10 +146,10 @@ namespace alys::shader
 			as_custom(const std::array<std::uint8_t, 4> values)
 			{
 				this->op_.custom.is_custom = true;
-				this->op_.custom.u.values[0] = values[0];
-				this->op_.custom.u.values[1] = values[1];
-				this->op_.custom.u.values[2] = values[2];
-				this->op_.custom.u.values[3] = values[3];
+				this->op_.custom.u.values8[0] = values[0];
+				this->op_.custom.u.values8[1] = values[1];
+				this->op_.custom.u.values8[2] = values[2];
+				this->op_.custom.u.values8[3] = values[3];
 			}
 
 			operator detail::operand_t() const
@@ -3201,8 +3201,8 @@ namespace alys::shader
 
 			detail::operand_t lengths{};
 			lengths.custom.is_custom = true;
-			lengths.custom.u.values[0] = static_cast<std::uint8_t>(entries.size());
-			lengths.custom.u.values[1] = arraySize;
+			lengths.custom.u.values16[0] = static_cast<std::uint8_t>(entries.size());
+			lengths.custom.u.values16[1] = arraySize;
 
 			detail::operand_t table_length{};
 			table_length.custom.is_custom = true;
@@ -3234,8 +3234,8 @@ namespace alys::shader
 
 			detail::operand_t lengths{};
 			lengths.custom.is_custom = true;
-			lengths.custom.u.values[0] = arraySize;
-			lengths.custom.u.values[1] = numCallSites;
+			lengths.custom.u.values16[0] = arraySize;
+			lengths.custom.u.values16[1] = numCallSites;
 
 			detail::operand_t table_length{};
 			table_length.custom.is_custom = true;

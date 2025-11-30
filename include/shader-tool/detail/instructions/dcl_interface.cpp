@@ -16,11 +16,11 @@ namespace alys::shader::detail
 
 		operand_t lengths{};
 		lengths.custom.is_custom = true;
-		lengths.custom.u.values[0] = input_buffer.read_bits(16); // TableLength
-		lengths.custom.u.values[1] = input_buffer.read_bits(16); // ArrayLength
+		lengths.custom.u.values16[0] = input_buffer.read_bits(16); // TableLength
+		lengths.custom.u.values16[1] = input_buffer.read_bits(16); // ArrayLength
 		instruction.operands.emplace_back(lengths);
 
-		for (auto i = 0u; i < lengths.custom.u.values[0]; i++)
+		for (auto i = 0u; i < lengths.custom.u.values16[0]; i++)
 		{
 			instruction.operands.emplace_back(read_custom_operand(input_buffer));
 		}
@@ -38,10 +38,10 @@ namespace alys::shader::detail
 		write_custom_operand(output_buffer, instruction.operands[0]);
 		write_custom_operand(output_buffer, instruction.operands[1]);
 
-		output_buffer.write_bits(16, instruction.operands[2].custom.u.values[0]);
-		output_buffer.write_bits(16, instruction.operands[2].custom.u.values[1]);
+		output_buffer.write_bits(16, instruction.operands[2].custom.u.values16[0]);
+		output_buffer.write_bits(16, instruction.operands[2].custom.u.values16[1]);
 
-		const auto table_length = instruction.operands[2].custom.u.values[0];
+		const auto table_length = instruction.operands[2].custom.u.values16[0];
 		for (auto i = 0u; i < table_length; i++)
 		{
 			write_custom_operand(output_buffer, instruction.operands[i + 3]);
@@ -60,11 +60,11 @@ namespace alys::shader::detail
 
 		buffer.write(" ");
 		buffer.write("fp%i", instruction.operands[0].custom.u.value);
-		buffer.write("[%i]", instruction.operands[2].custom.u.values[1]);
+		buffer.write("[%i]", instruction.operands[2].custom.u.values16[1]);
 		buffer.write("[%i]", instruction.operands[1].custom.u.value);
 		buffer.write(" = {");
 
-		const auto table_length = instruction.operands[2].custom.u.values[0];
+		const auto table_length = instruction.operands[2].custom.u.values16[0];
 		for (auto i = 0u; i < table_length; i++)
 		{
 			buffer.write("ft%i", instruction.operands[i + 3].custom.u.value);
