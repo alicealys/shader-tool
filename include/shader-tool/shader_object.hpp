@@ -53,6 +53,7 @@ namespace alys::shader
 		chunk_osg5 = '5GSO',
 		chunk_shex = 'XEHS',
 		chunk_shdr = 'RDHS',
+		chunk_rdef = 'FEDR',
 	};
 
 	const char* get_sys_value_name(const std::uint32_t value);
@@ -94,6 +95,58 @@ namespace alys::shader
 			std::uint32_t checksum[4];
 		};
 
+		struct resource_definition
+		{
+			struct constant_buffer
+			{
+				struct variable_type
+				{
+					std::uint16_t class_;
+					std::uint16_t type;
+					std::uint16_t row_count;
+					std::uint16_t col_count;
+					std::uint16_t element_count;
+					std::uint16_t member_count;
+					std::uint32_t member_offset;
+				};
+
+				struct variable
+				{
+					std::string name;
+					std::uint32_t offset;
+					std::uint32_t size;
+					std::uint32_t flags;
+					variable_type type;
+				};
+
+				std::string name;
+				std::uint32_t size;
+				std::uint32_t flags;
+				std::uint32_t type;
+				std::vector<variable> vars;
+			};
+
+			struct resource_binding
+			{
+				std::string name;
+				std::uint32_t shader_input_type;
+				std::uint32_t resource_return_type;
+				std::uint32_t resource_view_dim;
+				std::uint32_t sample_count;
+				std::uint32_t bind_point;
+				std::uint32_t bind_count;
+				std::uint32_t shader_input_flags;
+			};
+
+			std::uint32_t minor_version;
+			std::uint32_t major_version;
+			std::uint32_t program_type;
+			std::uint32_t flags;
+			std::string creator;
+			std::vector<constant_buffer> constant_buffers;
+			std::vector<resource_binding> resource_bindings;
+		};
+
 		using signature = std::vector<signature_element>;
 
 		shader_object();
@@ -101,6 +154,7 @@ namespace alys::shader
 
 		static shader_object parse(const std::string& data);
 		static void dump_signature(utils::string_writer& buffer, const signature& signature);
+		static void dump_resource_definition(utils::string_writer& buffer, const resource_definition& signature);
 		void dump(utils::string_writer& buffer) const;
 		std::string dump() const;
 		void print() const;
@@ -110,7 +164,6 @@ namespace alys::shader
 		signature get_signature(const std::uint32_t name);
 		std::unordered_map<std::uint32_t, signature>& get_signatures();
 		std::unordered_map<std::uint32_t, std::string>& get_unknown_chunks();
-		std::vector<std::uint32_t>& get_chunk_order();
 		std::vector<detail::instruction_t>& get_instructions();
 
 		info& get_info();
@@ -135,6 +188,7 @@ namespace alys::shader
 
 		signature parse_signature(utils::bit_buffer_le& data);
 		void parse_instructions_chunk(utils::bit_buffer_le& data, const std::uint32_t size);
+		void parse_resource_def_chunk(utils::bit_buffer_le& data, const std::uint32_t size);
 
 		std::string serialize_signature(const std::uint32_t type, const signature& elements);
 		std::string serialize_instructions();
@@ -143,9 +197,9 @@ namespace alys::shader
 
 		std::unordered_map<std::uint32_t, signature> signatures_;
 		info info_{};
+		resource_definition resource_definition_{};
 		std::vector<detail::instruction_t> instructions_;
 		std::unordered_map<std::uint32_t, std::string> unknown_chunks_;
-		std::vector<std::uint32_t> chunk_order_;
 
 	};
 }
