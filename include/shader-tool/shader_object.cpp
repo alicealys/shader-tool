@@ -170,7 +170,8 @@ namespace alys::shader
 		const auto header = reinterpret_cast<const shader_object::header*>(program);
 		const auto chunk_offsets = reinterpret_cast<const std::uint32_t*>(&header->chunk_offsets[0]);
 
-		if (header->program_size != static_cast<std::uint32_t>(data.size()))
+		if (*reinterpret_cast<const std::uint32_t*>(&header->dxbc[0]) != chunk_dxbc ||
+			header->program_size != static_cast<std::uint32_t>(data.size()))
 		{
 			throw std::runtime_error("invalid shader data");
 		}
@@ -786,6 +787,9 @@ namespace alys::shader
 	void shader_object::parse_instructions(utils::bit_buffer_le& chunk, const std::uint32_t size)
 	{
 		const auto version = this->calculate_version(this->info_);
+
+		assert(version >= 40 && version <= 51, "only sm4/sm5/sm5.1 are supported");
+
 		while (chunk.total() < size * 8)
 		{
 			this->instructions_.emplace_back(detail::read_instruction(chunk, version));

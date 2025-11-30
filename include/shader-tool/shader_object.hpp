@@ -47,6 +47,7 @@ namespace alys::shader
 	
 	enum shader_chunk_name
 	{
+		chunk_dxbc = 'CBXD',
 		chunk_isgn = 'NGSI',
 		chunk_osgn = 'NGSO',
 		chunk_pcsg = 'GSCP',
