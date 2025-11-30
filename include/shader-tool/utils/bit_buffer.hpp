@@ -80,6 +80,7 @@ namespace alys::utils
         T read_bits(const unsigned int num_bits)
         {
             T data{};
+            assert(sizeof(T) >= num_bits / 8);
             this->read_bits_internal(num_bits, &data);
             return data;
         }
@@ -103,6 +104,7 @@ namespace alys::utils
         template <typename T>
         void write_bits(const unsigned int num_bits, const T& data)
         {
+            assert(sizeof(T) >= num_bits / 8);
             this->write_bits_internal(num_bits, &data);
         }
 
