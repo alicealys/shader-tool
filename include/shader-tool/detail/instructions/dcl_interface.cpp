@@ -16,8 +16,8 @@ namespace alys::shader::detail
 
 		operand_t lengths{};
 		lengths.custom.is_custom = true;
-		lengths.custom.u.values16[0] = input_buffer.read_bits(16); // TableLength
-		lengths.custom.u.values16[1] = input_buffer.read_bits(16); // ArrayLength
+		lengths.custom.u.values16[0] = input_buffer.read_bits<std::uint16_t>(16); // TableLength
+		lengths.custom.u.values16[1] = input_buffer.read_bits<std::uint16_t>(16); // ArrayLength
 		instruction.operands.emplace_back(lengths);
 
 		for (auto i = 0u; i < lengths.custom.u.values16[0]; i++)

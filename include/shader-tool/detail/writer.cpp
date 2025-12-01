@@ -53,44 +53,30 @@ namespace alys::shader::detail
 			output_buffer.write_bits(1, is_not_last);
 		}
 
-		const auto write_index = [&](const std::uint32_t index)
+		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		for (auto i = 0u; i < operand.dimension; i++)
 		{
-			switch (operand.indices[index].representation)
+			switch (operand.indices[i].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-				output_buffer.write_bytes(4, operand.indices[index].value.uint32);
+				output_buffer.write_bytes(4, operand.indices[i].value.uint32);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
+				output_buffer.write_bytes(8, operand.indices[i].value.uint64.value);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				write_operand(output_buffer, *operand.indices[index].extra_operand);
+				write_operand(output_buffer, *operand.indices[i].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				output_buffer.write_bytes(4, operand.indices[index].value.uint32);
-				write_operand(output_buffer, *operand.indices[index].extra_operand);
+				output_buffer.write_bytes(4, operand.indices[i].value.uint32);
+				write_operand(output_buffer, *operand.indices[i].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				output_buffer.write_bytes(8, operand.indices[index].value.uint64.value);
-				write_operand(output_buffer, *operand.indices[index].extra_operand);
+				output_buffer.write_bytes(8, operand.indices[i].value.uint64.value);
+				write_operand(output_buffer, *operand.indices[i].extra_operand);
 				break;
 			}
 		};
-
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-		{
-			write_index(0);
-		}
-
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-		{
-			write_index(1);
-		}
-
-		if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-		{
-			write_index(2);
-		}
 
 		const auto num_components = get_num_components(operand.components.type);
 
@@ -166,13 +152,13 @@ namespace alys::shader::detail
 
 	std::uint32_t get_operand_length(const operand_t& operand)
 	{
-		std::uint32_t length = 1;
-
+		auto length = 1u;
 		length += static_cast<std::uint32_t>(operand.extensions.size());
 
-		const auto write_index = [&](const std::uint32_t index)
+		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		for (auto i = 0u; i < operand.dimension; i++)
 		{
-			switch (operand.indices[index].representation)
+			switch (operand.indices[i].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
 				length += 1;
@@ -181,49 +167,29 @@ namespace alys::shader::detail
 				length += 2;
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				length += get_operand_length(*operand.indices[index].extra_operand);
+				length += get_operand_length(*operand.indices[i].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				length += get_operand_length(*operand.indices[index].extra_operand);
 				length += 1;
+				length += get_operand_length(*operand.indices[i].extra_operand);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				length += get_operand_length(*operand.indices[index].extra_operand);
 				length += 2;
+				length += get_operand_length(*operand.indices[i].extra_operand);
 				break;
 			}
 		};
 
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-		{
-			write_index(0);
-		}
-
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-		{
-			write_index(1);
-		}
-
-		if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-		{
-			write_index(2);
-		}
+		const auto num_components = get_num_components(operand.components.type);
 
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE32)
 		{
-			if (operand.components.type == D3D10_SB_OPERAND_4_COMPONENT)
-			{
-				length += 4;
-			}
-			else
-			{
-				length += 1;
-			}
+			length += 1 * num_components;
 		}
 
 		if (operand.type == D3D10_SB_OPERAND_TYPE_IMMEDIATE64)
 		{
-			length += 2;
+			length += 2 * num_components;
 		}
 
 		return length;

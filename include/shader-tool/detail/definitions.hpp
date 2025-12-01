@@ -82,7 +82,7 @@ namespace alys::shader::detail
 	struct operand_t
 	{
 		operand_components_t components;
-		std::uint16_t type;
+		std::uint8_t type;
 		std::uint8_t dimension;
 		std::vector<operand_extended_t> extensions;
 		operand_index_t indices[3];

@@ -86,46 +86,32 @@ namespace alys::shader::detail
 			operand.extensions.emplace_back(operand_extended);
 		}
 
-		const auto read_index_rep = [&](const std::uint32_t index)
+		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		for (auto i = 0u; i < operand.dimension; i++)
 		{
-			switch (operand.indices[index].representation)
+			switch (operand.indices[i].representation)
 			{
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32:
-				operand.indices[index].value.uint32 = input_buffer.read_bytes(4);
+				operand.indices[i].value.uint32 = input_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64:
-				operand.indices[index].value.uint64.fields.low = input_buffer.read_bytes(4);
-				operand.indices[index].value.uint64.fields.high = input_buffer.read_bytes(4);
+				operand.indices[i].value.uint64.fields.low = input_buffer.read_bytes(4);
+				operand.indices[i].value.uint64.fields.high = input_buffer.read_bytes(4);
 				break;
 			case D3D10_SB_OPERAND_INDEX_RELATIVE:
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
+				operand.indices[i].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE:
-				operand.indices[index].value.uint32 = input_buffer.read_bytes(4);
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
+				operand.indices[i].value.uint32 = input_buffer.read_bytes(4);
+				operand.indices[i].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			case D3D10_SB_OPERAND_INDEX_IMMEDIATE64_PLUS_RELATIVE:
-				operand.indices[index].value.uint64.fields.low = input_buffer.read_bytes(4);
-				operand.indices[index].value.uint64.fields.high = input_buffer.read_bytes(4);
-				operand.indices[index].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
+				operand.indices[i].value.uint64.fields.low = input_buffer.read_bytes(4);
+				operand.indices[i].value.uint64.fields.high = input_buffer.read_bytes(4);
+				operand.indices[i].extra_operand = std::make_shared<operand_t>(read_operand(input_buffer));
 				break;
 			}
 		};
-
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_1D)
-		{
-			read_index_rep(0);
-		}
-
-		if (operand.dimension >= D3D10_SB_OPERAND_INDEX_2D)
-		{
-			read_index_rep(1);
-		}
-
-		if (operand.dimension == D3D10_SB_OPERAND_INDEX_3D)
-		{
-			read_index_rep(2);
-		}
 
 		const auto num_components = get_num_components(operand.components.type);
 

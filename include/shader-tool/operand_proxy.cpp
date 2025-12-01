@@ -290,7 +290,6 @@ namespace alys::shader
 		{
 			next.current_->indices[index].representation = D3D10_SB_OPERAND_INDEX_IMMEDIATE32_PLUS_RELATIVE;
 			next.current_->indices[index].value.uint32 = extra_operand.offset_.value();
-
 		}
 		else
 		{
