@@ -15,6 +15,7 @@ namespace alys::shader::detail
 		flag_saturate = (1 << 1),
 		flag_precise = (1 << 2),
 		flag_declaration = (1 << 3),
+		flag_indexable = (1 << 4),
 	};
 
 	class base_instruction

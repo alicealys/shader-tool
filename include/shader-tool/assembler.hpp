@@ -177,6 +177,10 @@ namespace alys::shader
 
 		void add_extension(const std::uint32_t type, const std::uint32_t x = 0u, const std::uint32_t y = 0u, const std::uint32_t z = 0u, const std::uint32_t w = 0u);
 
+		void set_aoffimmi(const std::uint32_t u, const std::uint32_t v, const std::uint32_t w);
+		void set_resource_dimension(const std::uint32_t dim);
+		void set_resource_return_type(const std::uint32_t x, const std::uint32_t y, const std::uint32_t z, const std::uint32_t w);
+
 		// https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-sm4-asm
 		// https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/shader-model-5-assembly--directx-hlsl-
 
@@ -1205,6 +1209,32 @@ namespace alys::shader
 		}
 
 		/*
+			Query the dimensions of a given input resource.
+
+			resinfo[_uint|_rcpFloat] dest[.mask], srcMipLevel.select_component, srcResource[.swizzle]
+			@param dest dest[.mask]
+			@param srcMipLevel srcMipLevel.select_component
+			@param srcResource srcResource[.swizzle]
+		*/
+		void resinfo_uint(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource)
+		{
+			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 2, {dest, srcMipLevel, srcResource}));
+		}
+
+		/*
+			Query the dimensions of a given input resource.
+
+			resinfo[_uint|_rcpFloat] dest[.mask], srcMipLevel.select_component, srcResource[.swizzle]
+			@param dest dest[.mask]
+			@param srcMipLevel srcMipLevel.select_component
+			@param srcResource srcResource[.swizzle]
+		*/
+		void resinfo_rcpFloat(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource)
+		{
+			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 1, {dest, srcMipLevel, srcResource}));
+		}
+
+		/*
 			Return statement.
 
 			ret
@@ -1456,6 +1486,18 @@ namespace alys::shader
 		void sampleinfo(const as_mask& dest, const as_swz& srcResource)
 		{
 			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_SAMPLE_INFO, 0, {dest, srcResource}));
+		}
+
+		/*
+			Queries the number of samples in a given shader resource view or in the rasterizer.
+
+			sampleinfo[_uint] dest[.mask], srcResource[.swizzle]
+			@param dest dest[.mask]
+			@param srcResource srcResource[.swizzle]
+		*/
+		void sampleinfo_uint(const as_mask& dest, const as_swz& srcResource)
+		{
+			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_SAMPLE_INFO, 1, {dest, srcResource}));
 		}
 
 		/*

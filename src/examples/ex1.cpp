@@ -48,8 +48,8 @@ void example1()
 	a.sqrt(r0.w(), r0.w());
 	a.mul_sat(r0.w(), r0.w(), cb1[4].w());
 
-	a.add_extension(res_dim, texture2d);
-	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
+	a.set_resource_dimension(texture2d);
+	a.set_resource_return_type(t_float, t_float, t_float, t_float);
 	a.sample_indexable(r2.xyz(), r0.wwww(), t3.xyzw(), s3);
 
 	a.mul(r2.xyz(), r2.xyzx(), r2.xyzx());
@@ -57,8 +57,8 @@ void example1()
 	a.dp3_sat(r0.x(), r1.xyzx(), r0.xyzx());
 	a.mul(r0.xyz(), r0.xxxx(), cb1[5].xyzx());
 
-	a.add_extension(res_dim, texture2d);
-	a.add_extension(res_return_type, t_float, t_float, t_float, t_float);
+	a.set_resource_dimension(texture2d);
+	a.set_resource_return_type(t_float, t_float, t_float, t_float);
 	a.sample_indexable(r1.xyzw(), v2.xyxx(), t0.xyzw(), s0);
 
 	a.mul(r3.xyzw(), r1.xyzw(), v1.xyzw());

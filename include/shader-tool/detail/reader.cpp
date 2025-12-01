@@ -138,21 +138,21 @@ namespace alys::shader::detail
 	{
 		opcode_extended_t opcode{};
 
-		opcode.type = input_buffer.read_bits(6);
+		opcode.type = input_buffer.read_bits<std::uint8_t>(6);
 		switch (opcode.type)
 		{
 		case D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS:
 			input_buffer.read_bits(3);
-			opcode.values[0] = input_buffer.read_bits(4);
-			opcode.values[1] = input_buffer.read_bits(4);
-			opcode.values[2] = input_buffer.read_bits(4);
+			opcode.values[0] = input_buffer.read_bits<std::uint16_t>(4);
+			opcode.values[1] = input_buffer.read_bits<std::uint16_t>(4);
+			opcode.values[2] = input_buffer.read_bits<std::uint16_t>(4);
 			input_buffer.read_bits(10);
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM:
-			opcode.values[0] = input_buffer.read_bits(5);
+			opcode.values[0] = input_buffer.read_bits<std::uint16_t>(5);
 			if (opcode.values[0] == D3D11_SB_RESOURCE_DIMENSION_STRUCTURED_BUFFER)
 			{
-				opcode.values[1] = input_buffer.read_bits(12);
+				opcode.values[1] = input_buffer.read_bits<std::uint16_t>(12);
 				input_buffer.read_bits(8);
 			}
 			else
@@ -161,10 +161,10 @@ namespace alys::shader::detail
 			}
 			break;
 		case D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE:
-			opcode.values[0] = input_buffer.read_bits(4);
-			opcode.values[1] = input_buffer.read_bits(4);
-			opcode.values[2] = input_buffer.read_bits(4);
-			opcode.values[3] = input_buffer.read_bits(4);
+			opcode.values[0] = input_buffer.read_bits<std::uint16_t>(4);
+			opcode.values[1] = input_buffer.read_bits<std::uint16_t>(4);
+			opcode.values[2] = input_buffer.read_bits<std::uint16_t>(4);
+			opcode.values[3] = input_buffer.read_bits<std::uint16_t>(4);
 			input_buffer.read_bits(9);
 			break;
 		default:
@@ -181,8 +181,8 @@ namespace alys::shader::detail
 	{
 		opcode_t opcode{};
 
-		opcode.type = input_buffer.read_bits(11);
-		opcode.controls = input_buffer.read_bits(13);
+		opcode.type = input_buffer.read_bits<std::uint16_t>(11);
+		opcode.controls = input_buffer.read_bits<std::uint16_t>(13);
 		length = input_buffer.read_bits(7);
 
 		auto extended = input_buffer.read_bits<bool>(1);

@@ -38,7 +38,7 @@ namespace alys::shader::detail
 		{
 			dump_opcode_name(buffer, instruction.opcode);
 
-			if constexpr ((Flags & flag_conditional))
+			if constexpr ((Flags & flag_conditional) != 0)
 			{
 				buffer.write((instruction.opcode.controls & 128) ? "_nz" : "_z");
 			}
@@ -87,10 +87,59 @@ namespace alys::shader::detail
 				}
 			}
 
+			if (instruction.opcode.type == D3D10_SB_OPCODE_RESINFO)
+			{
+				switch (instruction.opcode.controls)
+				{
+				case 1:
+					buffer.write("_rcpFloat");
+					break;
+				case 2:
+					buffer.write("_uint");
+					break;
+				}
+			}
+
+			if (instruction.opcode.type == D3D10_1_SB_OPCODE_SAMPLE_INFO)
+			{
+				switch (instruction.opcode.controls)
+				{
+				case 1:
+					buffer.write("_uint");
+					break;
+				}
+			}
+
 			for (const auto& ext : instruction.opcode.extensions)
 			{
-				dump_opcode_extended(buffer, ext);
+				if (ext.type == D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS)
+				{
+					buffer.write("_aoffimmi");
+				}
 			}
+
+			if constexpr ((Flags & flag_indexable) != 0)
+			{
+				buffer.write("_indexable");
+			}
+
+			const auto dump_extension = [&](const std::uint32_t type)
+			{
+				for (const auto& ext : instruction.opcode.extensions)
+				{
+					if (ext.type != type)
+					{
+						continue;
+					}
+
+					dump_opcode_extended(buffer, ext);
+					break;
+				}
+			};
+
+			dump_extension(D3D10_SB_EXTENDED_OPCODE_SAMPLE_CONTROLS);
+			dump_extension(D3D11_SB_EXTENDED_OPCODE_RESOURCE_DIM);
+			dump_extension(D3D11_SB_EXTENDED_OPCODE_RESOURCE_RETURN_TYPE);
 
 			if (!instruction.operands.empty())
 			{

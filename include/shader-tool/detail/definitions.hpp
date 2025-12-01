@@ -92,14 +92,14 @@ namespace alys::shader::detail
 
 	struct opcode_extended_t
 	{
-		std::uint32_t type;
-		std::uint32_t values[4];
+		std::uint8_t type;
+		std::uint16_t values[4];
 	};
 
 	struct opcode_t
 	{
-		std::uint32_t type;
-		std::uint32_t controls;
+		std::uint16_t type;
+		std::uint16_t controls;
 		std::vector<opcode_extended_t> extensions;
 	};
 
@@ -120,7 +120,6 @@ namespace alys::shader::detail
 	{
 		opcode_t opcode;
 		std::vector<operand_t> operands;
-		instruction_customdata_t customdata;
 	};
 
 	template <typename T>
@@ -143,14 +142,9 @@ namespace alys::shader::detail
 		token_custom = 5,
 	};
 
-	using instruction_operands_t = std::vector<token_type>;
-
 	extern std::unordered_map<std::uint32_t, const char*> opcode_names;
 	extern std::unordered_map<std::uint32_t, const char*> opcode_enum_names;
-
 	extern std::unordered_map<std::uint32_t, const char*> operand_names;
-
-	extern std::unordered_map<std::uint32_t, instruction_operands_t> instruction_defs;
 
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);

@@ -8,12 +8,22 @@ namespace alys::shader::detail
 	{
 		instruction_t instruction;
 		instruction.opcode.type = input_buffer.read_bits(11);
-		instruction.customdata.data_class = input_buffer.read_bits(21);
-		instruction.customdata.count = input_buffer.read_bytes(4);
 
-		for (auto i = 2u; i < instruction.customdata.count; i++)
+		operand_t data_class{};
+		operand_t count{};
+
+		data_class.custom.is_custom = true;
+		count.custom.is_custom = true;
+
+		data_class.custom.u.value = input_buffer.read_bits(21);
+		count.custom.u.value = input_buffer.read_bytes(4);
+
+		instruction.operands.emplace_back(data_class);
+		instruction.operands.emplace_back(count);
+
+		for (auto i = 2u; i < count.custom.u.value; i++)
 		{
-			instruction.customdata.values.emplace_back(input_buffer.read_bytes(4));
+			instruction.operands.emplace_back(read_custom_operand(input_buffer));
 		}
 
 		return instruction;
@@ -22,18 +32,18 @@ namespace alys::shader::detail
 	void customdata::write(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		output_buffer.write_bits(11, D3D10_SB_OPCODE_CUSTOMDATA);
-		output_buffer.write_bits(21, instruction.customdata.data_class);
-		output_buffer.write_bytes(4, instruction.customdata.count);
+		output_buffer.write_bits(21, instruction.operands[0].custom.u.value);
+		output_buffer.write_bytes(4, instruction.operands[1].custom.u.value);
 
-		for (const auto& value : instruction.customdata.values)
+		for (auto i = 2u; i < instruction.operands[1].custom.u.value; i++)
 		{
-			output_buffer.write_bytes(4, value.u32);
+			write_custom_operand(output_buffer, instruction.operands[i]);
 		}
 	}
 
 	void customdata::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
-		switch (instruction.customdata.data_class)
+		switch (instruction.operands[0].custom.u.value)
 		{
 		case D3D10_SB_CUSTOMDATA_COMMENT:
 			break;
@@ -44,20 +54,20 @@ namespace alys::shader::detail
 		case D3D10_SB_CUSTOMDATA_DCL_IMMEDIATE_CONSTANT_BUFFER:
 		{
 			buffer.write("dcl_immediateConstantBuffer ");
-			const auto const_count = (instruction.customdata.count - 2) / 4;
+			const auto const_count = (instruction.operands[1].custom.u.value - 2) / 4;
 
 			buffer.write(" {");
 
 			for (auto i = 0u; i < const_count; i++)
 			{
-				const auto values = &instruction.customdata.values[i * 4];
+				const auto values = &instruction.operands[2 + i * 4];
 
 				if (i > 0)
 				{
 					buffer.write("                              ");
 				}
 
-				buffer.write(" { %f, %f, %f, %f}", values[0].f32, values[1].f32, values[2].f32, values[3].f32);
+				buffer.write(" { %f, %f, %f, %f}", values[0].custom.u.float32, values[1].custom.u.float32, values[2].custom.u.float32, values[3].custom.u.float32);
 
 				if (i < const_count - 1)
 				{
