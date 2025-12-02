@@ -894,4 +894,9 @@ namespace alys::shader
 	{
 		return info.major_version * 10 + info.minor_version;
 	}
+
+	std::uint32_t shader_object::get_version() const
+	{
+		return this->calculate_version(this->info_);
+	}
 }

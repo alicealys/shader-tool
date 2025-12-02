@@ -38,23 +38,27 @@ namespace alys::shader::detail
 	{
 		dump_opcode(buffer, instruction.opcode);
 
-		if (((instruction.opcode.controls >> 5) & 0x1) != 0)
+		if ((instruction.opcode.controls & (D3D11_SB_GLOBALLY_COHERENT_ACCESS >> 11)) != 0)
 		{
 			buffer.write("_glc");
 		}
 
-		if (((instruction.opcode.controls >> 12) & 0x1) != 0)
+		if ((instruction.opcode.controls & (D3D11_SB_UAV_HAS_ORDER_PRESERVING_COUNTER >> 11)) != 0)
 		{
 			buffer.write("_opc");
 		}
 
+		if ((instruction.opcode.controls & (D3D11_SB_RASTERIZER_ORDERED_ACCESS >> 11)) != 0)
+		{
+			buffer.write("_rov");
+		}
+
 		buffer.write(" ");
-		dump_operand(buffer, instruction.operands[0]);
-		buffer.write(", %i", instruction.operands[1].custom.u.value);
 
 		if (version >= 51)
 		{
-			buffer.write("u%i[%i:%i], %i, space=%i",
+			buffer.write("%s%i[%i:%i], %i, space=%i",
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32,
 				instruction.operands[0].indices[2].value.uint32,

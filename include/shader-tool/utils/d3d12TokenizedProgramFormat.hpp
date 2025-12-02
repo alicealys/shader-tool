@@ -1,11 +1,10 @@
 #pragma once
-// ----------------------------------------------------------------------------
+//*********************************************************
 //
-// D3D11 Tokenized Program Format
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License (MIT).
 //
-// Copyright (c) Microsoft Corporation. 
-//
-// ----------------------------------------------------------------------------
+//*********************************************************
 //
 // High Level Goals
 //
@@ -50,7 +49,7 @@
 #include <winapifamily.h>
 
 #pragma region Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES)
 
 // ----------------------------------------------------------------------------
 // Version Token (VerTok)
@@ -71,6 +70,12 @@ typedef enum D3D10_SB_TOKENIZED_PROGRAM_TYPE
     D3D11_SB_HULL_SHADER        = 3,
     D3D11_SB_DOMAIN_SHADER      = 4,
     D3D11_SB_COMPUTE_SHADER     = 5,
+
+    // Subset of D3D12 Shaders where this field is referenced by runtime
+    // Entries from 6-12 are unique to state objects 
+    // (e.g. library, callable and raytracing shaders)
+    D3D12_SB_MESH_SHADER        = 13,
+    D3D12_SB_AMPLIFICATION_SHADER = 14,
 
     D3D11_SB_RESERVED0          = 0xFFF0
 } D3D10_SB_TOKENIZED_PROGRAM_TYPE;
@@ -951,6 +956,8 @@ typedef enum D3D10_SB_OPERAND_TYPE
     D3D11_SB_OPERAND_TYPE_OUTPUT_DEPTH_GREATER_EQUAL = 38, // Output Depth, forced to be greater than or equal than current depth
     D3D11_SB_OPERAND_TYPE_OUTPUT_DEPTH_LESS_EQUAL    = 39, // Output Depth, forced to be less than or equal to current depth
     D3D11_SB_OPERAND_TYPE_CYCLE_COUNTER = 40, // Cycle counter
+    D3D11_SB_OPERAND_TYPE_OUTPUT_STENCIL_REF = 41, // DX11 PS output stencil reference (scalar)
+    D3D11_SB_OPERAND_TYPE_INNER_COVERAGE = 42, // DX11 PS input inner coverage (scalar)
 } D3D10_SB_OPERAND_TYPE;
 
 #define D3D10_SB_OPERAND_TYPE_MASK   0x000ff000
@@ -1032,12 +1039,13 @@ typedef enum D3D10_SB_OPERAND_INDEX_REPRESENTATION
 //         {
 //              [13:06] D3D10_SB_OPERAND_MODIFIER
 //              [16:14] Min Precision: D3D11_SB_OPERAND_MIN_PRECISION
+//              [17:17] Non-uniform: D3D12_SB_OPERAND_NON_UNIFORM
 //         }
 //         else
 //         {
-//              [16:06] Ignored, 0.
+//              [17:06] Ignored, 0.
 //         }
-// [30:17] Ignored, 0.
+// [30:18] Ignored, 0.
 // [31]    0 normally. 1 if second order extended operand definition,
 //         meaning next DWORD contains yet ANOTHER extended operand
 //         description. Currently no second order extensions defined.
@@ -1117,6 +1125,18 @@ typedef enum D3D11_SB_OPERAND_MIN_PRECISION
 // into the extended operand token, OperandToken1
 #define ENCODE_D3D11_SB_OPERAND_MIN_PRECISION(MinPrecision) (((MinPrecision)<< D3D11_SB_OPERAND_MIN_PRECISION_SHIFT)& D3D11_SB_OPERAND_MIN_PRECISION_MASK)
 
+
+// Non-uniform extended operand modifier.
+#define D3D12_SB_OPERAND_NON_UNIFORM_MASK  0x00020000
+#define D3D12_SB_OPERAND_NON_UNIFORM_SHIFT 17
+
+// DECODER MACRO: For an OperandToken1 that can specify a non-uniform operand
+#define DECODE_D3D12_SB_OPERAND_NON_UNIFORM(OperandToken1) (((OperandToken1)& D3D12_SB_OPERAND_NON_UNIFORM_MASK)>> D3D12_SB_OPERAND_NON_UNIFORM_SHIFT)
+
+// ENCODER MACRO: Encode non-uniform state into the extended operand token, OperandToken1
+#define ENCODE_D3D12_SB_OPERAND_NON_UNIFORM(NonUniform) (((NonUniform)<< D3D12_SB_OPERAND_NON_UNIFORM_SHIFT)& D3D12_SB_OPERAND_NON_UNIFORM_MASK)
+
+
 #define D3D10_SB_OPERAND_DOUBLE_EXTENDED_MASK  0x80000000
 #define D3D10_SB_OPERAND_DOUBLE_EXTENDED_SHIFT 31
 // DECODER MACRO: Determine if an extended operand token
@@ -1185,6 +1205,8 @@ typedef enum D3D11_SB_OPERAND_MIN_PRECISION
 #define D3D11_1_SB_GLOBAL_FLAG_ENABLE_MINIMUM_PRECISION        (1<<16)
 #define D3D11_1_SB_GLOBAL_FLAG_ENABLE_DOUBLE_EXTENSIONS        (1<<17)
 #define D3D11_1_SB_GLOBAL_FLAG_ENABLE_SHADER_EXTENSIONS        (1<<18)
+#define D3D12_SB_GLOBAL_FLAG_ALL_RESOURCES_BOUND               (1<<19)
+
 #define D3D10_SB_GLOBAL_FLAGS_MASK  0x00fff800
 
 // DECODER MACRO: Get global flags
@@ -1206,10 +1228,26 @@ typedef enum D3D11_SB_OPERAND_MIN_PRECISION
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 2 operands:
+// OpcodeToken0 is followed by 2 operands on Shader Models 4.0 through 5.0:
 // (1) an operand, starting with OperandToken0, defining which
 //     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
 // (2) a Resource Return Type token (ResourceReturnTypeToken)
+//
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (t<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of resources in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the t# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (t<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of resource within space (may be dynamically indexed)
+// (2) a Resource Return Type token (ResourceReturnTypeToken)
+// (3) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 #define D3D10_SB_RESOURCE_DIMENSION_MASK  0x0000F800
@@ -1240,10 +1278,26 @@ typedef enum D3D11_SB_OPERAND_MIN_PRECISION
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 2 operands:
+// OpcodeToken0 is followed by 2 operands on Shader Models 4.0 through 5.0:
 // (1) an operand, starting with OperandToken0, defining which
 //     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
 // (2) a Resource Return Type token (ResourceReturnTypeToken)
+//
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (t<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of resources in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the t# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (t<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of resource within space (may be dynamically indexed)
+// (2) a Resource Return Type token (ResourceReturnTypeToken)
+// (3) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 
@@ -1294,9 +1348,24 @@ typedef enum D3D11_SB_OPERAND_MIN_PRECISION
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 1 operand:
+// OpcodeToken0 is followed by 1 operand on Shader Models 4.0 through 5.0:
 // (1) Operand starting with OperandToken0, defining which sampler
 //     (D3D10_SB_OPERAND_TYPE_SAMPLER) register # is being declared.
+//
+// OpcodeToken0 is followed by 2 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     s# register (D3D10_SB_OPERAND_TYPE_SAMPLER) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (s<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of samplers in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the s# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (s<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of sampler within space (may be dynamically indexed)
+// (2) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 typedef enum D3D10_SB_SAMPLER_MODE
@@ -1586,7 +1655,7 @@ typedef enum D3D10_SB_SAMPLER_MODE
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 1 operand:
+// OpcodeToken0 is followed by 1 operand on Shader Model 4.0 through 5.0:
 // (1) Operand, starting with OperandToken0, defining which CB slot (cb#[size])
 //     is being declared. (operand type: D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER)
 //     The indexing dimension for the register must be 
@@ -1601,6 +1670,25 @@ typedef enum D3D10_SB_SAMPLER_MODE
 // The order of constant buffer declarations in a shader indicates their
 // relative priority from highest to lowest (hint to driver).
 // 
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) Operand, starting with OperandToken0, defining which CB range (ID and bounds)
+//     is being declared. (operand type: D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER)
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (cb<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of constant buffers in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the cb#[] is used in shader instructions: (cb<id>[<idx>][<loc>])
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of constant buffer within space (may be dynamically indexed)
+//       3 <loc>: location of vector within constant buffer being referenced,
+//          which may also be dynamically indexed, with no access pattern flag required.
+// (2) a DWORD indicating the size of the constant buffer as a count of 16-byte vectors.
+//     Each vector is 32-bit*4 elements == 128-bits == 16 bytes.
+//     If the size is specified as 0, the CB size is not known (any size CB
+//     can be bound to the slot).
+// (3) a DWORD indicating the space index.
+//
 // ----------------------------------------------------------------------------
 
 typedef enum D3D10_SB_CONSTANT_BUFFER_ACCESS_PATTERN
@@ -2083,6 +2171,10 @@ typedef enum D3D10_SB_NAME
     D3D11_SB_NAME_FINAL_TRI_INSIDE_TESSFACTOR = 20, 
     D3D11_SB_NAME_FINAL_LINE_DETAIL_TESSFACTOR = 21,
     D3D11_SB_NAME_FINAL_LINE_DENSITY_TESSFACTOR = 22,
+    // The following are added for D3D12
+    D3D12_SB_NAME_BARYCENTRICS = 23,
+    D3D12_SB_NAME_SHADINGRATE = 24,
+    D3D12_SB_NAME_CULLPRIMITIVE = 25,
 } D3D10_SB_NAME;
 
 typedef enum D3D10_SB_RESOURCE_DIMENSION
@@ -2120,7 +2212,14 @@ typedef enum D3D10_SB_REGISTER_COMPONENT_TYPE
     D3D10_SB_REGISTER_COMPONENT_UNKNOWN = 0,
     D3D10_SB_REGISTER_COMPONENT_UINT32 = 1,
     D3D10_SB_REGISTER_COMPONENT_SINT32 = 2,
-    D3D10_SB_REGISTER_COMPONENT_FLOAT32 = 3
+    D3D10_SB_REGISTER_COMPONENT_FLOAT32 = 3,
+    // Below types aren't used in DXBC, only signatures from DXIL shaders
+    D3D10_SB_REGISTER_COMPONENT_UINT16 = 4,
+    D3D10_SB_REGISTER_COMPONENT_SINT16 = 5,
+    D3D10_SB_REGISTER_COMPONENT_FLOAT16 = 6,
+    D3D10_SB_REGISTER_COMPONENT_UINT64 = 7,
+    D3D10_SB_REGISTER_COMPONENT_SINT64 = 8,
+    D3D10_SB_REGISTER_COMPONENT_FLOAT64 = 9,
 } D3D10_SB_REGISTER_COMPONENT_TYPE;
 
 typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
@@ -2270,16 +2369,33 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 // [10:00] D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED
 // [15:11] D3D10_SB_RESOURCE_DIMENSION
 // [16:16] D3D11_SB_GLOBALLY_COHERENT_ACCESS or 0 (LOCALLY_COHERENT)
-// [23:17] Ignored, 0
+// [17:17] D3D11_SB_RASTERIZER_ORDERED_ACCESS or 0
+// [23:18] Ignored, 0
 // [30:24] Instruction length in DWORDs including the opcode token.
 // [31]    0 normally. 1 if extended operand definition, meaning next DWORD
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 2 operands:
+// OpcodeToken0 is followed by 2 operands on Shader Models 4.0 through 5.0:
 // (1) an operand, starting with OperandToken0, defining which
 //     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is being declared.
 // (2) a Resource Return Type token (ResourceReturnTypeToken)
+//
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (u<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of UAV's in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the u# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (u<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of uav within space (may be dynamically indexed)
+// (2) a Resource Return Type token (ResourceReturnTypeToken)
+// (3) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 // UAV access scope flags
@@ -2292,6 +2408,17 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 // ENCODER MACRO: Given a set of sync instruciton flags, encode them in OpcodeToken0.
 #define ENCODE_D3D11_SB_ACCESS_COHERENCY_FLAGS(Flags) ((Flags)&D3D11_SB_ACCESS_COHERENCY_MASK)
 
+// Additional UAV access flags
+#define D3D11_SB_RASTERIZER_ORDERED_ACCESS 0x00020000
+
+// Resource flags mask.  Use to retrieve all resource flags, including the order preserving counter.
+#define D3D11_SB_RESOURCE_FLAGS_MASK    (D3D11_SB_GLOBALLY_COHERENT_ACCESS|D3D11_SB_RASTERIZER_ORDERED_ACCESS|D3D11_SB_UAV_HAS_ORDER_PRESERVING_COUNTER)
+
+// DECODER MACRO: Retrieve UAV access flags for from OpcodeToken0.
+#define DECODE_D3D11_SB_RESOURCE_FLAGS(OperandToken0) ((OperandToken0)&D3D11_SB_RESOURCE_FLAGS_MASK)
+
+// ENCODER MACRO: Given UAV access flags, encode them in OpcodeToken0.
+#define ENCODE_D3D11_SB_RESOURCE_FLAGS(Flags) ((Flags)&D3D11_SB_RESOURCE_FLAGS_MASK)
 
 // ----------------------------------------------------------------------------
 // Raw Unordered Access View Declaration
@@ -2301,15 +2428,31 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 // [10:00] D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW
 // [15:11] Ignored, 0
 // [16:16] D3D11_SB_GLOBALLY_COHERENT_ACCESS or 0 (LOCALLY_COHERENT)
-// [23:17] Ignored, 0
+// [17:17] D3D11_SB_RASTERIZER_ORDERED_ACCESS or 0
+// [23:18] Ignored, 0
 // [30:24] Instruction length in DWORDs including the opcode token.
 // [31]    0 normally. 1 if extended operand definition, meaning next DWORD
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 1 operand:
+// OpcodeToken0 is followed by 1 operand on Shader Models 4.0 through 5.0:
 // (1) an operand, starting with OperandToken0, defining which
 //     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is being declared.
+//
+// OpcodeToken0 is followed by 2 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (u<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of UAV's in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the u# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (u<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of uav within space (may be dynamically indexed)
+// (2) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 
@@ -2321,7 +2464,8 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 // [10:00] D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED
 // [15:11] Ignored, 0
 // [16:16] D3D11_SB_GLOBALLY_COHERENT_ACCESS or 0 (LOCALLY_COHERENT)
-// [22:17] Ignored, 0
+// [17:17] D3D11_SB_RASTERIZER_ORDERED_ACCESS or 0
+// [22:18] Ignored, 0
 // [23:23] D3D11_SB_UAV_HAS_ORDER_PRESERVING_COUNTER or 0
 //
 //            The presence of this flag means that if a UAV is bound to the
@@ -2349,6 +2493,22 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 //     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is 
 //     being declared.
 // (2) a DWORD indicating UINT32 byte stride
+//
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     u# register (D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (u<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of UAV's in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the u# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (u<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of uav within space (may be dynamically indexed)
+// (2) a DWORD indicating UINT32 byte stride
+// (3) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 // UAV flags
@@ -2413,9 +2573,24 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 //         contains extended operand description.  This dcl is currently not
 //         extended.
 //
-// OpcodeToken0 is followed by 2 operands:
+// OpcodeToken0 is followed by 1 operand:
 // (1) an operand, starting with OperandToken0, defining which
 //     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
+//
+// OpcodeToken0 is followed by 2 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (t<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of resources in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the t# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (t<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of resource within space (may be dynamically indexed)
+// (2) a DWORD indicating the space index.
 //
 // ----------------------------------------------------------------------------
 
@@ -2437,7 +2612,23 @@ typedef enum D3D10_SB_INSTRUCTION_RETURN_TYPE
 //     being declared.
 // (2) a DWORD indicating UINT32 struct byte stride
 //
+// OpcodeToken0 is followed by 3 operands on Shader Model 5.1 and later:
+// (1) an operand, starting with OperandToken0, defining which
+//     t# register (D3D10_SB_OPERAND_TYPE_RESOURCE) is being declared.
+//     The indexing dimension for the register must be D3D10_SB_OPERAND_INDEX_DIMENSION_3D, 
+//     and the meaning of the index dimensions are as follows: (t<id>[<lbound>:<ubound>])
+//       1 <id>:     variable ID being declared
+//       2 <lbound>: the lower bound of the range of resources in the space
+//       3 <ubound>: the upper bound (inclusive) of this range
+//     As opposed to when the t# is used in shader instructions, where the register
+//     must be D3D10_SB_OPERAND_INDEX_DIMENSION_2D, and the meaning of the index 
+//     dimensions are as follows: (t<id>[<idx>]):
+//       1 <id>:  variable ID being used (matches dcl)
+//       2 <idx>: absolute index of resource within space (may be dynamically indexed)
+// (2) a DWORD indicating UINT32 struct byte stride
+// (3) a DWORD indicating the space index.
+//
 // ----------------------------------------------------------------------------
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_GAMES) */
 #pragma endregion

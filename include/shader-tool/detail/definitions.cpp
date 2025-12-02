@@ -491,12 +491,12 @@ namespace alys::shader::detail
 		{D3D10_SB_OPERAND_TYPE_OUTPUT, "o"},
 		{D3D10_SB_OPERAND_TYPE_INDEXABLE_TEMP, "x"},
 		{D3D10_SB_OPERAND_TYPE_IMMEDIATE32, "l"},
-		{D3D10_SB_OPERAND_TYPE_IMMEDIATE64, "l"},
+		{D3D10_SB_OPERAND_TYPE_IMMEDIATE64, "d"},
 		{D3D10_SB_OPERAND_TYPE_SAMPLER, "s"},
 		{D3D10_SB_OPERAND_TYPE_RESOURCE, "t"},
 		{D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, "cb"},
 		{D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER, "icb"},
-		{D3D10_SB_OPERAND_TYPE_LABEL, "l"},
+		{D3D10_SB_OPERAND_TYPE_LABEL, "label"},
 		{D3D10_SB_OPERAND_TYPE_INPUT_PRIMITIVEID, "vPrim"},
 		{D3D10_SB_OPERAND_TYPE_OUTPUT_DEPTH, "oDepth"},
 		{D3D10_SB_OPERAND_TYPE_NULL, "null"},
@@ -529,6 +529,51 @@ namespace alys::shader::detail
 		{D3D11_SB_OPERAND_TYPE_CYCLE_COUNTER, "aL"},
 	};
 
+	std::unordered_map<std::uint32_t, const char*> operand_names_upper =
+	{
+		{D3D10_SB_OPERAND_TYPE_TEMP, "R"},
+		{D3D10_SB_OPERAND_TYPE_INPUT, "V"},
+		{D3D10_SB_OPERAND_TYPE_OUTPUT, "O"},
+		{D3D10_SB_OPERAND_TYPE_INDEXABLE_TEMP, "X"},
+		{D3D10_SB_OPERAND_TYPE_IMMEDIATE32, "L"},
+		{D3D10_SB_OPERAND_TYPE_IMMEDIATE64, "D"},
+		{D3D10_SB_OPERAND_TYPE_SAMPLER, "S"},
+		{D3D10_SB_OPERAND_TYPE_RESOURCE, "T"},
+		{D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, "CB"},
+		{D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER, "ICB"},
+		{D3D10_SB_OPERAND_TYPE_LABEL, "LABEL"},
+		{D3D10_SB_OPERAND_TYPE_INPUT_PRIMITIVEID, "VPRIM"},
+		{D3D10_SB_OPERAND_TYPE_OUTPUT_DEPTH, "ODEPTH"},
+		{D3D10_SB_OPERAND_TYPE_NULL, "NULL"},
+		{D3D10_SB_OPERAND_TYPE_RASTERIZER, "RASTERIZER"},
+		{D3D10_SB_OPERAND_TYPE_OUTPUT_COVERAGE_MASK, "OMASK"},
+		{D3D11_SB_OPERAND_TYPE_STREAM, "M"},
+		{D3D11_SB_OPERAND_TYPE_FUNCTION_BODY, "FB"},
+		{D3D11_SB_OPERAND_TYPE_FUNCTION_TABLE, "FT"},
+		{D3D11_SB_OPERAND_TYPE_INTERFACE, "FP"},
+		{D3D11_SB_OPERAND_TYPE_FUNCTION_INPUT, "FUNCTION_INPUT"}, //
+		{D3D11_SB_OPERAND_TYPE_FUNCTION_OUTPUT, "FUNCTION_OUTPUT"}, //
+		{D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT_ID, "OCONTROLPOINTID"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_FORK_INSTANCE_ID, "VFORKINSTANCEID"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_JOIN_INSTANCE_ID, "VJOININSTANCEID"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_CONTROL_POINT, "VICP"},
+		{D3D11_SB_OPERAND_TYPE_OUTPUT_CONTROL_POINT, "VOCP"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_PATCH_CONSTANT, "VPC"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_DOMAIN_POINT, "VDOMAIN"},
+		{D3D11_SB_OPERAND_TYPE_THIS_POINTER, "THIS"}, //
+		{D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW, "U"},
+		{D3D11_SB_OPERAND_TYPE_THREAD_GROUP_SHARED_MEMORY, "G"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_THREAD_ID, "VTHREADID"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_THREAD_GROUP_ID, "VTHREADGROUPID"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_THREAD_ID_IN_GROUP, "VTHREADIDINGROUP"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_COVERAGE_MASK, "VCOVERAGE"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_THREAD_ID_IN_GROUP_FLATTENED, "VTHREADIDINGROUPFLATTENED"},
+		{D3D11_SB_OPERAND_TYPE_INPUT_GS_INSTANCE_ID, "VGSINSTANCEID"},
+		{D3D11_SB_OPERAND_TYPE_OUTPUT_DEPTH_GREATER_EQUAL, "ODEPTHGE"},
+		{D3D11_SB_OPERAND_TYPE_OUTPUT_DEPTH_LESS_EQUAL, "ODEPTHLE"},
+		{D3D11_SB_OPERAND_TYPE_CYCLE_COUNTER, "AL"},
+	};
+
 	const char* get_resource_dimension_name(const std::uint32_t dimension)
 	{
 		switch (dimension)
@@ -559,7 +604,7 @@ namespace alys::shader::detail
 			return "structured_buffer";
 		}
 
-		return "unknown";
+		return "<unknown dimension>";
 	}
 
 	const char* get_return_type_name(const std::uint32_t type)
@@ -581,16 +626,18 @@ namespace alys::shader::detail
 		case D3D11_SB_RETURN_TYPE_DOUBLE:
 			return "double";
 		case D3D11_SB_RETURN_TYPE_CONTINUED:
-			return "continued";
+			return "<continued>";
 		}
 
-		return "unknown";
+		return "<unknown resource return type>";
 	}
 
 	const char* get_name_token(const std::uint32_t type)
 	{
 		switch (type)
 		{
+		case D3D10_SB_NAME_UNDEFINED:
+			return "undefined";
 		case D3D10_SB_NAME_POSITION:
 			return "position";
 		case D3D10_SB_NAME_CLIP_DISTANCE:
@@ -635,9 +682,15 @@ namespace alys::shader::detail
 			return "finalLineDetailTessFactor";
 		case D3D11_SB_NAME_FINAL_LINE_DENSITY_TESSFACTOR:
 			return "finalLineDensityTessFactor";
+		case D3D12_SB_NAME_BARYCENTRICS:
+			return "barycentrics";
+		case D3D12_SB_NAME_SHADINGRATE:
+			return "shadingRate";
+		case D3D12_SB_NAME_CULLPRIMITIVE:
+			return "cullPrimitive";
 		}
 
-		return "undefined";
+		return "";
 	}
 
 	const char* get_interpolation_name(const std::uint32_t type)
@@ -662,7 +715,7 @@ namespace alys::shader::detail
 			return "linear noperspective sample";
 		}
 
-		return "unknown";
+		return "<unknown interpolation>";
 	}
 
 	std::uint32_t get_num_components(const std::uint32_t type)

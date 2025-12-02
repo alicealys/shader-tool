@@ -38,9 +38,12 @@ namespace alys::shader::detail
 	{
 		dump_opcode(buffer, instruction.opcode);
 
+		assert(instruction.operands[0].type == D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
+
 		if (version >= 51)
 		{
-			buffer.write(" CB%i[%i:%i][%i], ",
+			buffer.write(" %s%i[%i:%i][%i], ",
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32,
 				instruction.operands[0].indices[2].value.uint32,
@@ -49,12 +52,13 @@ namespace alys::shader::detail
 		}
 		else
 		{
-			buffer.write(" CB%i[%i], ",
+			buffer.write(" %s%i[%i], ",
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32);
 		}
 
-		switch (instruction.opcode.controls)
+		switch (instruction.opcode.controls & 0x1)
 		{
 		case D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED:
 			buffer.write("immediateIndexed");

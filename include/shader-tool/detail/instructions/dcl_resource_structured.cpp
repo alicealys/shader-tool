@@ -13,6 +13,11 @@ namespace alys::shader::detail
 		instruction.operands.emplace_back(read_operand(input_buffer));
 		instruction.operands.emplace_back(read_custom_operand(input_buffer));
 
+		if (version >= 51)
+		{
+			instruction.operands.emplace_back(read_custom_operand(input_buffer));
+		}
+
 		return instruction;
 	}
 
@@ -22,6 +27,11 @@ namespace alys::shader::detail
 		write_opcode(output_buffer, instruction.opcode, length);
 		write_operand(output_buffer, instruction.operands[0]);
 		write_custom_operand(output_buffer, instruction.operands[1]);
+
+		if (version >= 51)
+		{
+			write_custom_operand(output_buffer, instruction.operands[2]);
+		}
 	}
 	
 	void dcl_resource_structured::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
@@ -30,6 +40,20 @@ namespace alys::shader::detail
 		buffer.write(" ");
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", %i", instruction.operands[1].custom.u.value);
+
+		if (version >= 51)
+		{
+			buffer.write("%s%i[%i:%i], space=%i",
+				operand_names_upper[instruction.operands[0].type],
+				instruction.operands[0].indices[0].value.uint32,
+				instruction.operands[0].indices[1].value.uint32,
+				instruction.operands[0].indices[2].value.uint32,
+				instruction.operands[2].custom.u.value);
+		}
+		else
+		{
+			dump_operand(buffer, instruction.operands[0]);
+		}
 	}
 
 	std::uint32_t dcl_resource_structured::get_flags()

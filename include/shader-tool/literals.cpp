@@ -60,6 +60,17 @@ namespace alys::shader::literals
 	DEFINE_SAMPLER_REGISTER(s, 8);
 	DEFINE_SAMPLER_REGISTER(s, 9);
 
+	DEFINE_UAV_REGISTER(u, 0);
+	DEFINE_UAV_REGISTER(u, 1);
+	DEFINE_UAV_REGISTER(u, 2);
+	DEFINE_UAV_REGISTER(u, 3);
+	DEFINE_UAV_REGISTER(u, 4);
+	DEFINE_UAV_REGISTER(u, 5);
+	DEFINE_UAV_REGISTER(u, 6);
+	DEFINE_UAV_REGISTER(u, 7);
+	DEFINE_UAV_REGISTER(u, 8);
+	DEFINE_UAV_REGISTER(u, 9);
+
 	DEFINE_CB_REGISTER(cb, 0);
 	DEFINE_CB_REGISTER(cb, 1);
 	DEFINE_CB_REGISTER(cb, 2);
@@ -104,7 +115,7 @@ namespace alys::shader::literals
 	DEFINE_FB_REGISTER(fb, 8);
 	DEFINE_FB_REGISTER(fb, 9);
 
-	detail::operand_t c(const std::uint32_t value)
+	detail::operand_t custom(const std::uint32_t value)
 	{
 		detail::operand_t operand{};
 		operand.custom.is_custom = true;
@@ -112,7 +123,7 @@ namespace alys::shader::literals
 		return operand;
 	}
 
-	detail::operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w)
+	detail::operand_t custom(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w)
 	{
 		detail::operand_t operand{};
 		operand.custom.is_custom = true;
@@ -128,13 +139,30 @@ namespace alys::shader::literals
 		return operand.abs();
 	}
 
-	operand_proxy r(const std::uint32_t index)
-	{
-		return detail::create_operand(D3D10_SB_OPERAND_TYPE_TEMP, detail::operand_components_t{}, index);
-	}
-
 	operand_proxy cb(const std::uint32_t index, const std::uint32_t slot)
 	{
 		return detail::create_operand(D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER, "xyzw", index, slot);
+	}
+
+	operand_proxy icb(const std::uint32_t index, const std::uint32_t slot)
+	{
+		return detail::create_operand(D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER, "xyzw", index, slot);
+	}
+
+	detail::operand_t d(double x)
+	{
+		auto op = detail::create_literal_operand(0.f);
+		op.type = D3D10_SB_OPERAND_TYPE_IMMEDIATE64;
+		op.immediate_values[0].float64 = x;
+		return op;
+	}
+
+	detail::operand_t d(double x, double y)
+	{
+		auto op = detail::create_literal_operand(0.f, 0.f, 0.f, 0.f);
+		op.type = D3D10_SB_OPERAND_TYPE_IMMEDIATE64;
+		op.immediate_values[0].float64 = x;
+		op.immediate_values[1].float64 = y;
+		return op;
 	}
 }

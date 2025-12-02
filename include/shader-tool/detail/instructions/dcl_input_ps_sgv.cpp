@@ -37,7 +37,7 @@ namespace alys::shader::detail
 	void dcl_input_ps_sgv::dump(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version)
 	{
 		dump_opcode(buffer, instruction.opcode);
-		buffer.write(" ");
+		buffer.write(" %s ", get_interpolation_name(instruction.opcode.controls));
 		dump_operand(buffer, instruction.operands[0]);
 		buffer.write(", ");
 		buffer.write("%s", get_name_token(instruction.operands[1].custom.u.value));

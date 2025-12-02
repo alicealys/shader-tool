@@ -183,6 +183,8 @@ namespace alys::shader
 
 		assembler get_assembler();
 
+		std::uint32_t get_version() const;
+
 	private:
 		std::uint32_t parse_signature_mask(const std::string& mask);
 		void parse_instructions(utils::bit_buffer_le& data, const std::uint32_t size);

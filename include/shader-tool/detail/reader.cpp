@@ -86,7 +86,7 @@ namespace alys::shader::detail
 			operand.extensions.emplace_back(operand_extended);
 		}
 
-		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		assert(operand.dimension <= D3D10_SB_OPERAND_INDEX_3D);
 		for (auto i = 0u; i < operand.dimension; i++)
 		{
 			switch (operand.indices[i].representation)

@@ -51,15 +51,21 @@ namespace alys::shader::detail
 	{
 		dump_opcode(buffer, instruction.opcode);
 
-		if (((instruction.opcode.controls >> 5) & 0x1) != 0)
-		{
-			buffer.write("_glc");
-		}
-
 		const auto& resource_return_type = instruction.operands[1].custom.u.values8;
 		const auto dimension = instruction.opcode.controls & 0x1F;
 
 		buffer.write("_%s", get_resource_dimension_name(dimension));
+
+		if ((instruction.opcode.controls & (D3D11_SB_GLOBALLY_COHERENT_ACCESS >> 11)) != 0)
+		{
+			buffer.write("_glc");
+		}
+
+		if ((instruction.opcode.controls & (D3D11_SB_RASTERIZER_ORDERED_ACCESS >> 11)) != 0)
+		{
+			buffer.write("_rov");
+		}
+
 		buffer.write(" (%s,%s,%s,%s) ", get_return_type_name(resource_return_type[0]),
 			get_return_type_name(resource_return_type[1]),
 			get_return_type_name(resource_return_type[2]),
@@ -67,7 +73,8 @@ namespace alys::shader::detail
 
 		if (version >= 51)
 		{
-			buffer.write("u%i[%i:%i], space=%i",
+			buffer.write("%S%i[%i:%i], space=%i",
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32,
 				instruction.operands[0].indices[2].value.uint32,

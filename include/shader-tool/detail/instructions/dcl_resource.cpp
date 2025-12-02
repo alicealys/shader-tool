@@ -59,7 +59,8 @@ namespace alys::shader::detail
 
 		if (version >= 51)
 		{
-			buffer.write("t%i[%i:%i], space=%i",
+			buffer.write("%s%i[%i:%i], space=%i",
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32,
 				instruction.operands[0].indices[2].value.uint32,

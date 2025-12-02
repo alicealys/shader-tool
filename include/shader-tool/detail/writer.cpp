@@ -53,7 +53,7 @@ namespace alys::shader::detail
 			output_buffer.write_bits(1, is_not_last);
 		}
 
-		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		assert(operand.dimension <= D3D10_SB_OPERAND_INDEX_3D);
 		for (auto i = 0u; i < operand.dimension; i++)
 		{
 			switch (operand.indices[i].representation)
@@ -155,7 +155,7 @@ namespace alys::shader::detail
 		auto length = 1u;
 		length += static_cast<std::uint32_t>(operand.extensions.size());
 
-		assert(operand.dimension < D3D10_SB_OPERAND_INDEX_3D);
+		assert(operand.dimension <= D3D10_SB_OPERAND_INDEX_3D);
 		for (auto i = 0u; i < operand.dimension; i++)
 		{
 			switch (operand.indices[i].representation)

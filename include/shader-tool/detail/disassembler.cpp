@@ -61,26 +61,29 @@ namespace alys::shader::detail
 			break;
 		}
 		case D3D10_SB_OPERAND_TYPE_IMMEDIATE64:
-			buffer.write("l(");
-			for (auto i = 0u; i < num_components; i++)
+		{
+			const auto n = num_components == 1 ? 1 : 2;
+			buffer.write("d(");
+			for (auto i = 0u; i < n; i++)
 			{
 				const auto type = std::fpclassify(op.immediate_values[i].float64);
 				if (type == FP_NORMAL)
 				{
-					buffer.write("%f", op.immediate_values[i].float64);
+					buffer.write("%fl", op.immediate_values[i].float64);
 				}
 				else
 				{
 					buffer.write("%lli", op.immediate_values[i].int64);
 				}
 
-				if (i < num_components - 1)
+				if (i < n - 1)
 				{
 					buffer.write(", ");
 				}
 			}
 			buffer.write(")");
 			break;
+		}
 		default:
 		{
 			const auto iter = operand_names.find(op.type);

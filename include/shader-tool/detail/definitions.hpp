@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../utils/d3d11TokenizedProgramFormat.hpp"
+#include "../utils/d3d12TokenizedProgramFormat.hpp"
 #include "../utils/bit_buffer.hpp"
 #include "../utils/string_writer.hpp"
 
@@ -145,6 +145,7 @@ namespace alys::shader::detail
 	extern std::unordered_map<std::uint32_t, const char*> opcode_names;
 	extern std::unordered_map<std::uint32_t, const char*> opcode_enum_names;
 	extern std::unordered_map<std::uint32_t, const char*> operand_names;
+	extern std::unordered_map<std::uint32_t, const char*> operand_names_upper;
 
 	const char* get_resource_dimension_name(const std::uint32_t dimension);
 	const char* get_return_type_name(const std::uint32_t type);

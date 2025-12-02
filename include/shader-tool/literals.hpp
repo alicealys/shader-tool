@@ -16,6 +16,7 @@
 #define DEFINE_FT_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D11_SB_OPERAND_TYPE_FUNCTION_TABLE);
 #define DEFINE_CB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_CONSTANT_BUFFER);
 #define DEFINE_ICB_REGISTER(__name__, __index__) DEFINE_REGISTER_C_SWZ(__name__, "xyzw", __index__, D3D10_SB_OPERAND_TYPE_IMMEDIATE_CONSTANT_BUFFER);
+#define DEFINE_UAV_REGISTER(__name__, __index__) DEFINE_REGISTER_C(__name__, __index__, D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW);
 
 namespace alys::shader::literals
 {
@@ -73,6 +74,17 @@ namespace alys::shader::literals
 	DEFINE_REGISTER(s, 7);
 	DEFINE_REGISTER(s, 8);
 	DEFINE_REGISTER(s, 9);
+
+	DEFINE_REGISTER(u, 0);
+	DEFINE_REGISTER(u, 1);
+	DEFINE_REGISTER(u, 2);
+	DEFINE_REGISTER(u, 3);
+	DEFINE_REGISTER(u, 4);
+	DEFINE_REGISTER(u, 5);
+	DEFINE_REGISTER(u, 6);
+	DEFINE_REGISTER(u, 7);
+	DEFINE_REGISTER(u, 8);
+	DEFINE_REGISTER(u, 9);
 
 	DEFINE_REGISTER(cb, 0);
 	DEFINE_REGISTER(cb, 1);
@@ -164,17 +176,64 @@ namespace alys::shader::literals
 	constexpr std::uint32_t mode_comparison = D3D10_SB_SAMPLER_MODE_COMPARISON;
 	constexpr std::uint32_t mode_mono = D3D10_SB_SAMPLER_MODE_MONO;
 
+	constexpr std::uint32_t position = D3D10_SB_NAME_POSITION;
+	constexpr std::uint32_t clip_distance = D3D10_SB_NAME_CLIP_DISTANCE;
+	constexpr std::uint32_t cull_distance = D3D10_SB_NAME_CULL_DISTANCE;
+	constexpr std::uint32_t render_target_array_index = D3D10_SB_NAME_RENDER_TARGET_ARRAY_INDEX;
+	constexpr std::uint32_t viewport_array_index = D3D10_SB_NAME_VIEWPORT_ARRAY_INDEX;
+	constexpr std::uint32_t vertex_id = D3D10_SB_NAME_VERTEX_ID;
+	constexpr std::uint32_t primitiveId = D3D10_SB_NAME_PRIMITIVE_ID;
+	constexpr std::uint32_t instance_id = D3D10_SB_NAME_INSTANCE_ID;
+	constexpr std::uint32_t is_front_face = D3D10_SB_NAME_IS_FRONT_FACE;
+	constexpr std::uint32_t sampleIndex = D3D10_SB_NAME_SAMPLE_INDEX;
+	constexpr std::uint32_t finalQuadUEq0EdgeTessFactor = D3D11_SB_NAME_FINAL_QUAD_U_EQ_0_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalQuadVEq0EdgeTessFactor = D3D11_SB_NAME_FINAL_QUAD_V_EQ_0_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalQuadUEq1EdgeTessFactor = D3D11_SB_NAME_FINAL_QUAD_U_EQ_1_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalQuadVEq1EdgeTessFactor = D3D11_SB_NAME_FINAL_QUAD_V_EQ_1_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalQuadUInsideTessFactor = D3D11_SB_NAME_FINAL_QUAD_U_INSIDE_TESSFACTOR;
+	constexpr std::uint32_t finalQuadVInsideTessFactor = D3D11_SB_NAME_FINAL_QUAD_V_INSIDE_TESSFACTOR;
+	constexpr std::uint32_t finalTriUEq0EdgeTessFactor = D3D11_SB_NAME_FINAL_TRI_U_EQ_0_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalTriVEq0EdgeTessFactor = D3D11_SB_NAME_FINAL_TRI_V_EQ_0_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalTriWEq0EdgeTessFactor = D3D11_SB_NAME_FINAL_TRI_W_EQ_0_EDGE_TESSFACTOR;
+	constexpr std::uint32_t finalTriInsideTessFactor = D3D11_SB_NAME_FINAL_TRI_INSIDE_TESSFACTOR;
+	constexpr std::uint32_t finalLineDetailTessFactor = D3D11_SB_NAME_FINAL_LINE_DETAIL_TESSFACTOR;
+	constexpr std::uint32_t finalLineDensityTessFactor = D3D11_SB_NAME_FINAL_LINE_DENSITY_TESSFACTOR;
+	constexpr std::uint32_t barycentrics = D3D12_SB_NAME_BARYCENTRICS;
+	constexpr std::uint32_t shadingRate = D3D12_SB_NAME_SHADINGRATE;
+	constexpr std::uint32_t cullPrimitive = D3D12_SB_NAME_CULLPRIMITIVE;
+
 	template <typename ...Args>
 	detail::operand_t l(Args&&... args)
 	{
 		return detail::create_literal_operand(std::forward<Args>(args)...);
 	}
 
-	detail::operand_t c(const std::uint32_t value);
-	detail::operand_t c(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w);
+	detail::operand_t custom(const std::uint32_t value);
+	detail::operand_t custom(const std::uint8_t x, const std::uint8_t y, const std::uint8_t z, const std::uint8_t w);
 
 	operand_proxy::with_components abs(const operand_proxy::with_components& operand);
 
-	operand_proxy r(const std::uint32_t index);
+	template <std::uint32_t Type>
+	operand_proxy create_operand(const std::uint32_t index)
+	{
+		return detail::create_operand(Type, detail::operand_components_t{}, index);
+	}
+
+	const auto r = create_operand<D3D10_SB_OPERAND_TYPE_TEMP>;
+	const auto v = create_operand<D3D10_SB_OPERAND_TYPE_INPUT>;
+	const auto o = create_operand<D3D10_SB_OPERAND_TYPE_OUTPUT>;
+	const auto x = create_operand<D3D10_SB_OPERAND_TYPE_INDEXABLE_TEMP>;
+	const auto s = create_operand<D3D10_SB_OPERAND_TYPE_SAMPLER>;
+	const auto t = create_operand<D3D10_SB_OPERAND_TYPE_RESOURCE>;
+	const auto u = create_operand<D3D11_SB_OPERAND_TYPE_UNORDERED_ACCESS_VIEW>;
+	const auto label = create_operand<D3D10_SB_OPERAND_TYPE_LABEL>;
+	const auto fb = create_operand<D3D11_SB_OPERAND_TYPE_FUNCTION_BODY>;
+	const auto ft = create_operand<D3D11_SB_OPERAND_TYPE_FUNCTION_TABLE>;
+	const auto fp = create_operand<D3D11_SB_OPERAND_TYPE_INTERFACE>;
+
 	operand_proxy cb(const std::uint32_t index, const std::uint32_t slot);
+	operand_proxy icb(const std::uint32_t index, const std::uint32_t slot);
+
+	detail::operand_t d(double x);
+	detail::operand_t d(double x, double y);
 }

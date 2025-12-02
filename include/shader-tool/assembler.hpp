@@ -1,6 +1,7 @@
 #pragma once
 
 #include "detail/definitions.hpp"
+#include "shader_object.hpp"
 
 namespace alys::shader
 {
@@ -192,10 +193,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void add(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ADD, 0, {dest, src0, src1}));
-		}
+		void add(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise add of 2 vectors.
@@ -205,10 +203,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void add_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ADD, 4, {dest, src0, src1}));
-		}
+		void add_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Bitwise AND.
@@ -218,20 +213,14 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void and_(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_AND, 0, {dest, src0, src1}));
-		}
+		void and_(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Moves the point of execution to the instruction after the next endloop or endswitch.
 
 			break
 		*/
-		void break_()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAK, 0, {}));
-		}
+		void break_();
 
 		/*
 			Conditionally moves the point of execution to the instruction after the next endloop or endswitch.
@@ -239,10 +228,7 @@ namespace alys::shader
 			breakc{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void breakc_z(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAKC, 0, {src0}));
-		}
+		void breakc_z(const as_scalar& src0);
 
 		/*
 			Conditionally moves the point of execution to the instruction after the next endloop or endswitch.
@@ -250,10 +236,7 @@ namespace alys::shader
 			breakc{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void breakc_nz(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_BREAKC, 128, {src0}));
-		}
+		void breakc_nz(const as_scalar& src0);
 
 		/*
 			Calls a subroutine marked by where the label l# appears in the program.
@@ -261,10 +244,7 @@ namespace alys::shader
 			call l#
 			@param lN l#
 		*/
-		void call(const as_register& lN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALL, 0, {lN}));
-		}
+		void call(const as_register& lN);
 
 		/*
 			Conditionally calls a subroutine marked by where the label l# appears in the program.
@@ -273,10 +253,7 @@ namespace alys::shader
 			@param src0 src0.select_component
 			@param lN l#
 		*/
-		void callc_z(const as_scalar& src0, const as_register& lN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALLC, 0, {src0, lN}));
-		}
+		void callc_z(const as_scalar& src0, const as_register& lN);
 
 		/*
 			Conditionally calls a subroutine marked by where the label l# appears in the program.
@@ -285,10 +262,7 @@ namespace alys::shader
 			@param src0 src0.select_component
 			@param lN l#
 		*/
-		void callc_nz(const as_scalar& src0, const as_register& lN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CALLC, 128, {src0, lN}));
-		}
+		void callc_nz(const as_scalar& src0, const as_register& lN);
 
 		/*
 			A label in a switch instruction.
@@ -296,20 +270,14 @@ namespace alys::shader
 			case [32-bit immediate]
 			@param op0 [32-bit immediate]
 		*/
-		void case_(const as_literal& op0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CASE, 0, {op0}));
-		}
+		void case_(const as_literal& op0);
 
 		/*
 			Continues execution at the beginning of the current loop.
 
 			continue
 		*/
-		void continue_()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUE, 0, {}));
-		}
+		void continue_();
 
 		/*
 			Conditionally continues execution at the beginning of the current loop.
@@ -317,10 +285,7 @@ namespace alys::shader
 			continuec{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void continuec_z(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUEC, 0, {src0}));
-		}
+		void continuec_z(const as_scalar& src0);
 
 		/*
 			Conditionally continues execution at the beginning of the current loop.
@@ -328,30 +293,21 @@ namespace alys::shader
 			continuec{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void continuec_nz(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CONTINUEC, 128, {src0}));
-		}
+		void continuec_nz(const as_scalar& src0);
 
 		/*
 			Geometry Shader instruction that completes the current primitive topology (if any vertices have been emitted), and starts a new topology of the type declared by the Geometry Shader.
 
 			cut
 		*/
-		void cut()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_CUT, 0, {}));
-		}
+		void cut();
 
 		/*
 			An optional label in a switch statement.
 
 			default
 		*/
-		void default_()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DEFAULT, 0, {}));
-		}
+		void default_();
 
 		/*
 			Rate of change of contents of each float32 component of src0 (post-swizzle), with regard to RenderTarget x direction (rtx) or RenderTarget y direction.
@@ -360,10 +316,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTX, 0, {dest, src0}));
-		}
+		void deriv_rtx(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Rate of change of contents of each float32 component of src0 (post-swizzle), with regard to RenderTarget x direction (rtx) or RenderTarget y direction.
@@ -372,10 +325,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTX, 4, {dest, src0}));
-		}
+		void deriv_rtx_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Render-target y equivalent of deriv_rtx.
@@ -384,10 +334,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTY, 0, {dest, src0}));
-		}
+		void deriv_rty(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Render-target y equivalent of deriv_rtx.
@@ -396,10 +343,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DERIV_RTY, 4, {dest, src0}));
-		}
+		void deriv_rty_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Conditionally flag results of Pixel Shader to be discarded when the end of the program is reached.
@@ -407,10 +351,7 @@ namespace alys::shader
 			discard{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void discard_z(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DISCARD, 0, {src0}));
-		}
+		void discard_z(const as_scalar& src0);
 
 		/*
 			Conditionally flag results of Pixel Shader to be discarded when the end of the program is reached.
@@ -418,10 +359,7 @@ namespace alys::shader
 			discard{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void discard_nz(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DISCARD, 128, {src0}));
-		}
+		void discard_nz(const as_scalar& src0);
 
 		/*
 			Component-wise divide.
@@ -431,10 +369,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void div(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DIV, 0, {dest, src0, src1}));
-		}
+		void div(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise divide.
@@ -444,10 +379,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void div_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DIV, 4, {dest, src0, src1}));
-		}
+		void div_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			2-dimensional vector dot-product of components rg, POS-swizzle.
@@ -457,10 +389,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp2(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP2, 0, {dest, src0, src1}));
-		}
+		void dp2(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			2-dimensional vector dot-product of components rg, POS-swizzle.
@@ -470,10 +399,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp2_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP2, 4, {dest, src0, src1}));
-		}
+		void dp2_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			3-dimensional vector dot-product of components rgb, POS-swizzle.
@@ -483,10 +409,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp3(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP3, 0, {dest, src0, src1}));
-		}
+		void dp3(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			3-dimensional vector dot-product of components rgb, POS-swizzle.
@@ -496,10 +419,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp3_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP3, 4, {dest, src0, src1}));
-		}
+		void dp3_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			4-dimensional vector dot-product of components rgba, POS-swizzle.
@@ -509,10 +429,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp4(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP4, 0, {dest, src0, src1}));
-		}
+		void dp4(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			4-dimensional vector dot-product of components rgba, POS-swizzle.
@@ -522,70 +439,49 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dp4_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DP4, 4, {dest, src0, src1}));
-		}
+		void dp4_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Starts an else block.
 
 			else
 		*/
-		void else_()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ELSE, 0, {}));
-		}
+		void else_();
 
 		/*
 			Emit a vertex.
 
 			emit
 		*/
-		void emit()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_EMIT, 0, {}));
-		}
+		void emit();
 
 		/*
 			Equivalent to an emit command followed by a cut command.
 
 			emitThenCut
 		*/
-		void emitThenCut()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_EMITTHENCUT, 0, {}));
-		}
+		void emitThenCut();
 
 		/*
 			Ends an if statement.
 
 			endif
 		*/
-		void endif()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDIF, 0, {}));
-		}
+		void endif();
 
 		/*
 			Ends a loop statement.
 
 			endloop
 		*/
-		void endloop()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDLOOP, 0, {}));
-		}
+		void endloop();
 
 		/*
 			Ends a switch statement.
 
 			endswitch
 		*/
-		void endswitch()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ENDSWITCH, 0, {}));
-		}
+		void endswitch();
 
 		/*
 			Component-wise vector floating point equality comparison.
@@ -595,10 +491,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void eq(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_EQ, 0, {dest, src0, src1}));
-		}
+		void eq(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise 2exponent.
@@ -607,10 +500,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void exp(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_EXP, 0, {dest, src0}));
-		}
+		void exp(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise 2exponent.
@@ -619,10 +509,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void exp_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_EXP, 4, {dest, src0}));
-		}
+		void exp_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise, extract fractional component.
@@ -631,10 +518,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-] src0[_abs][.swizzle]
 		*/
-		void frc(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_FRC, 0, {dest, src0}));
-		}
+		void frc(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise, extract fractional component.
@@ -643,10 +527,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-] src0[_abs][.swizzle]
 		*/
-		void frc_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_FRC, 4, {dest, src0}));
-		}
+		void frc_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating point to signed integer conversion.
@@ -655,10 +536,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void ftoi(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_FTOI, 0, {dest, src0}));
-		}
+		void ftoi(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating point to unsigned integer conversion.
@@ -667,10 +545,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void ftou(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_FTOU, 0, {dest, src0}));
-		}
+		void ftou(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Gathers the four texels that would be used in a bi-linear filtering operation and packs them into a single register. This instruction only works with 2D or CubeMap textures, including arrays. Only the addressing modes of the sampler are used and the top level of any mip pyramid is used.
@@ -681,10 +556,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param srcSampler srcSampler[.select_component]
 		*/
-		void gather4_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_scalar& srcSampler)
-		{
-			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_GATHER4, 0, {dest, srcAddress, srcResource, srcSampler}));
-		}
+		void gather4_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_scalar& srcSampler);
 
 		/*
 			Component-wise vector floating point greater-than-or-equal comparison.
@@ -694,10 +566,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void ge(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_GE, 0, {dest, src0, src1}));
-		}
+		void ge(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Integer addition.
@@ -707,10 +576,7 @@ namespace alys::shader
 			@param src0 [-]src0[.swizzle]
 			@param src1 [-]src1[.swizzle]
 		*/
-		void iadd(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IADD, 0, {dest, src0, src1}));
-		}
+		void iadd(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector integer equality comparison.
@@ -720,10 +586,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ieq(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IEQ, 0, {dest, src0, src1}));
-		}
+		void ieq(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Branch based on logical OR result.
@@ -731,10 +594,7 @@ namespace alys::shader
 			if{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void if_z(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IF, 0, {src0}));
-		}
+		void if_z(const as_scalar& src0);
 
 		/*
 			Branch based on logical OR result.
@@ -742,10 +602,7 @@ namespace alys::shader
 			if{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void if_nz(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IF, 128, {src0}));
-		}
+		void if_nz(const as_scalar& src0);
 
 		/*
 			Component-wise vector integer greater-than-or-equal comparison.
@@ -755,10 +612,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ige(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IGE, 0, {dest, src0, src1}));
-		}
+		void ige(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector integer less-than comparison.
@@ -768,10 +622,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ilt(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ILT, 0, {dest, src0, src1}));
-		}
+		void ilt(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Signed integer multiply and add.
@@ -782,10 +633,7 @@ namespace alys::shader
 			@param src1 [-]src1[.swizzle]
 			@param src2 [-]src2[.swizzle]
 		*/
-		void imad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMAD, 0, {dest, src0, src1, src2}));
-		}
+		void imad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise integer maximum.
@@ -795,10 +643,7 @@ namespace alys::shader
 			@param src0 [ -]src0[.swizzle]
 			@param src1 [-]src1[.swizzle]
 		*/
-		void imax(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMAX, 0, {dest, src0, src1}));
-		}
+		void imax(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise integer minimum.
@@ -808,10 +653,7 @@ namespace alys::shader
 			@param src0 [-]src0[.swizzle]
 			@param src1 [-]src1[.swizzle]
 		*/
-		void imin(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMIN, 0, {dest, src0, src1}));
-		}
+		void imin(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Signed integer multiply.
@@ -822,10 +664,7 @@ namespace alys::shader
 			@param src0 [-]src0[.swizzle]
 			@param src1 [-]src1[.swizzle]
 		*/
-		void imul(const as_mask& destHI, const as_mask& destLO, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_IMUL, 0, {destHI, destLO, src0, src1}));
-		}
+		void imul(const as_mask& destHI, const as_mask& destLO, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector integer not-equal comparison.
@@ -835,10 +674,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ine(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_INE, 0, {dest, src0, src1}));
-		}
+		void ine(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			2's complement.
@@ -847,10 +683,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void ineg(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_INEG, 0, {dest, src0}));
-		}
+		void ineg(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Shift left.
@@ -860,10 +693,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ishl(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ISHL, 0, {dest, src0, src1}));
-		}
+		void ishl(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Arithmetic shift right (sign extending).
@@ -873,10 +703,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ishr(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ISHR, 0, {dest, src0, src1}));
-		}
+		void ishr(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Signed integer to floating point conversion.
@@ -885,10 +712,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[.swizzle]
 		*/
-		void itof(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ITOF, 0, {dest, src0}));
-		}
+		void itof(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Indicates the beginning of a subroutine.
@@ -896,10 +720,7 @@ namespace alys::shader
 			label l#
 			@param lN l#
 		*/
-		void label(const as_register& lN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LABEL, 0, {lN}));
-		}
+		void label(const as_register& lN);
 
 		/*
 			Fetches data from the specified buffer or texture without any filtering (e.g. point sampling) using the provided integer address. The source data may come from any resource type, other than TextureCube.
@@ -909,10 +730,7 @@ namespace alys::shader
 			@param srcAddress srcAddress[.swizzle]
 			@param srcResource srcResource[.swizzle]
 		*/
-		void ld_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LD, 0, {dest, srcAddress, srcResource}));
-		}
+		void ld_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource);
 
 		/*
 			Reads individual samples out of 2-dimensional multi-sample textures.
@@ -923,10 +741,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param sampleIndex sampleIndex
 		*/
-		void ld2dms_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_literal& sampleIndex)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LD_MS, 0, {dest, srcAddress, srcResource, sampleIndex}));
-		}
+		void ld2dms_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_literal& sampleIndex);
 
 		/*
 			Returns the level of detail (LOD) that would be used for texture filtering.
@@ -937,10 +752,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param srcSampler srcSampler
 		*/
-		void lod(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler)
-		{
-			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_LOD, 0, {dest, srcAddress, srcResource, srcSampler}));
-		}
+		void lod(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler);
 
 		/*
 			Component-wise log base 2.
@@ -949,10 +761,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void log(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LOG, 0, {dest, src0}));
-		}
+		void log(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise log base 2.
@@ -961,20 +770,14 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void log_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LOG, 4, {dest, src0}));
-		}
+		void log_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Specifies a loop which iterates until a break instruction is encountered.
 
 			loop
 		*/
-		void loop()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LOOP, 0, {}));
-		}
+		void loop();
 
 		/*
 			Component-wise vector floating point less-than comparison.
@@ -984,10 +787,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void lt(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_LT, 0, {dest, src0, src1}));
-		}
+		void lt(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise multiply & add.
@@ -998,10 +798,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void mad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAD, 0, {dest, src0, src1, src2}));
-		}
+		void mad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise multiply & add.
@@ -1012,10 +809,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void mad_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAD, 4, {dest, src0, src1, src2}));
-		}
+		void mad_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise float maximum.
@@ -1025,10 +819,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void max(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAX, 0, {dest, src0, src1}));
-		}
+		void max(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise float maximum.
@@ -1038,10 +829,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void max_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MAX, 4, {dest, src0, src1}));
-		}
+		void max_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise float minimum.
@@ -1051,10 +839,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void min(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MIN, 0, {dest, src0, src1}));
-		}
+		void min(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise float minimum.
@@ -1064,10 +849,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void min_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MIN, 4, {dest, src0, src1}));
-		}
+		void min_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise move.
@@ -1076,10 +858,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void mov(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOV, 0, {dest, src0}));
-		}
+		void mov(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise move.
@@ -1088,10 +867,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void mov_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOV, 4, {dest, src0}));
-		}
+		void mov_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise conditional move.
@@ -1102,10 +878,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void movc(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOVC, 0, {dest, src0, src1, src2}));
-		}
+		void movc(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise conditional move.
@@ -1116,10 +889,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void movc_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MOVC, 4, {dest, src0, src1, src2}));
-		}
+		void movc_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise multiply.
@@ -1129,10 +899,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void mul(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MUL, 0, {dest, src0, src1}));
-		}
+		void mul(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise multiply.
@@ -1142,10 +909,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void mul_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_MUL, 4, {dest, src0, src1}));
-		}
+		void mul_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector floating point not-equal comparison.
@@ -1155,20 +919,14 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void ne(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_NE, 0, {dest, src0, src1}));
-		}
+		void ne(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Do nothing.
 
 			nop
 		*/
-		void nop()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_NOP, 0, {}));
-		}
+		void nop();
 
 		/*
 			Bitwise not.
@@ -1177,10 +935,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void not_(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_NOT, 0, {dest, src0}));
-		}
+		void not_(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Bitwise or.
@@ -1190,10 +945,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void or_(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_OR, 0, {dest, src0, src1}));
-		}
+		void or_(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Query the dimensions of a given input resource.
@@ -1203,10 +955,7 @@ namespace alys::shader
 			@param srcMipLevel srcMipLevel.select_component
 			@param srcResource srcResource[.swizzle]
 		*/
-		void resinfo(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 0, {dest, srcMipLevel, srcResource}));
-		}
+		void resinfo(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource);
 
 		/*
 			Query the dimensions of a given input resource.
@@ -1216,10 +965,7 @@ namespace alys::shader
 			@param srcMipLevel srcMipLevel.select_component
 			@param srcResource srcResource[.swizzle]
 		*/
-		void resinfo_uint(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 2, {dest, srcMipLevel, srcResource}));
-		}
+		void resinfo_uint(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource);
 
 		/*
 			Query the dimensions of a given input resource.
@@ -1229,20 +975,14 @@ namespace alys::shader
 			@param srcMipLevel srcMipLevel.select_component
 			@param srcResource srcResource[.swizzle]
 		*/
-		void resinfo_rcpFloat(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RESINFO, 1, {dest, srcMipLevel, srcResource}));
-		}
+		void resinfo_rcpFloat(const as_mask& dest, const as_scalar& srcMipLevel, const as_swz& srcResource);
 
 		/*
 			Return statement.
 
 			ret
 		*/
-		void ret()
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RET, 0, {}));
-		}
+		void ret();
 
 		/*
 			Conditional return.
@@ -1250,10 +990,7 @@ namespace alys::shader
 			retc{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void retc_z(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RETC, 0, {src0}));
-		}
+		void retc_z(const as_scalar& src0);
 
 		/*
 			Conditional return.
@@ -1261,10 +998,7 @@ namespace alys::shader
 			retc{_z|_nz} src0.select_component
 			@param src0 src0.select_component
 		*/
-		void retc_nz(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RETC, 128, {src0}));
-		}
+		void retc_nz(const as_scalar& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1273,10 +1007,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_ne(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NE, 0, {dest, src0}));
-		}
+		void round_ne(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1285,10 +1016,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_ne_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NE, 4, {dest, src0}));
-		}
+		void round_ne_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1297,10 +1025,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_ni(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NI, 0, {dest, src0}));
-		}
+		void round_ni(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1309,10 +1034,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_ni_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_NI, 4, {dest, src0}));
-		}
+		void round_ni_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1321,10 +1043,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_pi(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_PI, 0, {dest, src0}));
-		}
+		void round_pi(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1333,10 +1052,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_pi_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_PI, 4, {dest, src0}));
-		}
+		void round_pi_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1345,10 +1061,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_z(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_Z, 0, {dest, src0}));
-		}
+		void round_z(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Floating-point round to integral float.
@@ -1357,10 +1070,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void round_z_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ROUND_Z, 4, {dest, src0}));
-		}
+		void round_z_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise reciprocal square root.
@@ -1369,10 +1079,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void rsq(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RSQ, 0, {dest, src0}));
-		}
+		void rsq(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise reciprocal square root.
@@ -1381,10 +1088,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void rsq_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_RSQ, 4, {dest, src0}));
-		}
+		void rsq_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Samples data from the specified Element/texture using the specified address and the filtering mode identified by the given sampler.
@@ -1395,10 +1099,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param srcSampler srcSampler
 		*/
-		void sample_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE, 0, {dest, srcAddress, srcResource, srcSampler}));
-		}
+		void sample_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler);
 
 		/*
 			Samples data from the specified Element/texture using the specified address and the filtering mode identified by the given sampler.
@@ -1410,10 +1111,7 @@ namespace alys::shader
 			@param srcSampler srcSampler
 			@param srcLODBias srcLODBias.select_component
 		*/
-		void sample_b_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcLODBias)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_B, 0, {dest, srcAddress, srcResource, srcSampler, srcLODBias}));
-		}
+		void sample_b_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcLODBias);
 
 		/*
 			Performs a comparison filter.
@@ -1425,10 +1123,7 @@ namespace alys::shader
 			@param srcSampler srcSampler
 			@param srcReferenceValue srcReferenceValue
 		*/
-		void sample_c_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_C, 0, {dest, srcAddress, srcResource, srcSampler, srcReferenceValue}));
-		}
+		void sample_c_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue);
 
 		/*
 			Performs a comparison filter. This instruction behaves like sample_c, except LOD is 0, and derivatives are ignored.
@@ -1440,10 +1135,7 @@ namespace alys::shader
 			@param srcSampler srcSampler
 			@param srcReferenceValue srcReferenceValue
 		*/
-		void sample_c_lz_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_C_LZ, 0, {dest, srcAddress, srcResource, srcSampler, srcReferenceValue}));
-		}
+		void sample_c_lz_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue);
 
 		/*
 			Samples data from the specified Element/texture using the specified address and the filtering mode identified by the given sampler.
@@ -1456,10 +1148,7 @@ namespace alys::shader
 			@param srcXDerivatives srcXDerivatives[.swizzle]
 			@param srcYDerivatives srcYDerivatives[.swizzle]
 		*/
-		void sample_d_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_swz& srcXDerivatives, const as_swz& srcYDerivatives)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_D, 0, {dest, srcAddress, srcResource, srcSampler, srcXDerivatives, srcYDerivatives}));
-		}
+		void sample_d_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_swz& srcXDerivatives, const as_swz& srcYDerivatives);
 
 		/*
 			Samples data from the specified Element/texture using the specified address and the filtering mode identified by the given sampler.
@@ -1471,10 +1160,7 @@ namespace alys::shader
 			@param srcSampler srcSampler
 			@param srcLOD srcLOD.select_component
 		*/
-		void sample_l_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcLOD)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SAMPLE_L, 0, {dest, srcAddress, srcResource, srcSampler, srcLOD}));
-		}
+		void sample_l_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcLOD);
 
 		/*
 			Queries the number of samples in a given shader resource view or in the rasterizer.
@@ -1483,10 +1169,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param srcResource srcResource[.swizzle]
 		*/
-		void sampleinfo(const as_mask& dest, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_SAMPLE_INFO, 0, {dest, srcResource}));
-		}
+		void sampleinfo(const as_mask& dest, const as_swz& srcResource);
 
 		/*
 			Queries the number of samples in a given shader resource view or in the rasterizer.
@@ -1495,10 +1178,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param srcResource srcResource[.swizzle]
 		*/
-		void sampleinfo_uint(const as_mask& dest, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_SAMPLE_INFO, 1, {dest, srcResource}));
-		}
+		void sampleinfo_uint(const as_mask& dest, const as_swz& srcResource);
 
 		/*
 			Queries the position of a sample in a given shader resource view or in the rasterizer.
@@ -1508,10 +1188,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param sampleIndex sampleIndex
 		*/
-		void samplepos(const as_mask& dest, const as_swz& srcResource, const as_scalar& sampleIndex)
-		{
-			this->operator()(this->create_instruction(D3D10_1_SB_OPCODE_SAMPLE_POS, 0, {dest, srcResource, sampleIndex}));
-		}
+		void samplepos(const as_mask& dest, const as_swz& srcResource, const as_scalar& sampleIndex);
 
 		/*
 			Component-wise sin(theta) and cos(theta) for theta in radians.
@@ -1521,10 +1198,7 @@ namespace alys::shader
 			@param destCOS destCOS[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void sincos(const as_mask& destSIN, const as_mask& destCOS, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SINCOS, 0, {destSIN, destCOS, src0}));
-		}
+		void sincos(const as_mask& destSIN, const as_mask& destCOS, const as_swz& src0);
 
 		/*
 			Component-wise sin(theta) and cos(theta) for theta in radians.
@@ -1534,10 +1208,7 @@ namespace alys::shader
 			@param destCOS destCOS[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void sincos_sat(const as_mask& destSIN, const as_mask& destCOS, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SINCOS, 4, {destSIN, destCOS, src0}));
-		}
+		void sincos_sat(const as_mask& destSIN, const as_mask& destCOS, const as_swz& src0);
 
 		/*
 			Component-wise square root.
@@ -1546,10 +1217,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void sqrt(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SQRT, 0, {dest, src0}));
-		}
+		void sqrt(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise square root.
@@ -1558,10 +1226,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void sqrt_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SQRT, 4, {dest, src0}));
-		}
+		void sqrt_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Transfers control to a different statement block within the switch body depending on the value of a selector.
@@ -1569,10 +1234,7 @@ namespace alys::shader
 			switch src0.select_component
 			@param src0 src0.select_component
 		*/
-		void switch_(const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_SWITCH, 0, {src0}));
-		}
+		void switch_(const as_scalar& src0);
 
 		/*
 			Unsigned integer divide.
@@ -1583,10 +1245,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void udiv(const as_mask& destQUOT, const as_mask& destREM, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UDIV, 0, {destQUOT, destREM, src0, src1}));
-		}
+		void udiv(const as_mask& destQUOT, const as_mask& destREM, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector unsigned integer greater-than-or-equal comparison.
@@ -1596,10 +1255,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void uge(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UGE, 0, {dest, src0, src1}));
-		}
+		void uge(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise vector unsigned integer less-than comparison.
@@ -1609,10 +1265,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ult(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_ULT, 0, {dest, src0, src1}));
-		}
+		void ult(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Unsigned integer multiply and add.
@@ -1623,10 +1276,7 @@ namespace alys::shader
 			@param src1 src1[.swizzle]
 			@param src2 src2[.swizzle]
 		*/
-		void umad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMAD, 0, {dest, src0, src1, src2}));
-		}
+		void umad(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise unsigned integer maximum.
@@ -1636,10 +1286,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void umax(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMAX, 0, {dest, src0, src1}));
-		}
+		void umax(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise unsigned integer minimum.
@@ -1649,10 +1296,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void umin(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMIN, 0, {dest, src0, src1}));
-		}
+		void umin(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Unsigned integer multiply.
@@ -1663,10 +1307,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void umul(const as_mask& destHI, const as_mask& destLO, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UMUL, 0, {destHI, destLO, src0, src1}));
-		}
+		void umul(const as_mask& destHI, const as_mask& destLO, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Shift right.
@@ -1676,10 +1317,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void ushr(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_USHR, 0, {dest, src0, src1}));
-		}
+		void ushr(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Unsigned integer to floating point conversion.
@@ -1688,10 +1326,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void utof(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_UTOF, 0, {dest, src0}));
-		}
+		void utof(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Bitwise xor.
@@ -1701,10 +1336,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void xor_(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_XOR, 0, {dest, src0, src1}));
-		}
+		void xor_(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Atomic bitwise AND to memory.
@@ -1714,10 +1346,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_and(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_AND, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_and(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic compare and write to memory.
@@ -1728,10 +1357,7 @@ namespace alys::shader
 			@param src0 src0[.select_component]
 			@param src1 src1[.select_component]
 		*/
-		void atomic_cmp_store(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0, const as_scalar& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_CMP_STORE, 0, {dest, dstAddress, src0, src1}));
-		}
+		void atomic_cmp_store(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0, const as_scalar& src1);
 
 		/*
 			Atomic integer add to memory.
@@ -1741,10 +1367,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_iadd(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_IADD, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_iadd(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic signed integer maximum to memory.
@@ -1754,10 +1377,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_imax(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_IMAX, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_imax(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic signed integer minimum to memory.
@@ -1767,10 +1387,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_imin(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_IMIN, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_imin(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic bitwise OR to memory.
@@ -1780,10 +1397,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_or(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_OR, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_or(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic unsigned integer maximum to memory.
@@ -1793,10 +1407,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_umax(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_UMAX, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_umax(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic unsigned integer minimum to memory.
@@ -1806,10 +1417,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_umin(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_UMIN, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_umin(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Atomic bitwise XOR to memory.
@@ -1819,10 +1427,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void atomic_xor(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_ATOMIC_XOR, 0, {dest, dstAddress, src0}));
-		}
+		void atomic_xor(const as_mask& dest, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Given a bit range from the LSB of a number, place that number of bits in another number at any offset.
@@ -1834,10 +1439,7 @@ namespace alys::shader
 			@param src2 src2[.swizzle]
 			@param src3 src3[.swizzle]
 		*/
-		void bfi(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2, const as_swz& src3)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_BFI, 0, {dest, src0, src1, src2, src3}));
-		}
+		void bfi(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2, const as_swz& src3);
 
 		/*
 			Reverse a 32-bit number.
@@ -1846,10 +1448,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void bfrev(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_BFREV, 0, {dest, src0}));
-		}
+		void bfrev(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Query the element count on a buffer (but not the constant buffer).
@@ -1858,10 +1457,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param srcResource srcResource
 		*/
-		void bufinfo(const as_mask& dest, const as_swz& srcResource)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_BUFINFO, 0, {dest, srcResource}));
-		}
+		void bufinfo(const as_mask& dest, const as_swz& srcResource);
 
 		/*
 			Counts the number of bits set in a number.
@@ -1870,10 +1466,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void countbits(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_COUNTBITS, 0, {dest, src0}));
-		}
+		void countbits(const as_mask& dest, const as_swz& src0);
 
 		/*
 			The geometry shader instruction that completes the current primitive topology at the specified stream, if any vertices have been emitted to it, and starts a new topology of the type declared by the geometry shader at that stream.
@@ -1881,10 +1474,7 @@ namespace alys::shader
 			cut_stream streamIndex
 			@param streamIndex streamIndex
 		*/
-		void cut_stream(const as_literal& streamIndex)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_CUT_STREAM, 0, {streamIndex}));
-		}
+		void cut_stream(const as_literal& streamIndex);
 
 		/*
 			Component-wise double-precision add.
@@ -1894,10 +1484,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dadd(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DADD, 0, {dest, src0, src1}));
-		}
+		void dadd(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision add.
@@ -1907,10 +1494,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dadd_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DADD, 4, {dest, src0, src1}));
-		}
+		void dadd_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Computes a component-wise double-precision division.
@@ -1920,10 +1504,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void ddiv(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DDIV, 0, {dest, src0, src1}));
-		}
+		void ddiv(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Computes a component-wise double-precision division.
@@ -1933,10 +1514,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void ddiv_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DDIV, 4, {dest, src0, src1}));
-		}
+		void ddiv_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision equality comparison.
@@ -1946,10 +1524,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void deq(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DEQ, 0, {dest, src0, src1}));
-		}
+		void deq(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision equality comparison.
@@ -1959,10 +1534,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void deq_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DEQ, 4, {dest, src0, src1}));
-		}
+		void deq_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Computes the rate of change of components.
@@ -1971,10 +1543,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx_coarse(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTX_COARSE, 0, {dest, src0}));
-		}
+		void deriv_rtx_coarse(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -1983,10 +1552,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx_coarse_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTX_COARSE, 4, {dest, src0}));
-		}
+		void deriv_rtx_coarse_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -1995,10 +1561,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx_fine(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTX_FINE, 0, {dest, src0}));
-		}
+		void deriv_rtx_fine(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -2007,10 +1570,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rtx_fine_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTX_FINE, 4, {dest, src0}));
-		}
+		void deriv_rtx_fine_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -2019,10 +1579,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty_coarse(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTY_COARSE, 0, {dest, src0}));
-		}
+		void deriv_rty_coarse(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -2031,10 +1588,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty_coarse_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTY_COARSE, 4, {dest, src0}));
-		}
+		void deriv_rty_coarse_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -2043,10 +1597,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty_fine(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTY_FINE, 0, {dest, src0}));
-		}
+		void deriv_rty_fine(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes the rate of change of components.
@@ -2055,10 +1606,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void deriv_rty_fine_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DERIV_RTY_FINE, 4, {dest, src0}));
-		}
+		void deriv_rty_fine_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Performs a fused-multiply add.
@@ -2069,10 +1617,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void dfma(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DFMA, 0, {dest, src0, src1, src2}));
-		}
+		void dfma(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Performs a fused-multiply add.
@@ -2083,10 +1628,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void dfma_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DFMA, 4, {dest, src0, src1, src2}));
-		}
+		void dfma_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise double-precision greater-than-or-equal comparison.
@@ -2096,10 +1638,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dge(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DGE, 0, {dest, src0, src1}));
-		}
+		void dge(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision greater-than-or-equal comparison.
@@ -2109,10 +1648,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dge_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DGE, 4, {dest, src0, src1}));
-		}
+		void dge_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision less-than comparison.
@@ -2122,10 +1658,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dlt(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DLT, 0, {dest, src0, src1}));
-		}
+		void dlt(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision less-than comparison.
@@ -2135,10 +1668,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dlt_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DLT, 4, {dest, src0, src1}));
-		}
+		void dlt_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision maximum.
@@ -2148,10 +1678,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmax(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMAX, 0, {dest, src0, src1}));
-		}
+		void dmax(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision maximum.
@@ -2161,10 +1688,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmax_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMAX, 4, {dest, src0, src1}));
-		}
+		void dmax_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision minimum.
@@ -2174,10 +1698,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmin(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMIN, 0, {dest, src0, src1}));
-		}
+		void dmin(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision minimum.
@@ -2187,10 +1708,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmin_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMIN, 4, {dest, src0, src1}));
-		}
+		void dmin_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise move.
@@ -2199,10 +1717,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void dmov(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMOV, 0, {dest, src0}));
-		}
+		void dmov(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise move.
@@ -2211,10 +1726,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void dmov_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMOV, 4, {dest, src0}));
-		}
+		void dmov_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise conditional move.
@@ -2225,10 +1737,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void dmovc(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMOVC, 0, {dest, src0, src1, src2}));
-		}
+		void dmovc(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise conditional move.
@@ -2239,10 +1748,7 @@ namespace alys::shader
 			@param src1 [-]src1[_abs][.swizzle]
 			@param src2 [-]src2[_abs][.swizzle]
 		*/
-		void dmovc_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMOVC, 4, {dest, src0, src1, src2}));
-		}
+		void dmovc_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Component-wise double-precision multiply.
@@ -2252,10 +1758,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmul(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMUL, 0, {dest, src0, src1}));
-		}
+		void dmul(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision multiply.
@@ -2265,10 +1768,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dmul_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DMUL, 4, {dest, src0, src1}));
-		}
+		void dmul_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision not equality comparison.
@@ -2278,10 +1778,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dne(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DNE, 0, {dest, src0, src1}));
-		}
+		void dne(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Component-wise double-precision not equality comparison.
@@ -2291,10 +1788,7 @@ namespace alys::shader
 			@param src0 [-]src0[_abs][.swizzle]
 			@param src1 [-]src1[_abs][.swizzle]
 		*/
-		void dne_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DNE, 4, {dest, src0, src1}));
-		}
+		void dne_sat(const as_mask& dest, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Computes a component-wise double-precision reciprocal.
@@ -2303,10 +1797,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void drcp(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DRCP, 0, {dest, src0}));
-		}
+		void drcp(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Computes a component-wise double-precision reciprocal.
@@ -2315,10 +1806,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void drcp_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_1_SB_OPCODE_DRCP, 4, {dest, src0}));
-		}
+		void drcp_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise conversion from double-precision floating-point data to single-precision floating-point data.
@@ -2327,10 +1815,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[.swizzle]
 		*/
-		void dtof(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DTOF, 0, {dest, src0}));
-		}
+		void dtof(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Emit a vertex to a given stream.
@@ -2338,10 +1823,7 @@ namespace alys::shader
 			emit_stream streamIndex
 			@param streamIndex streamIndex
 		*/
-		void emit_stream(const as_literal& streamIndex)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_EMIT_STREAM, 0, {streamIndex}));
-		}
+		void emit_stream(const as_literal& streamIndex);
 
 		/*
 			Equivalent to an emit command followed by a cut command.
@@ -2349,10 +1831,7 @@ namespace alys::shader
 			emitThenCut_stream streamIndex
 			@param streamIndex streamIndex
 		*/
-		void emitThenCut_stream(const as_literal& streamIndex)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_EMITTHENCUT_STREAM, 0, {streamIndex}));
-		}
+		void emitThenCut_stream(const as_literal& streamIndex);
 
 		/*
 			Component-wise float16 to float32 conversion.
@@ -2361,10 +1840,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[.swizzle]
 		*/
-		void f16tof32(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_F16TOF32, 0, {dest, src0}));
-		}
+		void f16tof32(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise float16 to float32 conversion.
@@ -2373,10 +1849,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[.swizzle]
 		*/
-		void f32tof16(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_F32TOF16, 0, {dest, src0}));
-		}
+		void f32tof16(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Interface function call.
@@ -2385,10 +1858,7 @@ namespace alys::shader
 			@param fpN fp#
 			@param arrayIndex arrayIndex
 		*/
-		void fcall(const as_register& fbN, const as_custom& arrayIndex)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_INTERFACE_CALL, 0, {arrayIndex, fbN}));
-		}
+		void fcall(const as_register& fbN, const as_custom& arrayIndex);
 
 		/*
 			Finds the first bit set in a number, either from LSB or MSB.
@@ -2397,10 +1867,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void firstbit_hi(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_FIRSTBIT_HI, 0, {dest, src0}));
-		}
+		void firstbit_hi(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Finds the first bit set in a number, either from LSB or MSB.
@@ -2409,10 +1876,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void firstbit_lo(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_FIRSTBIT_LO, 0, {dest, src0}));
-		}
+		void firstbit_lo(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Finds the first bit set in a number, either from LSB or MSB.
@@ -2421,10 +1885,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 src0[.swizzle]
 		*/
-		void firstbit_shi(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_FIRSTBIT_SHI, 0, {dest, src0}));
-		}
+		void firstbit_shi(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise conversion from single-precision floating-point data to double-precision floating-point data.
@@ -2433,10 +1894,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[.swizzle]
 		*/
-		void ftod(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_FTOD, 0, {dest, src0}));
-		}
+		void ftod(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Same as gather4, except this instrution performs comparison on texels, similar to sample_c.
@@ -2448,10 +1906,7 @@ namespace alys::shader
 			@param srcSampler srcSampler[.r]
 			@param srcReferenceValue srcReferenceValue
 		*/
-		void gather4_c_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_GATHER4_C, 0, {dest, srcAddress, srcResource, srcSampler, srcReferenceValue}));
-		}
+		void gather4_c_indexable(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue);
 
 		/*
 			A variant of gather4, but instead of supporting an immediate offset [-8..7], the offset comes as a parameter to the instruction, and also has larger range of [-32..31].
@@ -2463,10 +1918,7 @@ namespace alys::shader
 			@param srcResource srcResource[.swizzle]
 			@param srcSampler srcSampler[.select_component]
 		*/
-		void gather4_po(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcOffset, const as_swz& srcResource, const as_scalar& srcSampler)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_GATHER4_PO, 0, {dest, srcAddress, srcOffset, srcResource, srcSampler}));
-		}
+		void gather4_po(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcOffset, const as_swz& srcResource, const as_scalar& srcSampler);
 
 		/*
 			Behaves the same as gather4_po, except performs comparison on texels, similar to sample_c.
@@ -2479,50 +1931,35 @@ namespace alys::shader
 			@param srcSampler srcSampler[.r]
 			@param srcReferenceValue srcReferenceValue
 		*/
-		void gather4_po_c(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcOffset, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_GATHER4_PO_C, 0, {dest, srcAddress, srcOffset, srcResource, srcSampler, srcReferenceValue}));
-		}
+		void gather4_po_c(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcOffset, const as_swz& srcResource, const as_register& srcSampler, const as_scalar& srcReferenceValue);
 
 		/*
 			Start the control point phase in a hull shader.
 
 			hs_control_point_phase
 		*/
-		void hs_control_point_phase()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_HS_CONTROL_POINT_PHASE, 0, {}));
-		}
+		void hs_control_point_phase();
 
 		/*
 			Start the declarations phase in a hull shader.
 
 			hs_decls
 		*/
-		void hs_decls()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_HS_DECLS, 0, {}));
-		}
+		void hs_decls();
 
 		/*
 			Start the fork phase in a hull shader.
 
 			hs_fork_phase
 		*/
-		void hs_fork_phase()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_HS_FORK_PHASE, 0, {}));
-		}
+		void hs_fork_phase();
 
 		/*
 			Start the join phase in a hull shader.
 
 			hs_join_phase
 		*/
-		void hs_join_phase()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_HS_JOIN_PHASE, 0, {}));
-		}
+		void hs_join_phase();
 
 		/*
 			Given a range of bits in a number, shift those bits to the LSB and sign extend the MSB of the range.
@@ -2533,10 +1970,7 @@ namespace alys::shader
 			@param src1 src1[.swizzle]
 			@param src2 src2[.swizzle]
 		*/
-		void ibfe(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IBFE, 0, {dest, src0, src1, src2}));
-		}
+		void ibfe(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Atomically increment the hidden 32-bit counter stored with a Count or Append unordered access view (UAV), returning the original value.
@@ -2545,10 +1979,7 @@ namespace alys::shader
 			@param dest dest[.single_component_mask]
 			@param dstUAV dstUAV
 		*/
-		void imm_atomic_alloc(const as_mask& dest, const as_register& dstUAV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_ALLOC, 0, {dest, dstUAV}));
-		}
+		void imm_atomic_alloc(const as_mask& dest, const as_register& dstUAV);
 
 		/*
 			Immediate atomic bitwise AND to memory. Returns the value in memory before the AND.
@@ -2559,10 +1990,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_and(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_AND, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_and(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate compare and exchange to memory.
@@ -2574,10 +2002,7 @@ namespace alys::shader
 			@param src0 src0[.select_component]
 			@param src1 src1[.select_component]
 		*/
-		void imm_atomic_cmp_exch(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0, const as_scalar& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_CMP_EXCH, 0, {dst0, dst1, dstAddress, src0, src1}));
-		}
+		void imm_atomic_cmp_exch(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0, const as_scalar& src1);
 
 		/*
 			Atomically decrement the hidden 32-bit counter stored with a Count or Append unordered access view (UAV), returning the new value.
@@ -2586,10 +2011,7 @@ namespace alys::shader
 			@param dest dest[.single_component_mask]
 			@param dstUAV dstUAV
 		*/
-		void imm_atomic_consume(const as_mask& dest, const as_register& dstUAV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_CONSUME, 0, {dest, dstUAV}));
-		}
+		void imm_atomic_consume(const as_mask& dest, const as_register& dstUAV);
 
 		/*
 			Immediate atomic exchange to memory.
@@ -2600,10 +2022,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_exch(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_EXCH, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_exch(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic integer add to memory. Returns the value in memory before the add.
@@ -2614,10 +2033,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_iadd(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_IADD, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_iadd(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic signed max to memory. Returns value in memory before the max operation.
@@ -2628,10 +2044,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_imax(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_IMAX, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_imax(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic signed min to memory. Returns value in memory before the max operation.
@@ -2642,10 +2055,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_imin(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_IMIN, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_imin(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic bitwise OR to memory. Returns the value in memory before the OR.
@@ -2656,10 +2066,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_or(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_OR, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_or(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic unsigned max to memory. Returns value in memory before the max operation.
@@ -2670,10 +2077,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_umax(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_UMAX, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_umax(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic unsigned min to memory. Returns value in memory before the max operation.
@@ -2684,10 +2088,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_umin(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_UMIN, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_umin(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Immediate atomic bitwise XOR to memory. Returns value in memory before the XOR.
@@ -2698,10 +2099,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.select_component]
 		*/
-		void imm_atomic_xor(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_IMM_ATOMIC_XOR, 0, {dst0, dst1, dstAddress, src0}));
-		}
+		void imm_atomic_xor(const as_mask& dst0, const as_register& dst1, const as_swz& dstAddress, const as_scalar& src0);
 
 		/*
 			Random-access read of 1-4 32bit components from a raw buffer.
@@ -2711,10 +2109,7 @@ namespace alys::shader
 			@param srcByteOffset srcByteOffset[.select_component]
 			@param src0 src0[.swizzle]
 		*/
-		void ld_raw(const as_mask& dest, const as_scalar& srcByteOffset, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_LD_RAW, 0, {dest, srcByteOffset, src0}));
-		}
+		void ld_raw(const as_mask& dest, const as_scalar& srcByteOffset, const as_swz& src0);
 
 		/*
 			Random-access read of 1-4 32bit components from a structured buffer.
@@ -2725,10 +2120,7 @@ namespace alys::shader
 			@param srcByteOffset srcByteOffset[.select_component]
 			@param src0 src0[.swizzle]
 		*/
-		void ld_structured(const as_mask& dest, const as_scalar& srcAddress, const as_scalar& srcByteOffset, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_LD_STRUCTURED, 0, {dest, srcAddress, srcByteOffset, src0}));
-		}
+		void ld_structured(const as_mask& dest, const as_scalar& srcAddress, const as_scalar& srcByteOffset, const as_swz& src0);
 
 		/*
 			Random-access read of an element from a typed unordered access view (UAV).
@@ -2738,10 +2130,7 @@ namespace alys::shader
 			@param srcAddress srcAddress[.swizzle]
 			@param srcUAV srcUAV[.swizzle]
 		*/
-		void ld_uav_typed(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcUAV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_LD_UAV_TYPED, 0, {dest, srcAddress, srcUAV}));
-		}
+		void ld_uav_typed(const as_mask& dest, const as_swz& srcAddress, const as_swz& srcUAV);
 
 		/*
 			Component-wise reciprocal.
@@ -2750,10 +2139,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void rcp(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_RCP, 0, {dest, src0}));
-		}
+		void rcp(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Component-wise reciprocal.
@@ -2762,10 +2148,7 @@ namespace alys::shader
 			@param dest dest[.mask]
 			@param src0 [-]src0[_abs][.swizzle]
 		*/
-		void rcp_sat(const as_mask& dest, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_RCP, 4, {dest, src0}));
-		}
+		void rcp_sat(const as_mask& dest, const as_swz& src0);
 
 		/*
 			Random-access write of 1-4 32bit components into typeless memory.
@@ -2775,10 +2158,7 @@ namespace alys::shader
 			@param dstByteOffset dstByteOffset[.select_component]
 			@param src0 src0[.swizzle]
 		*/
-		void store_raw(const as_mask& dest, const as_scalar& dstByteOffset, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_STORE_RAW, 0, {dest, dstByteOffset, src0}));
-		}
+		void store_raw(const as_mask& dest, const as_scalar& dstByteOffset, const as_swz& src0);
 
 		/*
 			Random-access write of 1-4 32-bit components into a structured buffer unordered access view (UAV).
@@ -2789,10 +2169,7 @@ namespace alys::shader
 			@param dstByteOffset dstByteOffset[.select_component]
 			@param src0 src0[.swizzle]
 		*/
-		void store_structured(const as_mask& dest, const as_scalar& dstAddress, const as_scalar& dstByteOffset, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_STORE_STRUCTURED, 0, {dest, dstAddress, dstByteOffset, src0}));
-		}
+		void store_structured(const as_mask& dest, const as_scalar& dstAddress, const as_scalar& dstByteOffset, const as_swz& src0);
 
 		/*
 			Random-access write of an element into a typed unordered access view (UAV).
@@ -2802,10 +2179,7 @@ namespace alys::shader
 			@param dstAddress dstAddress[.swizzle]
 			@param src0 src0[.swizzle]
 		*/
-		void store_uav_typed(const as_mask& dstUAV, const as_swz& dstAddress, const as_swz& src0)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_STORE_UAV_TYPED, 0, {dstUAV, dstAddress, src0}));
-		}
+		void store_uav_typed(const as_mask& dstUAV, const as_swz& dstAddress, const as_swz& src0);
 
 		/*
 			Performs a component-wise conditional swap of the values between two input registers.
@@ -2817,10 +2191,7 @@ namespace alys::shader
 			@param src1 src1[.swizzle]
 			@param src2 src2[.swizzle]
 		*/
-		void swapc(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SWAPC, 0, {dst0, dst1, src0, src1, src2}));
-		}
+		void swapc(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 #define flag_sync_g (1 << 0)
 #define flag_sync_t (1 << 1)
@@ -2833,120 +2204,84 @@ namespace alys::shader
 			sync[_uglobal|_ugroup][_g][_t]
 			@param options options
 		*/
-		void sync(const std::uint32_t options)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, options, {}));
-		}
+		void sync(const std::uint32_t options);
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_g()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_g, {}));
-		}
+		void sync_g();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_t, {}));
-		}
+		void sync_t();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_g_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_g | flag_sync_t, {}));
-		}
+		void sync_g_t();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_ugroup()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_ugroup, {}));
-		}
+		void sync_ugroup();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_ugroup_g()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_ugroup | flag_sync_g, {}));
-		}
+		void sync_ugroup_g();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_ugroup_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_ugroup | flag_sync_t, {}));
-		}
+		void sync_ugroup_t();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_ugroup_g_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_ugroup | flag_sync_g | flag_sync_t, {}));
-		}
+		void sync_ugroup_g_t();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_uglobal()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_uglobal, {}));
-		}
+		void sync_uglobal();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_uglobal_g()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_uglobal | flag_sync_g, {}));
-		}
+		void sync_uglobal_g();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_uglobal_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_uglobal | flag_sync_t, {}));
-		}
+		void sync_uglobal_t();
 
 		/*
 			Thread group sync or memory barrier.
 
 			sync[_uglobal|_ugroup][_g][_t]
 		*/
-		void sync_uglobal_g_t()
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_SYNC, flag_sync_uglobal | flag_sync_g | flag_sync_t, {}));
-		}
+		void sync_uglobal_g_t();
 
 		/*
 			Unsigned integer add with carry.
@@ -2957,10 +2292,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void uaddc(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_UADDC, 0, {dst0, dst1, src0, src1}));
-		}
+		void uaddc(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Given a range of bits in a number, shift those bits to the LSB and set remaining bits to 0.
@@ -2971,10 +2303,7 @@ namespace alys::shader
 			@param src1 src1[.swizzle]
 			@param src2 src2[.swizzle]
 		*/
-		void ubfe(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_UBFE, 0, {dest, src0, src1, src2}));
-		}
+		void ubfe(const as_mask& dest, const as_swz& src0, const as_swz& src1, const as_swz& src2);
 
 		/*
 			Unsigned integer subtract with borrow.
@@ -2985,10 +2314,7 @@ namespace alys::shader
 			@param src0 src0[.swizzle]
 			@param src1 src1[.swizzle]
 		*/
-		void usubb(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_USUBB, 0, {dst0, dst1, src0, src1}));
-		}
+		void usubb(const as_mask& dst0, const as_mask& dst1, const as_swz& src0, const as_swz& src1);
 
 		/*
 			Declares a non-multisampled shader-input resource.
@@ -2998,10 +2324,7 @@ namespace alys::shader
 			@param resourceType resourceType
 			@param returnTypes returnType(s)
 		*/
-		void dcl_resource(const as_register& tN, const std::uint32_t resourceType, const as_custom& returnTypes)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_RESOURCE, resourceType, {tN, returnTypes}));
-		}
+		void dcl_resource(const as_register& tN, const std::uint32_t resourceType, const as_custom& returnTypes, const std::optional<as_custom>& space = {});
 
 		/*
 			Declares a shader constant buffer.
@@ -3009,11 +2332,10 @@ namespace alys::shader
 			dcl_constantBuffer cbN[size], AccessPattern
 			@param cbN cbN[size]
 			@param AccessPattern AccessPattern
+			@param size size (sm5.1)
+			@param space space (sm5.1)
 		*/
-		void dcl_constantbuffer(const as_swz& cbN, const std::uint32_t AccessPattern)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_CONSTANT_BUFFER, AccessPattern, {cbN}));
-		}
+		void dcl_constantbuffer(const as_swz& cbN, const std::uint32_t AccessPattern, const std::optional<as_custom>& size = {}, const std::optional<as_custom>& space = {});
 
 		/*
 			Declares a sampler register.
@@ -3021,11 +2343,9 @@ namespace alys::shader
 			dcl_sampler sN, mode
 			@param sN sN
 			@param mode mode
+			@param space space (sm5.1)
 		*/
-		void dcl_sampler(const as_register& sN, const std::uint32_t mode = D3D10_SB_SAMPLER_MODE_DEFAULT)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_SAMPLER, mode, {sN}));
-		}
+		void dcl_sampler(const as_register& sN, const std::uint32_t mode = D3D10_SB_SAMPLER_MODE_DEFAULT, const std::optional<as_custom>& space = {});
 
 		/*
 			Declares a range of registers that will be accessed by index (an integer computed in the shader).
@@ -3034,10 +2354,7 @@ namespace alys::shader
 			@param minRegisterM minRegisterM
 			@param maxRegisterN maxRegisterN
 		*/
-		void dcl_indexRange(const as_mask& minRegisterM, const as_custom& maxRegisterN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INDEX_RANGE, 0, {minRegisterM, maxRegisterN}));
-		}
+		void dcl_indexRange(const as_mask& minRegisterM, const as_custom& maxRegisterN);
 
 		/*
 			Declares the primitive type geometry-shader output data.
@@ -3045,10 +2362,7 @@ namespace alys::shader
 			dcl_outputTopology type
 			@param type type
 		*/
-		void dcl_outputTopology(const std::uint32_t type)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GS_OUTPUT_PRIMITIVE_TOPOLOGY, type, {}));
-		}
+		void dcl_outputTopology(const std::uint32_t type);
 
 		/*
 			Declares the primitive type for geometry-shader inputs.
@@ -3056,10 +2370,7 @@ namespace alys::shader
 			dcl_inputPrimitive type
 			@param type type
 		*/
-		void dcl_inputPrimitive(const std::uint32_t type)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GS_INPUT_PRIMITIVE, type, {}));
-		}
+		void dcl_inputPrimitive(const std::uint32_t type);
 
 		/*
 			Declares the maximum number of vertices that can be output by a geometry shader.
@@ -3067,10 +2378,7 @@ namespace alys::shader
 			dcl_maxOutputVertexCount count
 			@param count count
 		*/
-		void dcl_maxOutputVertexCount(const as_custom& count)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_MAX_OUTPUT_VERTEX_COUNT, 0, {count}));
-		}
+		void dcl_maxOutputVertexCount(const as_custom& count);
 
 		/*
 			Declares a shader-input register.
@@ -3079,23 +2387,16 @@ namespace alys::shader
 			@param vN vN.mask[.mask]
 			@param interpolationMode interpolationMode
 		*/
-		void dcl_input(const as_mask& vN, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT, interpolationMode, {vN}));
-		}
+		void dcl_input(const as_mask& vN, const std::uint32_t interpolationMode = 0u);
 
 		/*
 			Declares a shader-input register that expects a system-value to be provided from a preceding stage.
 
-			dcl_input_sgv vN[.mask], systemValueName[, interpolationMode]
+			dcl_input_sgv vN[.mask], systemValueName
 			@param vN vN.mask
 			@param systemValueName systemValueName
-			@param interpolationMode interpolationMode
 		*/
-		void dcl_input_sgv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_SGV, interpolationMode, {vN, systemValueName}));
-		}
+		void dcl_input_sgv(const as_mask& vN, const as_custom& systemValueName);
 
 		/*
 			Declares a shader-input register that expects a system-value to be provided from a preceding stage.
@@ -3105,10 +2406,7 @@ namespace alys::shader
 			@param systemValueName systemValueName
 			@param interpolationMode interpolationMode
 		*/
-		void dcl_input_siv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_SIV, interpolationMode, {vN, systemValueName}));
-		}
+		void dcl_input_siv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u);
 
 		/*
 			Declares a pixel shader-input register.
@@ -3117,10 +2415,16 @@ namespace alys::shader
 			@param vN vN.mask[.mask]
 			@param interpolationMode interpolationMode
 		*/
-		void dcl_input_ps(const as_mask& vN, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS, interpolationMode, {vN}));
-		}
+		void dcl_input_ps(const as_mask& vN, const std::uint32_t interpolationMode = 0u);
+
+		/*
+			Declares a pixel shader-input register that expects a system-value to be provided from a preceding stage.
+
+			dcl_input_sgv vN[.mask], systemValueName[, interpolationMode]
+			@param vN vN.mask
+			@param systemValueName systemValueName
+		*/
+		void dcl_input_ps_sgv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u);
 
 		/*
 			Declares a pixel shader-input register that expects a system-value to be provided from a preceding stage.
@@ -3130,23 +2434,7 @@ namespace alys::shader
 			@param systemValueName systemValueName
 			@param interpolationMode interpolationMode
 		*/
-		void dcl_input_ps_sgv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS_SGV, interpolationMode, {vN, systemValueName}));
-		}
-
-		/*
-			Declares a pixel shader-input register that expects a system-value to be provided from a preceding stage.
-
-			dcl_input_sgv vN[.mask], systemValueName[, interpolationMode]
-			@param vN vN.mask
-			@param systemValueName systemValueName
-			@param interpolationMode interpolationMode
-		*/
-		void dcl_input_ps_siv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INPUT_PS_SIV, interpolationMode, {vN, systemValueName}));
-		}
+		void dcl_input_ps_siv(const as_mask& vN, const as_custom& systemValueName, const std::uint32_t interpolationMode = 0u);
 
 		/*
 			Declares a shader-output register.
@@ -3154,10 +2442,7 @@ namespace alys::shader
 			dcl_output oN[.mask]
 			@param oN oN.mask
 		*/
-		void dcl_output(const as_mask& oN)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT, 0, {oN}));
-		}
+		void dcl_output(const as_mask& oN);
 
 		/*
 			Declares an output register that contains a system-value parameter.
@@ -3166,10 +2451,7 @@ namespace alys::shader
 			@param oN oN.mask
 			@param systemValueName systemValueName
 		*/
-		void dcl_output_sgv(const as_mask& oN, const as_custom& systemValueName)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT_SGV, 0, {oN, systemValueName}));
-		}
+		void dcl_output_sgv(const as_mask& oN, const as_custom& systemValueName);
 
 		/*
 			Declares an output register that contains a system-value parameter.
@@ -3178,10 +2460,7 @@ namespace alys::shader
 			@param oN oN.mask
 			@param systemValueName systemValueName
 		*/
-		void dcl_output_siv(const as_mask& oN, const as_custom& systemValueName)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_OUTPUT_SIV, 0, {oN, systemValueName}));
-		}
+		void dcl_output_siv(const as_mask& oN, const as_custom& systemValueName);
 
 		/*
 			Declares temporary registers.
@@ -3189,10 +2468,7 @@ namespace alys::shader
 			dcl_temps N
 			@param N N
 		*/
-		void dcl_temps(const as_custom& N)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_TEMPS, 0, {N}));
-		}
+		void dcl_temps(const as_custom& N);
 
 		/*
 			Declare a function body.
@@ -3200,10 +2476,7 @@ namespace alys::shader
 			dcl_function_body fb#
 			@param fbN fb#
 		*/
-		void dcl_function_body(const as_custom& fbN)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_FUNCTION_BODY, 0, {fbN}));
-		}
+		void dcl_function_body(const as_custom& fbN);
 
 		/*
 			Declare a function table.
@@ -3212,21 +2485,7 @@ namespace alys::shader
 			@param ftN = ft#
 			@param entries {fb#, fb#, ...}
 		*/
-		void dcl_function_table(const as_custom& ftN, const std::vector<as_custom>& entries)
-		{
-			const as_custom table_length = static_cast<std::uint32_t>(entries.size());
-			
-			std::vector<detail::operand_t> operands;
-			operands.emplace_back(ftN);
-			operands.emplace_back(table_length);
-
-			for (const auto& entry : entries)
-			{
-				operands.emplace_back(entry);
-			}
-
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_FUNCTION_TABLE, 0, operands));
-		}
+		void dcl_function_table(const as_custom& ftN, const std::vector<as_custom>& entries);
 
 		/*
 			Declare function table pointers (interfaces).
@@ -3237,30 +2496,7 @@ namespace alys::shader
 			@param numCallSites numCallSites
 			@param entries {ft#, ft#, ...}
 		*/
-		void dcl_interface(const as_custom& fpN, const std::uint8_t arraySize, const std::uint32_t numCallSites, const std::vector<as_custom>& entries)
-		{
-			std::vector<detail::operand_t> operands;
-
-			detail::operand_t lengths{};
-			lengths.custom.is_custom = true;
-			lengths.custom.u.values16[0] = static_cast<std::uint8_t>(entries.size());
-			lengths.custom.u.values16[1] = arraySize;
-
-			detail::operand_t table_length{};
-			table_length.custom.is_custom = true;
-			table_length.custom.u.value = numCallSites;
-
-			operands.emplace_back(fpN);
-			operands.emplace_back(table_length);
-			operands.emplace_back(lengths);
-
-			for (const auto& entry : entries)
-			{
-				operands.emplace_back(entry);
-			}
-
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INTERFACE, 0, operands));
-		}
+		void dcl_interface(const as_custom& fpN, const std::uint8_t arraySize, const std::uint32_t numCallSites, const std::vector<as_custom>& entries);
 
 		/*
 			Declare function table pointers (interfaces).
@@ -3270,30 +2506,7 @@ namespace alys::shader
 			@param ftN ft#
 			@param op2 ...}
 		*/
-		void dcl_interface_dynamicindexed(const as_custom& fpN, const std::uint8_t arraySize, const std::uint8_t numCallSites, const std::vector<as_custom>& entries)
-		{
-			std::vector<detail::operand_t> operands;
-
-			detail::operand_t lengths{};
-			lengths.custom.is_custom = true;
-			lengths.custom.u.values16[0] = arraySize;
-			lengths.custom.u.values16[1] = numCallSites;
-
-			detail::operand_t table_length{};
-			table_length.custom.is_custom = true;
-			table_length.custom.u.value = static_cast<std::uint32_t>(entries.size());
-
-			operands.emplace_back(fpN);
-			operands.emplace_back(table_length);
-			operands.emplace_back(lengths);
-
-			for (const auto& entry : entries)
-			{
-				operands.emplace_back(entry);
-			}
-
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INTERFACE, 1, operands));
-		}
+		void dcl_interface_dynamicindexed(const as_custom& fpN, const std::uint8_t arraySize, const std::uint8_t numCallSites, const std::vector<as_custom>& entries);
 
 		/*
 			Declares an indexable, temporary register.
@@ -3303,10 +2516,7 @@ namespace alys::shader
 			@param size size
 			@param ComponentCount ComponentCount
 		*/
-		void dcl_indexableTemp(const as_custom& xN, const as_custom& size, const as_custom& ComponentCount)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_INDEXABLE_TEMP, 0, {xN, size, ComponentCount}));
-		}
+		void dcl_indexableTemp(const as_custom& xN, const as_custom& size, const as_custom& ComponentCount);
 
 		/*
 			Declares shader global flags.
@@ -3314,10 +2524,7 @@ namespace alys::shader
 			dcl_globalFlags flags
 			@param flags flags
 		*/
-		void dcl_globalFlags(const std::uint32_t flags)
-		{
-			this->operator()(this->create_instruction(D3D10_SB_OPCODE_DCL_GLOBAL_FLAGS, flags, {}));
-		}
+		void dcl_globalFlags(const std::uint32_t flags);
 
 		/*
 			Declare the hull shader input control point count in the hull shader declaration section.
@@ -3325,10 +2532,7 @@ namespace alys::shader
 			dcl_input_control_point_count N
 			@param N N
 		*/
-		void dcl_input_control_point_count(const std::uint32_t N)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_INPUT_CONTROL_POINT_COUNT, N, {}));
-		}
+		void dcl_input_control_point_count(const std::uint32_t N);
 
 		/*
 			Declares the hull shader output control point count.
@@ -3336,10 +2540,7 @@ namespace alys::shader
 			dcl_output_control_point_count N
 			@param N N
 		*/
-		void dcl_output_control_point_count(const std::uint32_t N)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_OUTPUT_CONTROL_POINT_COUNT, N, {}));
-		}
+		void dcl_output_control_point_count(const std::uint32_t N);
 
 		/*
 			Declare the tessellator domain in a hull shader declaration section, and the domain shader.
@@ -3347,10 +2548,7 @@ namespace alys::shader
 			dcl_tessellator_domain domain
 			@param domain domain
 		*/
-		void dcl_tessellator_domain(const std::uint32_t domain)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_DOMAIN, domain, {}));
-		}
+		void dcl_tessellator_domain(const std::uint32_t domain);
 
 		/*
 			Declare the tessellator partitioning in a hull shader declaration section.
@@ -3358,10 +2556,7 @@ namespace alys::shader
 			dcl_tessellator_partitioning mode
 			@param mode mode
 		*/
-		void dcl_tessellator_partitioning(const std::uint32_t mode)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_PARTITIONING, mode, {}));
-		}
+		void dcl_tessellator_partitioning(const std::uint32_t mode);
 
 		/*
 			Declare the tessellator output primitive type in a hull shader declaration section.
@@ -3369,10 +2564,7 @@ namespace alys::shader
 			dcl_tessellator_output_primitive type
 			@param type type
 		*/
-		void dcl_tessellator_output_primitive(const std::uint32_t type)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_TESS_OUTPUT_PRIMITIVE, type, {}));
-		}
+		void dcl_tessellator_output_primitive(const std::uint32_t type);
 
 		/*
 			Declare the maxTessFactor for the patch.
@@ -3380,10 +2572,7 @@ namespace alys::shader
 			dcl_hs_max_tessfactor N
 			@param N N
 		*/
-		void dcl_hs_max_tessfactor(const as_custom& N)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_MAX_TESSFACTOR, 0, {N}));
-		}
+		void dcl_hs_max_tessfactor(const as_custom& N);
 
 		/*
 			Declare the fork phase instance count in a hull shader fork phase.
@@ -3391,10 +2580,7 @@ namespace alys::shader
 			dcl_hs_fork_phase_instance_count N
 			@param N N
 		*/
-		void dcl_hs_fork_phase_instance_count(const as_custom& N)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_FORK_PHASE_INSTANCE_COUNT, 0, {N}));
-		}
+		void dcl_hs_fork_phase_instance_count(const as_custom& N);
 
 		/*
 			Declare the join phase instance count in a hull shader join phase.
@@ -3402,10 +2588,7 @@ namespace alys::shader
 			dcl_hs_join_phase_instance_count N
 			@param N N
 		*/
-		void dcl_hs_join_phase_instance_count(const as_custom& N)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_HS_JOIN_PHASE_INSTANCE_COUNT, 0, {N}));
-		}
+		void dcl_hs_join_phase_instance_count(const as_custom& N);
 
 		/*
 			Declare thread group size.
@@ -3415,10 +2598,7 @@ namespace alys::shader
 			@param y y
 			@param z z
 		*/
-		void dcl_thread_group(const as_custom& x, const as_custom& y, const as_custom& z)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP, 0, {x, y, z}));
-		}
+		void dcl_thread_group(const as_custom& x, const as_custom& y, const as_custom& z);
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3427,11 +2607,9 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param dimension dimension
 			@param type type
+			@param space space (sm5.1 only)
 		*/
-		void dcl_uav_typed(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED, dimension & 0x1F, {dstUAV, type}));
-		}
+		void dcl_uav_typed(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3440,11 +2618,9 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param dimension dimension
 			@param type type
+			@param space space (sm5.1 only)
 		*/
-		void dcl_uav_typed_glc(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_TYPED, (dimension & 0x1F) | 0x20, {dstUAV, type}));
-		}
+		void dcl_uav_typed_glc(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3452,10 +2628,7 @@ namespace alys::shader
 			dcl_uav_raw[_glc] dstUAV
 			@param dstUAV dstUAV
 		*/
-		void dcl_uav_raw(const as_register& dstUAV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW, 0, {dstUAV}));
-		}
+		void dcl_uav_raw(const as_register& dstUAV, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3463,10 +2636,7 @@ namespace alys::shader
 			dcl_uav_raw[_glc] dstUAV
 			@param dstUAV dstUAV
 		*/
-		void dcl_uav_raw_glc(const as_register& dstUAV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_RAW, 0x20, {dstUAV}));
-		}
+		void dcl_uav_raw_glc(const as_register& dstUAV, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3475,10 +2645,7 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param structByteStride structByteStride
 		*/
-		void dcl_uav_structured(const as_register& dstUAV, const as_custom& structByteStride)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED, 0, {dstUAV, structByteStride}));
-		}
+		void dcl_uav_structured(const as_register& dstUAV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare an unordered access view (UAV) for use by a shader.
@@ -3487,10 +2654,7 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param structByteStride structByteStride
 		*/
-		void dcl_uav_structured_glc(const as_register& dstUAV, const as_custom& structByteStride)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_UNORDERED_ACCESS_VIEW_STRUCTURED, 0x20, {dstUAV, structByteStride}));
-		}
+		void dcl_uav_structured_glc(const as_register& dstUAV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare a reference to a region of shared memory space available to the compute shader s thread group.
@@ -3499,10 +2663,7 @@ namespace alys::shader
 			@param gN g#
 			@param byteCount byteCount
 		*/
-		void dcl_tgsm_raw(const as_register& gN, const as_custom& byteCount)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_RAW, 0, {gN, byteCount}));
-		}
+		void dcl_tgsm_raw(const as_register& gN, const as_custom& byteCount);
 
 		/*
 			Declare a reference to a region of shared memory space available to the compute shader s thread group. The memory is viewed as an array of structures.
@@ -3512,10 +2673,7 @@ namespace alys::shader
 			@param structByteStride structByteStride
 			@param structCount structCount
 		*/
-		void dcl_tgsm_structured(const as_register& gN, const as_custom& structByteStride, const as_custom& structCount)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_THREAD_GROUP_SHARED_MEMORY_STRUCTURED, 0, {gN, structByteStride, structCount}));
-		}
+		void dcl_tgsm_structured(const as_register& gN, const as_custom& structByteStride, const as_custom& structCount);
 
 		/*
 			Declare a shader resource input and assign it to a t# - a placeholder register for the resource.
@@ -3523,10 +2681,7 @@ namespace alys::shader
 			dcl_resource_raw dstSRV
 			@param dstSRV dstSRV
 		*/
-		void dcl_resource_raw(const as_register& dstSRV)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_RESOURCE_RAW, 0, {dstSRV}));
-		}
+		void dcl_resource_raw(const as_register& dstSRV, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare a shader resource input and assign it to a t# - a placeholder register for the resource.
@@ -3535,10 +2690,7 @@ namespace alys::shader
 			@param dstSRV dstSRV
 			@param structByteStride structByteStride
 		*/
-		void dcl_resource_structured(const as_register& dstSRV, const as_custom& structByteStride)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_RESOURCE_STRUCTURED, 0, {dstSRV, structByteStride}));
-		}
+		void dcl_resource_structured(const as_register& dstSRV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
 		/*
 			Declare a geometry shader output stream.
@@ -3546,10 +2698,7 @@ namespace alys::shader
 			dcl_stream mN
 			@param mN mN
 		*/
-		void dcl_stream(const as_register& mN)
-		{
-			this->operator()(this->create_instruction(D3D11_SB_OPCODE_DCL_STREAM, 0, {mN}));
-		}
+		void dcl_stream(const as_register& mN);
 
 	private:
 		detail::instruction_t create_instruction(const std::uint32_t type, const std::uint32_t controls,

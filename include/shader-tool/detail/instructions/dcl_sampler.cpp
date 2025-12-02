@@ -39,7 +39,8 @@ namespace alys::shader::detail
 
 		if (version >= 51)
 		{
-			buffer.write("s%i[%i:%i]", 
+			buffer.write("%s%i[%i:%i]", 
+				operand_names_upper[instruction.operands[0].type],
 				instruction.operands[0].indices[0].value.uint32,
 				instruction.operands[0].indices[1].value.uint32,
 				instruction.operands[0].indices[2].value.uint32
@@ -50,18 +51,16 @@ namespace alys::shader::detail
 			dump_operand(buffer, instruction.operands[0]);
 		}
 
-		buffer.write(", ");
-
 		switch (instruction.opcode.controls)
 		{
 		case D3D10_SB_SAMPLER_MODE_DEFAULT:
-			buffer.write("mode_default");
+			buffer.write(", mode_default");
 			break;
 		case D3D10_SB_SAMPLER_MODE_COMPARISON:
-			buffer.write("mode_comparison");
+			buffer.write(", mode_comparison");
 			break;
 		case D3D10_SB_SAMPLER_MODE_MONO:
-			buffer.write("mode_mono");
+			buffer.write(", mode_mono");
 			break;
 		}
 
