@@ -231,4 +231,7 @@ ret
 
 </details>
 
+### Projects that use shader-tool
+
+- [x64 Zonetool](https://github.com/Joelrau/x64-zt): usage can be found here [techset.cpp](https://github.com/Joelrau/x64-zt/blob/main/src/zonetool/zonetool/iw6/converter/h1/assets/techset.cpp)
 
