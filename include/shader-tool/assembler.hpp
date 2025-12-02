@@ -2323,6 +2323,7 @@ namespace alys::shader
 			@param tN tN
 			@param resourceType resourceType
 			@param returnTypes returnType(s)
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_resource(const as_register& tN, const std::uint32_t resourceType, const as_custom& returnTypes, const std::optional<as_custom>& space = {});
 
@@ -2332,8 +2333,8 @@ namespace alys::shader
 			dcl_constantBuffer cbN[size], AccessPattern
 			@param cbN cbN[size]
 			@param AccessPattern AccessPattern
-			@param size size (sm5.1)
-			@param space space (sm5.1)
+			@param size size (sm5.1 only)
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_constantbuffer(const as_swz& cbN, const std::uint32_t AccessPattern, const std::optional<as_custom>& size = {}, const std::optional<as_custom>& space = {});
 
@@ -2343,7 +2344,7 @@ namespace alys::shader
 			dcl_sampler sN, mode
 			@param sN sN
 			@param mode mode
-			@param space space (sm5.1)
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_sampler(const as_register& sN, const std::uint32_t mode = D3D10_SB_SAMPLER_MODE_DEFAULT, const std::optional<as_custom>& space = {});
 
@@ -2607,7 +2608,7 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param dimension dimension
 			@param type type
-			@param space space (sm5.1 only)
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_typed(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type, const std::optional<as_custom>& space = {});
 
@@ -2618,7 +2619,7 @@ namespace alys::shader
 			@param dstUAV dstUAV
 			@param dimension dimension
 			@param type type
-			@param space space (sm5.1 only)
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_typed_glc(const as_register& dstUAV, const std::uint32_t dimension, const as_custom& type, const std::optional<as_custom>& space = {});
 
@@ -2627,6 +2628,7 @@ namespace alys::shader
 
 			dcl_uav_raw[_glc] dstUAV
 			@param dstUAV dstUAV
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_raw(const as_register& dstUAV, const std::optional<as_custom>& space = {});
 
@@ -2635,6 +2637,7 @@ namespace alys::shader
 
 			dcl_uav_raw[_glc] dstUAV
 			@param dstUAV dstUAV
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_raw_glc(const as_register& dstUAV, const std::optional<as_custom>& space = {});
 
@@ -2644,6 +2647,7 @@ namespace alys::shader
 			dcl_uav_structured[_glc] dstUAV, structByteStride
 			@param dstUAV dstUAV
 			@param structByteStride structByteStride
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_structured(const as_register& dstUAV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
@@ -2653,6 +2657,7 @@ namespace alys::shader
 			dcl_uav_structured[_glc] dstUAV, structByteStride
 			@param dstUAV dstUAV
 			@param structByteStride structByteStride
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_uav_structured_glc(const as_register& dstUAV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
@@ -2680,6 +2685,7 @@ namespace alys::shader
 
 			dcl_resource_raw dstSRV
 			@param dstSRV dstSRV
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_resource_raw(const as_register& dstSRV, const std::optional<as_custom>& space = {});
 
@@ -2689,6 +2695,7 @@ namespace alys::shader
 			dcl_resource_structured dstSRV, structByteStride
 			@param dstSRV dstSRV
 			@param structByteStride structByteStride
+			@param space space index (sm5.1 only)
 		*/
 		void dcl_resource_structured(const as_register& dstSRV, const as_custom& structByteStride, const std::optional<as_custom>& space = {});
 
