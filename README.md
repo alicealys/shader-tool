@@ -23,7 +23,7 @@ Currently it only supports DXBC shaders.
 
 ### Parser Example
 
-This code patches all constant buffer accesses by remapping the cb index
+This code patches all constant buffer accesses by remapping the CB index.
 
 ```c++
 
@@ -233,5 +233,11 @@ ret
 
 ### Projects that use shader-tool
 
-- [x64 Zonetool](https://github.com/Joelrau/x64-zt): usage can be found here [techset.cpp](https://github.com/Joelrau/x64-zt/blob/main/src/zonetool/zonetool/iw6/converter/h1/assets/techset.cpp)
+- [x64 ZoneTool](https://github.com/Joelrau/x64-zt): usage can be found here: [techset.cpp](https://github.com/Joelrau/x64-zt/blob/main/src/zonetool/zonetool/iw6/converter/h1/assets/techset.cpp).
+
+### Credits
+
+- "[Parsing Direct3D shader bytecode](http://timjones.io/blog/archive/2015/09/02/parsing-direct3d-shader-bytecode)" by Tim Jones.
+- [Windows Driver Kit](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk): contains instruction formats.
+- [fxcd](github.com/hellokenlee/fxcd): HLSL decompiler.
 
