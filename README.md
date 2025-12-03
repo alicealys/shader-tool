@@ -231,12 +231,12 @@ ret
 
 </details>
 
-### Projects that use shader-tool
+## Projects that use shader-tool
 
 - [x64 ZoneTool](https://github.com/Joelrau/x64-zt): usage can be found here: [techset.cpp](https://github.com/Joelrau/x64-zt/blob/main/src/zonetool/zonetool/iw6/converter/h1/assets/techset.cpp).
 - [H1-Mod](https://github.com/auroramod/h1-mod)
 
-### Credits
+## Credits
 
 - "[Parsing Direct3D shader bytecode](http://timjones.io/blog/archive/2015/09/02/parsing-direct3d-shader-bytecode)" by Tim Jones.
 - [Windows Driver Kit](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk): contains instruction formats.
