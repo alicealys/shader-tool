@@ -1,6 +1,6 @@
 # shader-tool
 
-**shader-tool** is a C++ library that allows parsing and writing DirectX shaders at runtime.  
+**shader-tool** is a C++ library that allows parsing and assembling compiled DirectX shaders at runtime.  
 
 Currently it only supports DXBC shaders. 
 
