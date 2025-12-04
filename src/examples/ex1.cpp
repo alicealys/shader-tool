@@ -30,7 +30,6 @@ void example1()
 
 	a.dcl_resource(t0, texture2d, custom(t_float, t_float, t_float, t_float));
 	a.dcl_resource(t3, texture2d, custom(t_float, t_float, t_float, t_float));
-	a.pop_controls();
 
 	a.dcl_input_ps(v1.xyzw(), linear_centroid);
 	a.dcl_input_ps(v2.xy(), linear_centroid);
