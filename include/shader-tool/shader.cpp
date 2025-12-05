@@ -377,6 +377,21 @@ namespace alys::shader
 			dump_instruction(buffer, instruction, version);
 			printf("%s\n", buffer.data());
 		}
+
+		std::uint32_t get_instruction_flags(const instruction_t& instruction)
+		{
+			if (instruction.opcode.type >= instruction_handlers.size())
+			{
+				return 0u;
+			}
+
+			if (const auto& handler = instruction_handlers[instruction.opcode.type]; handler.get() != nullptr)
+			{
+				return handler->get_flags();
+			}
+
+			return 0u;
+		}
 	}
 
 	std::string patch_shader(const std::string& shader_data, const instruction_cb& callback)
