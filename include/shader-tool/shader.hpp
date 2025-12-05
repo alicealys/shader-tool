@@ -9,6 +9,7 @@
 #include "detail/writer.hpp"
 #include "detail/disassembler.hpp"
 #include "detail/tokens.hpp"
+#include "detail/instructions/base.hpp"
 #include "operand_proxy.hpp"
 #include "literals.hpp"
 #include "shader_object.hpp"
@@ -17,7 +18,6 @@ namespace alys::shader
 {
 	namespace detail
 	{
-		void generate_instruction_methods(utils::string_writer& buffer);
 		instruction_t read_instruction(utils::bit_buffer_le& input_buffer, const std::uint32_t version);
 		void write_instruction(utils::bit_buffer_le& output_buffer, const instruction_t& instruction, const std::uint32_t version);
 		void dump_instruction(utils::string_writer& buffer, const instruction_t& instruction, const std::uint32_t version);
